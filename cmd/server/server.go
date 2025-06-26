@@ -1,0 +1,65 @@
+package server
+
+import (
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
+)
+
+// ConfigServerChi is a struct that represents the configuration for ServerChi
+type ConfigServerChi struct {
+	// ServerAddress is the address where the server will be listening
+	ServerAddress string
+}
+
+// NewServerChi is a function that returns a new instance of ServerChi
+func NewServerChi(cfg *ConfigServerChi) *ServerChi {
+	// default values
+	defaultConfig := &ConfigServerChi{
+		ServerAddress: ":8080",
+	}
+	if cfg != nil {
+		if cfg.ServerAddress != "" {
+			defaultConfig.ServerAddress = cfg.ServerAddress
+		}
+	}
+
+	return &ServerChi{
+		serverAddress: defaultConfig.ServerAddress,
+	}
+}
+
+// ServerChi is a struct that implements the Application interface
+type ServerChi struct {
+	// serverAddress is the address where the server will be listening
+	serverAddress string
+}
+
+// Run is a method that runs the server
+func (a *ServerChi) Run() (err error) {
+	// dependencies
+	// - loader
+
+	// - repository
+
+	// - service
+
+	// - handler
+
+	// router
+	rt := chi.NewRouter()
+	// - middlewares
+	rt.Use(middleware.Logger)
+	rt.Use(middleware.Recoverer)
+	// - endpoints
+	rt.Get("/healthy", healthyHandler)
+	// run server
+	err = http.ListenAndServe(a.serverAddress, rt)
+	return
+}
+
+func healthyHandler(w http.ResponseWriter, r *http.Request) {
+	response.JSON(w, http.StatusOK, "success", "Ok")
+}
