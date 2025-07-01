@@ -11,17 +11,14 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
+
 )
 
-// ConfigServerChi is a struct that represents the configuration for ServerChi
 type ConfigServerChi struct {
-	// ServerAddress is the address where the server will be listening
 	ServerAddress string
 }
 
-// NewServerChi is a function that returns a new instance of ServerChi
 func NewServerChi(cfg *ConfigServerChi) *ServerChi {
-	// default values
 	defaultConfig := &ConfigServerChi{
 		ServerAddress: ":8080",
 	}
@@ -36,9 +33,7 @@ func NewServerChi(cfg *ConfigServerChi) *ServerChi {
 	}
 }
 
-// ServerChi is a struct that implements the Application interface
 type ServerChi struct {
-	// serverAddress is the address where the server will be listening
 	serverAddress string
 }
 
@@ -46,6 +41,10 @@ type ServerChi struct {
 func (a *ServerChi) Run() (err error) {
 	// dependencies
 	// - loader
+
+	buyerLd := loader.NewBuyerJSONFile("docs/db/buyers.json")
+	buyerDb, err := buyerLd.Load()
+
 
 	loadWarehouse := loader.NewWarehouseJSONFile("docs/db/warehouse.json")
 	dbWarehouse, err := loadWarehouse.Load()
@@ -56,11 +55,15 @@ func (a *ServerChi) Run() (err error) {
   
 	sellerLd := loader.NewSellerJSONFile("docs/db/seller.json")
 	sellerDb, err := sellerLd.Load()
-
 	if err != nil {
 		return
 	}
 	// - repository
+	buyerRp := repository.NewBuyerRepository(buyerDb)
+	// - service
+	buyerSv := service.NewBuyerService(buyerRp)
+	// - handler
+	buyerHd := handler.NewBuyerHandler(buyerSv)
 
 	rpWarehouse := repository.NewWarehouseMap(dbWarehouse)
 	// - service
@@ -79,8 +82,15 @@ func (a *ServerChi) Run() (err error) {
 	// - middlewares
 	rt.Use(middleware.Logger)
 	rt.Use(middleware.Recoverer)
+
 	// - endpoints
-	rt.Get("/healthy", healthyHandler)
+	rt.Route("/api/v1/buyers", func(rt chi.Router) {
+		rt.Post("/", buyerHd.Create())
+		rt.Patch("/{id}", buyerHd.Update())
+		rt.Delete("/{id}", buyerHd.Delete())
+		rt.Get("/", buyerHd.FindAll())
+		rt.Get("/{id}", buyerHd.FindById())
+	})
 
 
 	rt.Route("/warehouses", func(rt chi.Router) {
@@ -105,8 +115,4 @@ func (a *ServerChi) Run() (err error) {
 	// run server
 	err = http.ListenAndServe(a.serverAddress, rt)
 	return
-}
-
-func healthyHandler(w http.ResponseWriter, r *http.Request) {
-	response.JSON(w, http.StatusOK, "Ok")
 }
