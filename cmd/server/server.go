@@ -12,37 +12,28 @@ import (
 )
 
 type ConfigServerChi struct {
-	ServerAddress  string
-	EmployeeDBPath string
+	ServerAddress string
 }
 
 func NewServerChi(cfg *ConfigServerChi) *ServerChi {
 	defaultConfig := &ConfigServerChi{
-		ServerAddress:  ":8080",
-		EmployeeDBPath: "docs/db/employees.json",
+		ServerAddress: ":8080",
 	}
-	if cfg != nil {
-		if cfg.ServerAddress != "" {
-			defaultConfig.ServerAddress = cfg.ServerAddress
-		}
-		if cfg.EmployeeDBPath != "" {
-			defaultConfig.EmployeeDBPath = cfg.EmployeeDBPath
-		}
+	if cfg != nil && cfg.ServerAddress != "" {
+		defaultConfig.ServerAddress = cfg.ServerAddress
 	}
 	return &ServerChi{
-		serverAddress:  defaultConfig.ServerAddress,
-		employeeDBPath: defaultConfig.EmployeeDBPath,
+		serverAddress: defaultConfig.ServerAddress,
 	}
 }
 
 type ServerChi struct {
-	serverAddress  string
-	employeeDBPath string
+	serverAddress string
 }
 
 func (s *ServerChi) Run() error {
 	// 1) Loader
-	l := loader.NewEmployeeJSONFile(s.employeeDBPath)
+	l := loader.NewEmployeeJSONFile("docs/db/employees.json")
 	db, err := l.Load()
 	if err != nil {
 		return err
