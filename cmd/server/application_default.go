@@ -68,6 +68,8 @@ func (s *ServerChi) Run() error {
 		r.Post("/", hd.Create)
 		r.Get("/", hd.GetAll)
 		r.Get("/{id}", hd.GetByID)
+		r.Patch("/{id}", hd.Update)
+		r.Delete("/{id}", hd.Delete)
 	})
 
 	// 6) Run server

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
@@ -99,4 +100,61 @@ func (h *EmployeeHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 	employeeDoc := mappers.MapEmployeeToEmployeeDoc(emp)
 	response.JSON(w, http.StatusOK, employeeDoc)
+}
+func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request) {
+	idParam := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		response.Error(w, http.StatusBadRequest, "Invalid id")
+		return
+	}
+
+	var patch models.EmployeePatch
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&patch); err != nil {
+		response.Error(w, http.StatusBadRequest, "Invalid JSON or unknown field: "+err.Error())
+		return
+	}
+
+	updated, err := h.service.Update(id, &patch)
+	if err != nil {
+		var se api.ServiceError
+		if errors.As(err, &se) {
+			response.Error(w, se.ResponseCode, se.Message)
+		} else {
+			response.Error(w, http.StatusInternalServerError, "Internal error")
+		}
+		return
+	}
+
+	if err := h.service.SaveToFile("docs/db/employees.json"); err != nil {
+		response.Error(w, http.StatusInternalServerError, "Employee updated but failed to persist")
+		return
+	}
+
+	employeeDoc := mappers.MapEmployeeToEmployeeDoc(updated)
+	response.JSON(w, http.StatusOK, employeeDoc)
+}
+func (h *EmployeeHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	idParam := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		response.Error(w, http.StatusBadRequest, "Invalid id")
+		return
+	}
+	if err := h.service.Delete(id); err != nil {
+		var se api.ServiceError
+		if errors.As(err, &se) {
+			response.Error(w, se.ResponseCode, se.Message)
+		} else {
+			response.Error(w, http.StatusInternalServerError, "Internal error")
+		}
+		return
+	}
+	if err := h.service.SaveToFile("docs/db/employees.json"); err != nil {
+		response.Error(w, http.StatusInternalServerError, "Employee deleted but failed to persist")
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }

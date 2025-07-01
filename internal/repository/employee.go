@@ -17,6 +17,8 @@ type EmployeeRepository interface {
 	FindByCardNumberID(cardNumberID string) (*models.Employee, error)
 	FindAll() ([]*models.Employee, error)
 	FindByID(id int) (*models.Employee, error)
+	Update(id int, patch *models.EmployeePatch) (*models.Employee, error)
+	Delete(id int) error
 }
 
 // Implementación en memoria
@@ -88,4 +90,40 @@ func (r *EmployeeMap) FindByID(id int) (*models.Employee, error) {
 		return nil, nil
 	}
 	return emp, nil
+}
+func (r *EmployeeMap) Update(id int, patch *models.EmployeePatch) (*models.Employee, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	emp, ok := r.data[id]
+	if !ok {
+		return nil, errors.New("not found")
+	}
+	if patch.CardNumberID != nil && *patch.CardNumberID != emp.CardNumberID {
+		for _, v := range r.data {
+			if v.CardNumberID == *patch.CardNumberID {
+				return nil, errors.New("card_number_id already exists")
+			}
+		}
+		emp.CardNumberID = *patch.CardNumberID
+	}
+	if patch.FirstName != nil {
+		emp.FirstName = *patch.FirstName
+	}
+	if patch.LastName != nil {
+		emp.LastName = *patch.LastName
+	}
+	if patch.WarehouseID != nil && *patch.WarehouseID != 0 {
+		emp.WarehouseID = *patch.WarehouseID
+	}
+	r.data[emp.ID] = emp
+	return emp, nil
+}
+func (r *EmployeeMap) Delete(id int) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if _, exists := r.data[id]; !exists {
+		return errors.New("not found")
+	}
+	delete(r.data, id)
+	return nil
 }

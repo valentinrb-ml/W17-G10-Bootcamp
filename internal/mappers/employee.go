@@ -21,3 +21,19 @@ func MapEmployeeToEmployeeDoc(e *models.Employee) models.EmployeeDoc {
 		WarehouseID:  e.WarehouseID,
 	}
 }
+func MapEmployeePatchToEmployee(existing *models.Employee, patch *models.EmployeePatch) *models.Employee {
+	emp := *existing
+	if patch.CardNumberID != nil {
+		emp.CardNumberID = *patch.CardNumberID
+	}
+	if patch.FirstName != nil {
+		emp.FirstName = *patch.FirstName
+	}
+	if patch.LastName != nil {
+		emp.LastName = *patch.LastName
+	}
+	if patch.WarehouseID != nil && *patch.WarehouseID != 0 {
+		emp.WarehouseID = *patch.WarehouseID
+	}
+	return &emp
+}
