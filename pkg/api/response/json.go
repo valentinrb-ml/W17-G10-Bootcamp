@@ -6,13 +6,11 @@ import (
 )
 
 type apiResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-	Data    any    `json:"data,omitempty"`
+	Data any `json:"data,omitempty"`
 }
 
 // JSON writes json response
-func JSON(w http.ResponseWriter, code int, message string, body any) {
+func JSON(w http.ResponseWriter, code int, body any) {
 	// check body
 	if body == nil {
 		w.WriteHeader(code)
@@ -20,9 +18,7 @@ func JSON(w http.ResponseWriter, code int, message string, body any) {
 	}
 
 	response := apiResponse{
-		Status:  http.StatusText(code),
-		Message: message,
-		Data:    body,
+		Data: body,
 	}
 
 	// marshal body

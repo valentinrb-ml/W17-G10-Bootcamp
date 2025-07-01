@@ -1,0 +1,10 @@
+[{"id":1,"cid":101,"company_name":"Alkemy","address":"Monroe 860","telephone":"47470000"},
+{"id":2,"cid":102,"company_name":"MercadoLibre","address":"Godoy Cruz 3500","telephone":"47470001"},
+{"id":3,"cid":103,"company_name":"Globant","address":"Serrano 1249","telephone":"47470002"},
+{"id":4,"cid":104,"company_name":"Despegar","address":"Dorrego 2300","telephone":"47470003"},
+{"id":5,"cid":105,"company_name":"Techint","address":"Av. Libertador 7200","telephone":"47470004"},
+{"id":6,"cid":106,"company_name":"Accenture","address":"Bouchard 419","telephone":"47470005"},
+{"id":7,"cid":107,"company_name":"CocaCola","address":"Aguero 2245","telephone":"47470006"},
+{"id":8,"cid":108,"company_name":"Claro","address":"Avenida Rivadavia 1111","telephone":"47470007"},
+{"id":9,"cid":109,"company_name":"Toyota","address":"Paraguay 2570","telephone":"47470008"},
+{"id":10,"cid":110,"company_name":"YPF","address":"San Martín 1234","telephone":"47470009"}]

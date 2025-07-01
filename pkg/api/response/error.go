@@ -12,6 +12,7 @@ type errorResponse struct {
 }
 
 func Error(w http.ResponseWriter, statusCode int, message string) {
+	w.Header().Set("Content-Type", "application/json")
 	// default status code
 	defaultStatusCode := http.StatusInternalServerError
 	// check if status code is valid
@@ -32,7 +33,6 @@ func Error(w http.ResponseWriter, statusCode int, message string) {
 
 	// write response
 	w.WriteHeader(defaultStatusCode)
-	w.Header().Set("Content-Type", "application/json")
 	w.Write(bytes)
 }
 

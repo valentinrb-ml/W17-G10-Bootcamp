@@ -5,6 +5,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/loader"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 )
 
@@ -41,13 +45,17 @@ type ServerChi struct {
 func (a *ServerChi) Run() (err error) {
 	// dependencies
 	// - loader
-
+	sellerLd := loader.NewSellerJSONFile("docs/db/seller.json")
+	sellerDb, err := sellerLd.Load()
+	if err != nil {
+		return
+	}
 	// - repository
-
+	sellerRp := repository.NewSellerRepository(sellerDb)
 	// - service
-
+	sellerSv := service.NewSellerService(sellerRp)
 	// - handler
-
+	sellerHd := handler.NewSellerHandler(sellerSv)
 	// router
 	rt := chi.NewRouter()
 	// - middlewares
@@ -55,11 +63,19 @@ func (a *ServerChi) Run() (err error) {
 	rt.Use(middleware.Recoverer)
 	// - endpoints
 	rt.Get("/healthy", healthyHandler)
+
+	rt.Route("/seller", func(rt chi.Router) {
+		rt.Post("/", sellerHd.Create())
+		rt.Patch("/{id}", sellerHd.Update())
+		rt.Delete("/{id}", sellerHd.Delete())
+		rt.Get("/", sellerHd.FindAll())
+		rt.Get("/{id}", sellerHd.FindById())
+	})
 	// run server
 	err = http.ListenAndServe(a.serverAddress, rt)
 	return
 }
 
 func healthyHandler(w http.ResponseWriter, r *http.Request) {
-	response.JSON(w, http.StatusOK, "success", "Ok")
+	response.JSON(w, http.StatusOK, "Ok")
 }

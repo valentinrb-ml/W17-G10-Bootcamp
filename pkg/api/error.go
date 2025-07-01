@@ -25,6 +25,8 @@ const (
 	ErrBadRequest
 	ErrInternalServer
 	ErrUnatuhorize
+	ErrConflict
+	ErrUnprocessableEntity
 )
 
 var ServiceErrors = map[int]ServiceError{
@@ -52,5 +54,15 @@ var ServiceErrors = map[int]ServiceError{
 		Code:         ErrUnatuhorize,
 		ResponseCode: http.StatusUnauthorized,
 		Message:      "Unauthorize token",
+	},
+	ErrConflict: {
+		Code:         ErrConflict,
+		ResponseCode: http.StatusConflict,
+		Message:      "conflict",
+	},
+	ErrUnprocessableEntity: {
+		Code:         ErrUnprocessableEntity,
+		ResponseCode: http.StatusUnprocessableEntity,
+		Message:      "unprocessable entity",
 	},
 }
