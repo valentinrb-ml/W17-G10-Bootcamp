@@ -13,14 +13,16 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/request"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
+	warehouse "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
 
 type EmployeeHandler struct {
-	service service.EmployeeService
+	service    service.EmployeeService
+	warehouses map[int]warehouse.Warehouse
 }
 
-func NewEmployeeHandler(s service.EmployeeService) *EmployeeHandler {
-	return &EmployeeHandler{service: s}
+func NewEmployeeHandler(s service.EmployeeService, warehouses map[int]warehouse.Warehouse) *EmployeeHandler {
+	return &EmployeeHandler{service: s, warehouses: warehouses}
 }
 
 type EmployeeRequest struct {
@@ -34,6 +36,10 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req EmployeeRequest
 	if err := request.JSON(r, &req); err != nil {
 		response.Error(w, http.StatusBadRequest, "Invalid request body: "+err.Error())
+		return
+	}
+	if _, ok := h.warehouses[req.WarehouseID]; !ok {
+		response.Error(w, http.StatusBadRequest, "warehouse_id does not exist")
 		return
 	}
 

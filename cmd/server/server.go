@@ -38,21 +38,21 @@ func (s *ServerChi) Run() error {
 	buyerLd := loader.NewBuyerJSONFile("docs/db/buyers.json")
 	buyerDb, err := buyerLd.Load()
 	if err != nil {
-		return
+		return err
 	}
 
 	loadWarehouse := loader.NewWarehouseJSONFile("docs/db/warehouse.json")
 	dbWarehouse, err := loadWarehouse.Load()
 	if err != nil {
-		return
+		return err
 	}
 
 	sellerLd := loader.NewSellerJSONFile("docs/db/seller.json")
 	sellerDb, err := sellerLd.Load()
 	if err != nil {
-		return
+		return err
 	}
-  l := loader.NewEmployeeJSONFile("docs/db/employees.json")
+	l := loader.NewEmployeeJSONFile("docs/db/employees.json")
 	db, err := l.Load()
 	if err != nil {
 		return err
@@ -75,17 +75,16 @@ func (s *ServerChi) Run() error {
 	sellerSv := service.NewSellerService(sellerRp)
 	// - handler
 	sellerHd := handler.NewSellerHandler(sellerSv)
-  
-  // - repository
-  repo := repository.NewEmployeeMap()
+
+	// - repository
+	repo := repository.NewEmployeeMap()
 	for _, emp := range db {
 		_, _ = repo.Create(emp)
 	}
-  // - service
-  svc := service.NewEmployeeDefault(repo)
-  // - handler
-  hd := handler.NewEmployeeHandler(svc)
-  
+	// - service
+	svc := service.NewEmployeeDefault(repo)
+	// - handler
+	hd := handler.NewEmployeeHandler(svc, dbWarehouse)
 
 	// router
 	rt := chi.NewRouter()
@@ -117,7 +116,7 @@ func (s *ServerChi) Run() error {
 		rt.Get("/", sellerHd.FindAll())
 		rt.Get("/{id}", sellerHd.FindById())
 	})
-  rt.Route("/api/v1/employees", func(rt chi.Router) {
+	rt.Route("/api/v1/employees", func(rt chi.Router) {
 		rt.Post("/", hd.Create)
 		rt.Get("/", hd.GetAll)
 		rt.Get("/{id}", hd.GetByID)
@@ -125,9 +124,9 @@ func (s *ServerChi) Run() error {
 		rt.Delete("/{id}", hd.Delete)
 	})
 
-	fmt.Printf("Server running at http://localhost%s\n", a.serverAddress)
+	fmt.Printf("Server running at http://localhost%s\n", s.serverAddress)
 
 	// run server
-	err = http.ListenAndServe(a.serverAddress, rt)
-	return
+	err = http.ListenAndServe(s.serverAddress, rt)
+	return err
 }
