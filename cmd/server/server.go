@@ -10,8 +10,6 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/loader"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
-
 )
 
 type ConfigServerChi struct {
@@ -44,15 +42,16 @@ func (a *ServerChi) Run() (err error) {
 
 	buyerLd := loader.NewBuyerJSONFile("docs/db/buyers.json")
 	buyerDb, err := buyerLd.Load()
-
+	if err != nil {
+		return
+	}
 
 	loadWarehouse := loader.NewWarehouseJSONFile("docs/db/warehouse.json")
 	dbWarehouse, err := loadWarehouse.Load()
-
-  if err != nil {
+	if err != nil {
 		return
 	}
-  
+
 	sellerLd := loader.NewSellerJSONFile("docs/db/seller.json")
 	sellerDb, err := sellerLd.Load()
 	if err != nil {
@@ -92,7 +91,6 @@ func (a *ServerChi) Run() (err error) {
 		rt.Get("/{id}", buyerHd.FindById())
 	})
 
-
 	rt.Route("/warehouses", func(rt chi.Router) {
 		rt.Post("/", hdWarehouse.Create)
 		rt.Get("/", hdWarehouse.FindAll)
@@ -100,7 +98,6 @@ func (a *ServerChi) Run() (err error) {
 		rt.Patch("/{id}", hdWarehouse.Update)
 		rt.Delete("/{id}", hdWarehouse.Delete)
 	})
-
 
 	rt.Route("/seller", func(rt chi.Router) {
 		rt.Post("/", sellerHd.Create())
@@ -110,8 +107,8 @@ func (a *ServerChi) Run() (err error) {
 		rt.Get("/{id}", sellerHd.FindById())
 	})
 
-  fmt.Printf("Server running at http://localhost%s\n", a.serverAddress)
-  
+	fmt.Printf("Server running at http://localhost%s\n", a.serverAddress)
+
 	// run server
 	err = http.ListenAndServe(a.serverAddress, rt)
 	return
