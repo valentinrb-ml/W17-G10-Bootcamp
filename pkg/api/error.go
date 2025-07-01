@@ -25,7 +25,6 @@ const (
 	ErrBadRequest
 	ErrInternalServer
 	ErrUnatuhorize
-
 	ErrConflict
 	ErrUnprocessableEntity
 )
@@ -65,6 +64,5 @@ var ServiceErrors = map[int]ServiceError{
 		Code:         ErrConflict,
 		ResponseCode: http.StatusConflict,
 		Message:      "Resource already exists",
-
 	},
 }

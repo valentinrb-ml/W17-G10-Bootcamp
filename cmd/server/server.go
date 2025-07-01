@@ -20,12 +20,9 @@ func NewServerChi(cfg *ConfigServerChi) *ServerChi {
 	defaultConfig := &ConfigServerChi{
 		ServerAddress: ":8080",
 	}
-	if cfg != nil {
-		if cfg.ServerAddress != "" {
-			defaultConfig.ServerAddress = cfg.ServerAddress
-		}
+	if cfg != nil && cfg.ServerAddress != "" {
+		defaultConfig.ServerAddress = cfg.ServerAddress
 	}
-
 	return &ServerChi{
 		serverAddress: defaultConfig.ServerAddress,
 	}
@@ -35,9 +32,7 @@ type ServerChi struct {
 	serverAddress string
 }
 
-// Run is a method that runs the server
-func (a *ServerChi) Run() (err error) {
-	// dependencies
+func (s *ServerChi) Run() error {
 	// - loader
 
 	buyerLd := loader.NewBuyerJSONFile("docs/db/buyers.json")
@@ -57,6 +52,11 @@ func (a *ServerChi) Run() (err error) {
 	if err != nil {
 		return
 	}
+  l := loader.NewEmployeeJSONFile("docs/db/employees.json")
+	db, err := l.Load()
+	if err != nil {
+		return err
+	}
 	// - repository
 	buyerRp := repository.NewBuyerRepository(buyerDb)
 	// - service
@@ -75,6 +75,17 @@ func (a *ServerChi) Run() (err error) {
 	sellerSv := service.NewSellerService(sellerRp)
 	// - handler
 	sellerHd := handler.NewSellerHandler(sellerSv)
+  
+  // - repository
+  repo := repository.NewEmployeeMap()
+	for _, emp := range db {
+		_, _ = repo.Create(emp)
+	}
+  // - service
+  svc := service.NewEmployeeDefault(repo)
+  // - handler
+  hd := handler.NewEmployeeHandler(svc)
+  
 
 	// router
 	rt := chi.NewRouter()
@@ -105,6 +116,13 @@ func (a *ServerChi) Run() (err error) {
 		rt.Delete("/{id}", sellerHd.Delete())
 		rt.Get("/", sellerHd.FindAll())
 		rt.Get("/{id}", sellerHd.FindById())
+	})
+  rt.Route("/api/v1/employees", func(rt chi.Router) {
+		rt.Post("/", hd.Create)
+		rt.Get("/", hd.GetAll)
+		rt.Get("/{id}", hd.GetByID)
+		rt.Patch("/{id}", hd.Update)
+		rt.Delete("/{id}", hd.Delete)
 	})
 
 	fmt.Printf("Server running at http://localhost%s\n", a.serverAddress)
