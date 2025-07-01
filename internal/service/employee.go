@@ -32,7 +32,10 @@ func (s *EmployeeDefault) Create(e *models.Employee) (*models.Employee, error) {
 	if err := validators.ValidateEmployee(e); err != nil {
 		return nil, err
 	}
-	emp, _ := s.repo.FindByCardNumberID(e.CardNumberID)
+	emp, err := s.repo.FindByCardNumberID(e.CardNumberID)
+	if err != nil {
+		return nil, err
+	}
 	if emp != nil {
 		se := api.ServiceErrors[api.ErrBadRequest]
 		se.InternalError = errors.New("card_number_id already exists")
