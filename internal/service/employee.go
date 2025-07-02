@@ -161,13 +161,13 @@ func (s *EmployeeDefault) Delete(id int) error {
 	if found == nil {
 		se := api.ServiceErrors[api.ErrNotFound]
 		se.Message = "employee not found"
-		return &se // <-- aquí
+		return &se
 	}
 	if err := s.repo.Delete(id); err != nil {
 		se := api.ServiceErrors[api.ErrInternalServer]
 		se.Message = "failed to delete employee"
 		se.InternalError = err
-		return &se // <-- aquí
+		return &se
 	}
 	return nil
 }
