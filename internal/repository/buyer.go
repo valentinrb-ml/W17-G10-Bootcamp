@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
 type BuyerRepository interface {

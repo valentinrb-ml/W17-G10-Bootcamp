@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/loader"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/router"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 )
 
@@ -98,53 +97,7 @@ func (s *ServerChi) Run() (err error) {
 	hdEmployee := handler.NewEmployeeHandler(svcEmployee)
 
 	// router
-	rt := chi.NewRouter()
-	rtProduct := hdProduct.Routes()
-	// - middlewares
-	rt.Use(middleware.Logger)
-	rt.Use(middleware.Recoverer)
-
-	rt.Mount("/api/v1/products", rtProduct)
-
-	rt.Route("/api/v1/sections", func(r chi.Router) {
-		r.Get("/", hdSection.FindAllSections())
-		r.Get("/{id}", hdSection.FindById())
-		r.Post("/", hdSection.CreateSection())
-		r.Patch("/{id}", hdSection.UpdateSection())
-		r.Delete("/{id}", hdSection.DeleteSection())
-
-	})
-
-	rt.Route("/api/v1/buyers", func(rt chi.Router) {
-		rt.Post("/", hdBuyer.Create())
-		rt.Patch("/{id}", hdBuyer.Update())
-		rt.Delete("/{id}", hdBuyer.Delete())
-		rt.Get("/", hdBuyer.FindAll())
-		rt.Get("/{id}", hdBuyer.FindById())
-	})
-
-	rt.Route("/api/v1/warehouses", func(rt chi.Router) {
-		rt.Post("/", hdWarehouse.Create)
-		rt.Get("/", hdWarehouse.FindAll)
-		rt.Get("/{id}", hdWarehouse.FindById)
-		rt.Patch("/{id}", hdWarehouse.Update)
-		rt.Delete("/{id}", hdWarehouse.Delete)
-	})
-
-	rt.Route("/api/v1/sellers", func(rt chi.Router) {
-		rt.Post("/", hdSeller.Create())
-		rt.Patch("/{id}", hdSeller.Update())
-		rt.Delete("/{id}", hdSeller.Delete())
-		rt.Get("/", hdSeller.FindAll())
-		rt.Get("/{id}", hdSeller.FindById())
-	})
-	rt.Route("/api/v1/employees", func(rt chi.Router) {
-		rt.Post("/", hdEmployee.Create)
-		rt.Get("/", hdEmployee.GetAll)
-		rt.Get("/{id}", hdEmployee.GetByID)
-		rt.Patch("/{id}", hdEmployee.Update)
-		rt.Delete("/{id}", hdEmployee.Delete)
-	})
+	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee)
 
 	fmt.Printf("Server running at http://localhost%s\n", s.serverAddress)
 

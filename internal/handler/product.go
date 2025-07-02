@@ -18,17 +18,7 @@ type ProductHandler struct{ svc service.ProductService }
 
 func NewProductHandler(s service.ProductService) *ProductHandler { return &ProductHandler{svc: s} }
 
-func (h *ProductHandler) Routes() chi.Router {
-	r := chi.NewRouter()
-	r.Get("/", h.getAll)
-	r.Get("/{id}", h.getByID)
-	r.Post("/", h.create)
-	r.Patch("/{id}", h.patch)
-	r.Delete("/{id}", h.delete)
-	return r
-}
-
-func (h *ProductHandler) getAll(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		response.Error(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -43,7 +33,7 @@ func (h *ProductHandler) getAll(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, list)
 }
 
-func (h *ProductHandler) create(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		response.Error(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -71,7 +61,7 @@ func (h *ProductHandler) create(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusCreated, result)
 }
 
-func (h *ProductHandler) getByID(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		response.Error(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -110,7 +100,7 @@ func (h *ProductHandler) parseID(r *http.Request) (int, error) {
 	return id, nil
 }
 
-func (h *ProductHandler) delete(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		response.Error(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -131,7 +121,7 @@ func (h *ProductHandler) delete(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusNoContent, nil)
 }
 
-func (h *ProductHandler) patch(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) Patch(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPatch {
 		response.Error(w, http.StatusMethodNotAllowed, "method not allowed")
 		return

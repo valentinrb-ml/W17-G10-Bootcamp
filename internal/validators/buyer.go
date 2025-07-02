@@ -2,7 +2,7 @@ package validators
 
 import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
-	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
 func ValidateRequestBuyer(br models.RequestBuyer) *api.ServiceError {

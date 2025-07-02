@@ -14,16 +14,16 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
 
-func NewWarehouseDefault(sv service.WarehouseService) *WarehouseDefault {
-	return &WarehouseDefault{sv: sv}
+func NewWarehouseDefault(sv service.WarehouseService) *WarehouseHandler {
+	return &WarehouseHandler{sv: sv}
 }
 
-type WarehouseDefault struct {
+type WarehouseHandler struct {
 	// sv is the service that will be used by the handler
 	sv service.WarehouseService
 }
 
-func (h *WarehouseDefault) Create(w http.ResponseWriter, r *http.Request) {
+func (h *WarehouseHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req = warehouse.WarehouseRequest{}
 	if err := request.JSON(r, &req); err != nil {
 		response.Error(w, http.StatusBadRequest, err.Error())
@@ -46,7 +46,7 @@ func (h *WarehouseDefault) Create(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusCreated, mappers.WarehouseToDoc(newW))
 }
 
-func (h *WarehouseDefault) FindAll(w http.ResponseWriter, r *http.Request) {
+func (h *WarehouseHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 	whs, err := h.sv.FindAll()
 	if err != nil {
 		response.Error(w, err.ResponseCode, err.Message)
@@ -56,7 +56,7 @@ func (h *WarehouseDefault) FindAll(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, mappers.WarehouseToDocSlice(whs))
 }
 
-func (h *WarehouseDefault) FindById(w http.ResponseWriter, r *http.Request) {
+func (h *WarehouseHandler) FindById(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -75,7 +75,7 @@ func (h *WarehouseDefault) FindById(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *WarehouseDefault) Update(w http.ResponseWriter, r *http.Request) {
+func (h *WarehouseHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -99,7 +99,7 @@ func (h *WarehouseDefault) Update(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, mappers.WarehouseToDoc(updated))
 }
 
-func (h *WarehouseDefault) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *WarehouseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {

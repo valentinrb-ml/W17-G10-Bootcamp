@@ -5,18 +5,9 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
 )
 
-func serviceErr(code int, internal error, overrideMsg string) error {
-	e := api.ServiceErrors[code]
-	if overrideMsg != "" {
-		e.Message = overrideMsg
-	}
-	e.InternalError = internal
-	return e
-}
 
 type ProductService interface {
 	GetAll(ctx context.Context) ([]product.ProductResponse, error)
