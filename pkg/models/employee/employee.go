@@ -13,8 +13,9 @@ type EmployeeDoc struct {
 	CardNumberID string `json:"card_number_id"`
 	FirstName    string `json:"first_name"`
 	LastName     string `json:"last_name"`
-	WarehouseID  int    `json:"warehouse_id"`
+	WarehouseID  *int   `json:"warehouse_id"`
 }
+
 type EmployeePatch struct {
 	CardNumberID *string `json:"card_number_id,omitempty"`
 	FirstName    *string `json:"first_name,omitempty"`

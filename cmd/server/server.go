@@ -79,10 +79,7 @@ func (s *ServerChi) Run() (err error) {
 	if err != nil {
 		return err
 	}
-	repoEmployee := repository.NewEmployeeMap()
-	for _, emp := range dbEmployee {
-		_, _ = repoEmployee.Create(emp)
-	}
+	repoEmployee := repository.NewEmployeeMap(dbEmployee)
 
 	// - service
 	svcSeller := service.NewSellerService(repoSeller)
@@ -90,7 +87,7 @@ func (s *ServerChi) Run() (err error) {
 	svcSection := service.NewSectionServer(repoSection)
 	svcProduct := service.NewProductService(repoProduct)
 	svcWarehouse := service.NewWarehouseDefault(repoWarehouse)
-	svcEmployee := service.NewEmployeeDefault(repoEmployee)
+	svcEmployee := service.NewEmployeeDefault(repoEmployee, repoWarehouse)
 
 	// - handler
 	hdBuyer := handler.NewBuyerHandler(svcBuyer)
@@ -98,7 +95,7 @@ func (s *ServerChi) Run() (err error) {
 	hdSeller := handler.NewSellerHandler(svcSeller)
 	hdWarehouse := handler.NewWarehouseDefault(svcWarehouse)
 	hdProduct := handler.NewProductHandler(svcProduct)
-	hdEmployee := handler.NewEmployeeHandler(svcEmployee, dbWarehouse)
+	hdEmployee := handler.NewEmployeeHandler(svcEmployee)
 
 	// router
 	rt := chi.NewRouter()

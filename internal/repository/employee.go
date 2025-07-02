@@ -10,7 +10,11 @@ import (
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
 )
 
-// Interface
+var (
+	ErrCardNumberIDExists = errors.New("card_number_id already exists")
+	ErrNotFound           = errors.New("not found")
+)
+
 type EmployeeRepository interface {
 	Create(e *models.Employee) (*models.Employee, error)
 	SaveToFile(filename string) error
@@ -21,17 +25,28 @@ type EmployeeRepository interface {
 	Delete(id int) error
 }
 
-// Implementación en memoria
 type EmployeeMap struct {
 	mu     sync.Mutex
 	nextID int
 	data   map[int]*models.Employee
 }
 
-func NewEmployeeMap() *EmployeeMap {
+func NewEmployeeMap(db map[int]*models.Employee) *EmployeeMap {
+	defaultDb := make(map[int]*models.Employee)
+	if db != nil {
+		defaultDb = db
+	}
+
+	maxID := 0
+	for id := range defaultDb {
+		if id > maxID {
+			maxID = id
+		}
+	}
+
 	return &EmployeeMap{
-		nextID: 1,
-		data:   make(map[int]*models.Employee),
+		nextID: maxID + 1,
+		data:   defaultDb,
 	}
 }
 
@@ -40,7 +55,7 @@ func (r *EmployeeMap) Create(e *models.Employee) (*models.Employee, error) {
 	defer r.mu.Unlock()
 	for _, emp := range r.data {
 		if emp.CardNumberID == e.CardNumberID {
-			return nil, errors.New("card_number_id already exists")
+			return nil, ErrCardNumberIDExists
 		}
 	}
 	e.ID = r.nextID
@@ -82,6 +97,7 @@ func (r *EmployeeMap) FindAll() ([]*models.Employee, error) {
 	}
 	return employees, nil
 }
+
 func (r *EmployeeMap) FindByID(id int) (*models.Employee, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -91,17 +107,18 @@ func (r *EmployeeMap) FindByID(id int) (*models.Employee, error) {
 	}
 	return emp, nil
 }
+
 func (r *EmployeeMap) Update(id int, patch *models.EmployeePatch) (*models.Employee, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	emp, ok := r.data[id]
 	if !ok {
-		return nil, errors.New("not found")
+		return nil, ErrNotFound
 	}
 	if patch.CardNumberID != nil && *patch.CardNumberID != emp.CardNumberID {
 		for _, v := range r.data {
 			if v.CardNumberID == *patch.CardNumberID {
-				return nil, errors.New("card_number_id already exists")
+				return nil, ErrCardNumberIDExists
 			}
 		}
 		emp.CardNumberID = *patch.CardNumberID
@@ -118,11 +135,12 @@ func (r *EmployeeMap) Update(id int, patch *models.EmployeePatch) (*models.Emplo
 	r.data[emp.ID] = emp
 	return emp, nil
 }
+
 func (r *EmployeeMap) Delete(id int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if _, exists := r.data[id]; !exists {
-		return errors.New("not found")
+		return ErrNotFound
 	}
 	delete(r.data, id)
 	return nil
