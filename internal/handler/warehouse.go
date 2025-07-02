@@ -35,14 +35,7 @@ func (h *WarehouseDefault) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	wh := warehouse.Warehouse{
-		Id:                 0,
-		Address:            req.Address,
-		WarehouseCode:      req.WarehouseCode,
-		Telephone:          req.Telephone,
-		MinimumCapacity:    req.MinimumCapacity,
-		MinimumTemperature: *req.MinimumTemperature,
-	}
+	wh := mappers.RequestToWarehouse(req)
 
 	newW, err := h.sv.Create(wh)
 	if err != nil {
@@ -68,7 +61,7 @@ func (h *WarehouseDefault) FindById(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		err := api.ServiceErrors[api.ErrBadRequest]
-		response.Error(w, http.StatusBadRequest, err.Message)
+		response.Error(w, err.ResponseCode, "Invalid id")
 		return
 	}
 
@@ -87,7 +80,7 @@ func (h *WarehouseDefault) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		err := api.ServiceErrors[api.ErrBadRequest]
-		response.Error(w, http.StatusBadRequest, err.Message)
+		response.Error(w, err.ResponseCode, "Invalid id")
 		return
 	}
 
@@ -111,7 +104,7 @@ func (h *WarehouseDefault) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		err := api.ServiceErrors[api.ErrBadRequest]
-		response.Error(w, http.StatusBadRequest, err.Message)
+		response.Error(w, err.ResponseCode, "Invalid id")
 		return
 	}
 
