@@ -12,7 +12,6 @@ type errorResponse struct {
 }
 
 func Error(w http.ResponseWriter, statusCode int, message string) {
-
 	w.Header().Set("Content-Type", "application/json")
 	defaultStatusCode := http.StatusInternalServerError
 	if statusCode > 299 && statusCode < 600 {

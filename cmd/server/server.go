@@ -57,6 +57,11 @@ func (s *ServerChi) Run() error {
 	if err != nil {
 		return err
 	}
+  ldSection := loader.NewSectionJSONFile("docs/db/section.json")
+	dbSection, err := ldSection.Load()
+  if err != nil {
+		return err
+	}
 	// - repository
 	buyerRp := repository.NewBuyerRepository(buyerDb)
 	// - service
@@ -75,6 +80,13 @@ func (s *ServerChi) Run() error {
 	sellerSv := service.NewSellerService(sellerRp)
 	// - handler
 	sellerHd := handler.NewSellerHandler(sellerSv)
+  
+  // - repository
+	repSection := repository.NewSectionMap(dbSection)
+  // - service
+  serSection := service.NewSectionServer(repSection)
+  // - handler
+  handSection := handler.NewSectionHandler(serSection)
 
 	// - repository
 	repo := repository.NewEmployeeMap()
@@ -86,6 +98,7 @@ func (s *ServerChi) Run() error {
 	// - handler
 	hd := handler.NewEmployeeHandler(svc, dbWarehouse)
 
+
 	// router
 	rt := chi.NewRouter()
 	// - middlewares
@@ -93,6 +106,16 @@ func (s *ServerChi) Run() error {
 	rt.Use(middleware.Recoverer)
 
 	// - endpoints
+
+	rt.Route("/api/v1/sections", func(r chi.Router) {
+		r.Get("/", handSection.FindAllSections())
+		r.Get("/{id}", handSection.FindById())
+		r.Post("/", handSection.CreateSection())
+		r.Patch("/{id}", handSection.UpdateSection())
+		r.Delete("/{id}", handSection.DeleteSection())
+
+	})
+
 	rt.Route("/api/v1/buyers", func(rt chi.Router) {
 		rt.Post("/", buyerHd.Create())
 		rt.Patch("/{id}", buyerHd.Update())

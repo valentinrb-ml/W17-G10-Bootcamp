@@ -1,0 +1,222 @@
+[
+  {
+    "id": 1,
+    "section_number": 101,
+    "current_temperature": 8,
+    "minimum_temperature": 5,
+    "current_capacity": 80,
+    "minimum_capacity": 40,
+    "maximum_capacity": 100,
+    "warehouse_id": 1,
+    "product_id": 1
+  },
+  {
+    "id": 2,
+    "section_number": 102,
+    "current_temperature": 10,
+    "minimum_temperature": 6,
+    "current_capacity": 60,
+    "minimum_capacity": 30,
+    "maximum_capacity": 90,
+    "warehouse_id": 1,
+    "product_id": 2
+  },
+  {
+    "id": 3,
+    "section_number": 103,
+    "current_temperature": 7,
+    "minimum_temperature": 4,
+    "current_capacity": 55,
+    "minimum_capacity": 25,
+    "maximum_capacity": 75,
+    "warehouse_id": 2,
+    "product_id": 3
+  },
+  {
+    "id": 4,
+    "section_number": 104,
+    "current_temperature": 12,
+    "minimum_temperature": 8,
+    "current_capacity": 70,
+    "minimum_capacity": 50,
+    "maximum_capacity": 100,
+    "warehouse_id": 2,
+    "product_id": 4
+  },
+  {
+    "id": 5,
+    "section_number": 105,
+    "current_temperature": 9,
+    "minimum_temperature": 6,
+    "current_capacity": 40,
+    "minimum_capacity": 20,
+    "maximum_capacity": 60,
+    "warehouse_id": 1,
+    "product_id": 5
+  },
+  {
+    "id": 6,
+    "section_number": 106,
+    "current_temperature": 11,
+    "minimum_temperature": 7,
+    "current_capacity": 65,
+    "minimum_capacity": 35,
+    "maximum_capacity": 80,
+    "warehouse_id": 3,
+    "product_id": 6
+  },
+  {
+    "id": 7,
+    "section_number": 107,
+    "current_temperature": 8,
+    "minimum_temperature": 5,
+    "current_capacity": 95,
+    "minimum_capacity": 50,
+    "maximum_capacity": 110,
+    "warehouse_id": 3,
+    "product_id": 7
+  },
+  {
+    "id": 8,
+    "section_number": 108,
+    "current_temperature": 13,
+    "minimum_temperature": 10,
+    "current_capacity": 80,
+    "minimum_capacity": 60,
+    "maximum_capacity": 120,
+    "warehouse_id": 4,
+    "product_id": 8
+  },
+  {
+    "id": 9,
+    "section_number": 109,
+    "current_temperature": 6,
+    "minimum_temperature": 3,
+    "current_capacity": 35,
+    "minimum_capacity": 15,
+    "maximum_capacity": 55,
+    "warehouse_id": 2,
+    "product_id": 9
+  },
+  {
+    "id": 10,
+    "section_number": 110,
+    "current_temperature": 10,
+    "minimum_temperature": 7,
+    "current_capacity": 75,
+    "minimum_capacity": 40,
+    "maximum_capacity": 95,
+    "warehouse_id": 1,
+    "product_id": 10
+  },
+  {
+    "id": 11,
+    "section_number": 111,
+    "current_temperature": 9,
+    "minimum_temperature": 6,
+    "current_capacity": 65,
+    "minimum_capacity": 30,
+    "maximum_capacity": 85,
+    "warehouse_id": 3,
+    "product_id": 1
+  },
+  {
+    "id": 12,
+    "section_number": 112,
+    "current_temperature": 14,
+    "minimum_temperature": 11,
+    "current_capacity": 110,
+    "minimum_capacity": 80,
+    "maximum_capacity": 140,
+    "warehouse_id": 4,
+    "product_id": 2
+  },
+  {
+    "id": 13,
+    "section_number": 113,
+    "current_temperature": 6,
+    "minimum_temperature": 4,
+    "current_capacity": 45,
+    "minimum_capacity": 25,
+    "maximum_capacity": 65,
+    "warehouse_id": 2,
+    "product_id": 3
+  },
+  {
+    "id": 14,
+    "section_number": 114,
+    "current_temperature": 8,
+    "minimum_temperature": 6,
+    "current_capacity": 90,
+    "minimum_capacity": 50,
+    "maximum_capacity": 100,
+    "warehouse_id": 3,
+    "product_id": 4
+  },
+  {
+    "id": 15,
+    "section_number": 115,
+    "current_temperature": 7,
+    "minimum_temperature": 5,
+    "current_capacity": 60,
+    "minimum_capacity": 35,
+    "maximum_capacity": 75,
+    "warehouse_id": 1,
+    "product_id": 5
+  },
+  {
+    "id": 16,
+    "section_number": 116,
+    "current_temperature": 12,
+    "minimum_temperature": 8,
+    "current_capacity": 85,
+    "minimum_capacity": 55,
+    "maximum_capacity": 100,
+    "warehouse_id": 4,
+    "product_id": 6
+  },
+  {
+    "id": 17,
+    "section_number": 117,
+    "current_temperature": 9,
+    "minimum_temperature": 7,
+    "current_capacity": 55,
+    "minimum_capacity": 35,
+    "maximum_capacity": 70,
+    "warehouse_id": 1,
+    "product_id": 7
+  },
+  {
+    "id": 18,
+    "section_number": 118,
+    "current_temperature": 10,
+    "minimum_temperature": 9,
+    "current_capacity": 100,
+    "minimum_capacity": 60,
+    "maximum_capacity": 120,
+    "warehouse_id": 2,
+    "product_id": 8
+  },
+  {
+    "id": 19,
+    "section_number": 119,
+    "current_temperature": 11,
+    "minimum_temperature": 8,
+    "current_capacity": 120,
+    "minimum_capacity": 90,
+    "maximum_capacity": 150,
+    "warehouse_id": 4,
+    "product_id": 9
+  },
+  {
+    "id": 20,
+    "section_number": 120,
+    "current_temperature": 7,
+    "minimum_temperature": 6,
+    "current_capacity": 50,
+    "minimum_capacity": 25,
+    "maximum_capacity": 70,
+    "warehouse_id": 3,
+    "product_id": 10
+  }
+]
