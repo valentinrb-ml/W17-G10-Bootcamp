@@ -133,4 +133,5 @@ func (h *SectionDefault) UpdateSection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.JSON(w, http.StatusOK, mappers.SectionToResponseSection(secUpd))
+
 }

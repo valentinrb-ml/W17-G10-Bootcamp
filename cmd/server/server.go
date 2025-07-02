@@ -83,7 +83,7 @@ func (s *ServerChi) Run() (err error) {
 	// - service
 	svcSeller := service.NewSellerService(repoSeller)
 	svcBuyer := service.NewBuyerService(repoBuyer)
-	svcSection := service.NewSectionServer(repoSection)
+	svcSection := service.NewSectionServer(repoSection, repoWarehouse)
 	svcProduct := service.NewProductService(repoProduct)
 	svcWarehouse := service.NewWarehouseDefault(repoWarehouse)
 	svcEmployee := service.NewEmployeeDefault(repoEmployee, repoWarehouse)
