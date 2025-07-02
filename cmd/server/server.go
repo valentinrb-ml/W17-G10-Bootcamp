@@ -43,6 +43,10 @@ func (s *ServerChi) Run() (err error) {
 	if err != nil {
 		return err
 	}
+	dbProduct, err := ldProduct.Load(ctx)
+	if err != nil {
+		return err
+	}
 	ldBuyer := loader.NewBuyerJSONFile("docs/db/buyers.json")
 	dbBuyer, err := ldBuyer.Load()
 	if err != nil {
@@ -74,10 +78,7 @@ func (s *ServerChi) Run() (err error) {
 	repoSeller := repository.NewSellerRepository(dbSeller)
 	repoBuyer := repository.NewBuyerRepository(dbBuyer)
 	repoWarehouse := repository.NewWarehouseMap(dbWarehouse)
-	repoProduct, err := repository.NewProductRepository(ctx, ldProduct)
-	if err != nil {
-		return err
-	}
+	repoProduct := repository.NewProductRepository(dbProduct)
 	repoEmployee := repository.NewEmployeeMap(dbEmployee)
 
 	// - service

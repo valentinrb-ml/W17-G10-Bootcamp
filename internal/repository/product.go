@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"fmt"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/loader"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
 )
@@ -31,12 +30,7 @@ type productMemoryRepository struct {
 	nextID int
 }
 
-func NewProductRepository(ctx context.Context, l loader.ProductLoader) (ProductRepository, error) {
-	db, err := l.Load(ctx)
-	if err != nil {
-		return nil, err
-	}
-
+func NewProductRepository(db map[int]product.Product) ProductRepository {
 	var highestID int
 	for id := range db {
 		if id > highestID {
@@ -47,7 +41,7 @@ func NewProductRepository(ctx context.Context, l loader.ProductLoader) (ProductR
 	return &productMemoryRepository{
 		db:     db,
 		nextID: highestID + 1,
-	}, nil
+	}
 }
 
 func (r *productMemoryRepository) GetAll(_ context.Context) ([]product.Product, error) {
