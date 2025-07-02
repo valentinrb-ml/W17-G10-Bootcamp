@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -32,99 +33,100 @@ type ServerChi struct {
 	serverAddress string
 }
 
-func (s *ServerChi) Run() error {
+// Run is a method that runs the server
+func (s *ServerChi) Run() (err error) {
+	ctx := context.Background()
+
+	// dependencies
+
 	// - loader
-
-	buyerLd := loader.NewBuyerJSONFile("docs/db/buyers.json")
-	buyerDb, err := buyerLd.Load()
+	ldProduct, err := loader.NewJSONFileProductLoader("docs/db/products.json")
 	if err != nil {
 		return err
 	}
-
-	loadWarehouse := loader.NewWarehouseJSONFile("docs/db/warehouse.json")
-	dbWarehouse, err := loadWarehouse.Load()
+	ldBuyer := loader.NewBuyerJSONFile("docs/db/buyers.json")
+	dbBuyer, err := ldBuyer.Load()
 	if err != nil {
 		return err
 	}
-
-	sellerLd := loader.NewSellerJSONFile("docs/db/seller.json")
-	sellerDb, err := sellerLd.Load()
+	ldWarehouse := loader.NewWarehouseJSONFile("docs/db/warehouse.json")
+	dbWarehouse, err := ldWarehouse.Load()
 	if err != nil {
 		return err
 	}
-	l := loader.NewEmployeeJSONFile("docs/db/employees.json")
-	db, err := l.Load()
+	ldSeller := loader.NewSellerJSONFile("docs/db/seller.json")
+	dbSeller, err := ldSeller.Load()
 	if err != nil {
 		return err
 	}
-  ldSection := loader.NewSectionJSONFile("docs/db/section.json")
+	ldEmployee := loader.NewEmployeeJSONFile("docs/db/employees.json")
+	dbEmployee, err := ldEmployee.Load()
+	if err != nil {
+		return err
+	}
+	ldSection := loader.NewSectionJSONFile("docs/db/section.json")
 	dbSection, err := ldSection.Load()
-  if err != nil {
+	if err != nil {
 		return err
 	}
-	// - repository
-	buyerRp := repository.NewBuyerRepository(buyerDb)
-	// - service
-	buyerSv := service.NewBuyerService(buyerRp)
-	// - handler
-	buyerHd := handler.NewBuyerHandler(buyerSv)
-
-	rpWarehouse := repository.NewWarehouseMap(dbWarehouse)
-	// - service
-	svWarehouse := service.NewWarehouseDefault(rpWarehouse)
-	// - handler
-	hdWarehouse := handler.NewWarehouseDefault(svWarehouse)
-
-	sellerRp := repository.NewSellerRepository(sellerDb)
-	// - service
-	sellerSv := service.NewSellerService(sellerRp)
-	// - handler
-	sellerHd := handler.NewSellerHandler(sellerSv)
-  
-  // - repository
-	repSection := repository.NewSectionMap(dbSection)
-  // - service
-  serSection := service.NewSectionServer(repSection)
-  // - handler
-  handSection := handler.NewSectionHandler(serSection)
 
 	// - repository
-	repo := repository.NewEmployeeMap()
-	for _, emp := range db {
-		_, _ = repo.Create(emp)
+	repoSection := repository.NewSectionMap(dbSection)
+	repoSeller := repository.NewSellerRepository(dbSeller)
+	repoBuyer := repository.NewBuyerRepository(dbBuyer)
+	repoWarehouse := repository.NewWarehouseMap(dbWarehouse)
+	repoProduct, err := repository.NewProductRepository(ctx, ldProduct)
+	if err != nil {
+		return err
 	}
-	// - service
-	svc := service.NewEmployeeDefault(repo)
-	// - handler
-	hd := handler.NewEmployeeHandler(svc, dbWarehouse)
+	repoEmployee := repository.NewEmployeeMap()
+	for _, emp := range dbEmployee {
+		_, _ = repoEmployee.Create(emp)
+	}
 
+	// - service
+	svcSeller := service.NewSellerService(repoSeller)
+	svcBuyer := service.NewBuyerService(repoBuyer)
+	svcSection := service.NewSectionServer(repoSection)
+	svcProduct := service.NewProductService(repoProduct)
+	svcWarehouse := service.NewWarehouseDefault(repoWarehouse)
+	svcEmployee := service.NewEmployeeDefault(repoEmployee)
+
+	// - handler
+	hdBuyer := handler.NewBuyerHandler(svcBuyer)
+	hdSection := handler.NewSectionHandler(svcSection)
+	hdSeller := handler.NewSellerHandler(svcSeller)
+	hdWarehouse := handler.NewWarehouseDefault(svcWarehouse)
+	hdProduct := handler.NewProductHandler(svcProduct)
+	hdEmployee := handler.NewEmployeeHandler(svcEmployee, dbWarehouse)
 
 	// router
 	rt := chi.NewRouter()
+	rtProduct := hdProduct.Routes()
 	// - middlewares
 	rt.Use(middleware.Logger)
 	rt.Use(middleware.Recoverer)
 
-	// - endpoints
+	rt.Mount("/api/v1/products", rtProduct)
 
 	rt.Route("/api/v1/sections", func(r chi.Router) {
-		r.Get("/", handSection.FindAllSections())
-		r.Get("/{id}", handSection.FindById())
-		r.Post("/", handSection.CreateSection())
-		r.Patch("/{id}", handSection.UpdateSection())
-		r.Delete("/{id}", handSection.DeleteSection())
+		r.Get("/", hdSection.FindAllSections())
+		r.Get("/{id}", hdSection.FindById())
+		r.Post("/", hdSection.CreateSection())
+		r.Patch("/{id}", hdSection.UpdateSection())
+		r.Delete("/{id}", hdSection.DeleteSection())
 
 	})
 
 	rt.Route("/api/v1/buyers", func(rt chi.Router) {
-		rt.Post("/", buyerHd.Create())
-		rt.Patch("/{id}", buyerHd.Update())
-		rt.Delete("/{id}", buyerHd.Delete())
-		rt.Get("/", buyerHd.FindAll())
-		rt.Get("/{id}", buyerHd.FindById())
+		rt.Post("/", hdBuyer.Create())
+		rt.Patch("/{id}", hdBuyer.Update())
+		rt.Delete("/{id}", hdBuyer.Delete())
+		rt.Get("/", hdBuyer.FindAll())
+		rt.Get("/{id}", hdBuyer.FindById())
 	})
 
-	rt.Route("/warehouses", func(rt chi.Router) {
+	rt.Route("/api/v1/warehouses", func(rt chi.Router) {
 		rt.Post("/", hdWarehouse.Create)
 		rt.Get("/", hdWarehouse.FindAll)
 		rt.Get("/{id}", hdWarehouse.FindById)
@@ -132,19 +134,19 @@ func (s *ServerChi) Run() error {
 		rt.Delete("/{id}", hdWarehouse.Delete)
 	})
 
-	rt.Route("/seller", func(rt chi.Router) {
-		rt.Post("/", sellerHd.Create())
-		rt.Patch("/{id}", sellerHd.Update())
-		rt.Delete("/{id}", sellerHd.Delete())
-		rt.Get("/", sellerHd.FindAll())
-		rt.Get("/{id}", sellerHd.FindById())
+	rt.Route("/api/v1/sellers", func(rt chi.Router) {
+		rt.Post("/", hdSeller.Create())
+		rt.Patch("/{id}", hdSeller.Update())
+		rt.Delete("/{id}", hdSeller.Delete())
+		rt.Get("/", hdSeller.FindAll())
+		rt.Get("/{id}", hdSeller.FindById())
 	})
 	rt.Route("/api/v1/employees", func(rt chi.Router) {
-		rt.Post("/", hd.Create)
-		rt.Get("/", hd.GetAll)
-		rt.Get("/{id}", hd.GetByID)
-		rt.Patch("/{id}", hd.Update)
-		rt.Delete("/{id}", hd.Delete)
+		rt.Post("/", hdEmployee.Create)
+		rt.Get("/", hdEmployee.GetAll)
+		rt.Get("/{id}", hdEmployee.GetByID)
+		rt.Patch("/{id}", hdEmployee.Update)
+		rt.Delete("/{id}", hdEmployee.Delete)
 	})
 
 	fmt.Printf("Server running at http://localhost%s\n", s.serverAddress)

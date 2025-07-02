@@ -53,16 +53,16 @@ var ServiceErrors = map[int]ServiceError{
 	ErrUnatuhorize: {
 		Code:         ErrUnatuhorize,
 		ResponseCode: http.StatusUnauthorized,
-		Message:      "Unauthorize token",
-	},
-	ErrUnprocessableEntity: {
-		Code:         ErrUnprocessableEntity,
-		ResponseCode: http.StatusUnprocessableEntity,
-		Message:      "Unprocessable Entity",
+		Message:      "unauthorize token",
 	},
 	ErrConflict: {
 		Code:         ErrConflict,
 		ResponseCode: http.StatusConflict,
-		Message:      "Resource already exists",
+		Message:      "conflict",
+	},
+	ErrUnprocessableEntity: {
+		Code:         ErrUnprocessableEntity,
+		ResponseCode: http.StatusUnprocessableEntity,
+		Message:      "unprocessable Entity",
 	},
 }
