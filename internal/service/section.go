@@ -2,10 +2,12 @@ package service
 
 import (
 	"fmt"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
+	"net/http"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
-	"net/http"
 )
 
 type SectionService interface {
@@ -73,11 +75,6 @@ func (s *SectionDefault) UpdateSection(id int, sec section.RequestSection) (sect
 	if err != nil {
 		return section.Section{}, err
 	}
-
-	if sec.ProductId != 0 {
-		existing.ProductId = sec.ProductId
-
-	}
 	if sec.SectionNumber != nil {
 		if s.rp.ExistsSectionByNumber(*sec.SectionNumber) && *sec.SectionNumber != existing.SectionNumber {
 			err := api.ServiceErrors[api.ErrConflict]
@@ -87,22 +84,6 @@ func (s *SectionDefault) UpdateSection(id int, sec section.RequestSection) (sect
 				Message:      "The section number already exists",
 			}
 		}
-		existing.SectionNumber = *sec.SectionNumber
-	}
-	if sec.CurrentTemperature != nil {
-		existing.CurrentTemperature = *sec.CurrentTemperature
-	}
-	if sec.MinimumTemperature != nil {
-		existing.MinimumTemperature = *sec.MinimumTemperature
-	}
-	if sec.CurrentCapacity != nil {
-		existing.CurrentCapacity = *sec.CurrentCapacity
-	}
-	if sec.MinimumCapacity != nil {
-		existing.MinimumCapacity = *sec.MinimumCapacity
-	}
-	if sec.MaximumCapacity != nil {
-		existing.MaximumCapacity = *sec.MaximumCapacity
 	}
 	if sec.WarehouseId != nil {
 		if _, err1 := s.rpWareHouse.FindById(*sec.WarehouseId); err1 != nil {
@@ -112,8 +93,9 @@ func (s *SectionDefault) UpdateSection(id int, sec section.RequestSection) (sect
 				Message:      "The warehouse does not exist",
 			}
 		}
-		existing.WarehouseId = *sec.WarehouseId
 	}
+
+	mappers.ApplySectionPatch(sec, &existing)
 
 	secUpd, err := s.rp.UpdateSection(id, existing)
 

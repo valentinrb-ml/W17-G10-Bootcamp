@@ -30,3 +30,31 @@ func SectionToResponseSection(s section.Section) section.ResponseSection {
 		ProductId:          s.ProductId,
 	}
 }
+
+func ApplySectionPatch(sec section.RequestSection, existing *section.Section) {
+	if sec.ProductId != 0 {
+		existing.ProductId = sec.ProductId
+
+	}
+	if sec.SectionNumber != nil {
+		existing.SectionNumber = *sec.SectionNumber
+	}
+	if sec.CurrentTemperature != nil {
+		existing.CurrentTemperature = *sec.CurrentTemperature
+	}
+	if sec.MinimumTemperature != nil {
+		existing.MinimumTemperature = *sec.MinimumTemperature
+	}
+	if sec.CurrentCapacity != nil {
+		existing.CurrentCapacity = *sec.CurrentCapacity
+	}
+	if sec.MinimumCapacity != nil {
+		existing.MinimumCapacity = *sec.MinimumCapacity
+	}
+	if sec.MaximumCapacity != nil {
+		existing.MaximumCapacity = *sec.MaximumCapacity
+	}
+	if sec.WarehouseId != nil {
+		existing.WarehouseId = *sec.WarehouseId
+	}
+}
