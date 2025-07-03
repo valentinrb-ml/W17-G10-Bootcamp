@@ -6,12 +6,45 @@ import (
 )
 
 func ValidateRequestSeller(sr models.RequestSeller) *api.ServiceError {
-	if sr.Cid == nil || *sr.Cid <= 0 ||
-		sr.CompanyName == nil || *sr.CompanyName == "" ||
-		sr.Address == nil || *sr.Address == "" ||
-		sr.Telephone == nil || *sr.Telephone == "" {
-		err := api.ServiceErrors[api.ErrUnprocessableEntity]
-		err.Message = "All fields are required. They cannot be empty."
+	err := api.ServiceErrors[api.ErrUnprocessableEntity]
+
+	if sr.Cid == nil || *sr.Cid <= 0 {
+		err.Message = "Cid is required and must be greater than 0."
+		return &err
+	}
+	if sr.CompanyName == nil || *sr.CompanyName == "" {
+		err.Message = "CompanyName is required and cannot be empty."
+		return &err
+	}
+	if sr.Address == nil || *sr.Address == "" {
+		err.Message = "Address is required and cannot be empty."
+		return &err
+	}
+	if sr.Telephone == nil || *sr.Telephone == "" {
+		err.Message = "Telephone is required and cannot be empty."
+		return &err
+	}
+
+	return nil
+}
+
+func ValidateRequestSellerToPatch(sr models.RequestSeller) *api.ServiceError {
+	err := api.ServiceErrors[api.ErrUnprocessableEntity]
+
+	if sr.Cid != nil && *sr.Cid <= 0 {
+		err.Message = "Cid must be greater than 0."
+		return &err
+	}
+	if sr.CompanyName != nil && *sr.CompanyName == "" {
+		err.Message = "CompanyName cannot be empty."
+		return &err
+	}
+	if sr.Address != nil && *sr.Address == "" {
+		err.Message = "Address cannot be empty."
+		return &err
+	}
+	if sr.Telephone != nil && *sr.Telephone == "" {
+		err.Message = "Telephone cannot be empty."
 		return &err
 	}
 

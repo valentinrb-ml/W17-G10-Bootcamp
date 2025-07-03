@@ -75,7 +75,7 @@ func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	er := validators.ValidateRequestSeller(sr)
+	er := validators.ValidateRequestSellerToPatch(sr)
 	if er != nil {
 		response.Error(w, er.ResponseCode, er.Message)
 		return

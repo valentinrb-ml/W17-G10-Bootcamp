@@ -11,3 +11,18 @@ func RequestSellerToSeller(rs models.RequestSeller) models.Seller {
 		Telephone:   *rs.Telephone,
 	}
 }
+
+func ApplySellerPatch(seller *models.Seller, patch *models.RequestSeller) {
+	if patch.Cid != nil {
+		seller.Cid = *patch.Cid
+	}
+	if patch.CompanyName != nil {
+		seller.CompanyName = *patch.CompanyName
+	}
+	if patch.Address != nil {
+		seller.Address = *patch.Address
+	}
+	if patch.Telephone != nil {
+		seller.Telephone = *patch.Telephone
+	}
+}

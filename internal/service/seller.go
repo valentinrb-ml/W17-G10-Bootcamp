@@ -26,7 +26,7 @@ func NewSellerService(rp repository.SellerRepository) SellerService {
 }
 
 func (sv *sellerService) Create(reqs models.RequestSeller) (*models.ResponseSeller, *api.ServiceError) {
-	if !sv.rp.IsValidCid(*reqs.Cid) {
+	if sv.rp.CidAlreadyExists(*reqs.Cid) {
 		err := api.ServiceErrors[api.ErrConflict]
 		return nil, &api.ServiceError{
 			Code:         err.Code,
@@ -44,15 +44,7 @@ func (sv *sellerService) Create(reqs models.RequestSeller) (*models.ResponseSell
 }
 
 func (sv *sellerService) Update(id int, reqs models.RequestSeller) (*models.ResponseSeller, *api.ServiceError) {
-	if !sv.rp.ExistsById(id) {
-		err := api.ServiceErrors[api.ErrNotFound]
-		return nil, &api.ServiceError{
-			Code:         err.Code,
-			ResponseCode: err.ResponseCode,
-			Message:      "The seller you are trying to update does not exist",
-		}
-	}
-	if !sv.rp.IsValidCidExcludeId(*reqs.Cid, id) {
+	if sv.rp.CidAlreadyExistsExcludeId(*reqs.Cid, id) {
 		err := api.ServiceErrors[api.ErrConflict]
 		return nil, &api.ServiceError{
 			Code:         err.Code,
@@ -60,12 +52,15 @@ func (sv *sellerService) Update(id int, reqs models.RequestSeller) (*models.Resp
 			Message:      "The CID is in use, use a valid one",
 		}
 	}
+	s, err := sv.rp.FindById(id)
+	if err != nil {
+		return nil, err
+	}
 
-	ms := mappers.RequestSellerToSeller(reqs)
+	mappers.ApplySellerPatch(s, &reqs)
 
-	ms.Id = id
-	sv.rp.Update(id, ms)
-	resps := models.ResponseSeller(ms)
+	sv.rp.Update(id, *s)
+	resps := models.ResponseSeller(*s)
 
 	return &resps, nil
 }

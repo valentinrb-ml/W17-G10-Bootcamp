@@ -12,8 +12,8 @@ type SellerRepository interface {
 	FindAll() []models.Seller
 	FindById(id int) (*models.Seller, *api.ServiceError)
 
-	IsValidCid(cid int) bool
-	IsValidCidExcludeId(cid int, excludeId int) bool
+	CidAlreadyExists(cid int) bool
+	CidAlreadyExistsExcludeId(cid int, excludeId int) bool
 	ExistsById(id int) bool
 }
 
@@ -68,23 +68,23 @@ func (r *sellerRepository) FindById(id int) (*models.Seller, *api.ServiceError) 
 	return &s, nil
 }
 
-func (r *sellerRepository) IsValidCid(cid int) bool {
+func (r *sellerRepository) CidAlreadyExists(cid int) bool {
 	for _, s := range r.db {
 		if s.Cid == cid {
-			return false
+			return true
 		}
 	}
 
-	return true
+	return false
 }
 
-func (r *sellerRepository) IsValidCidExcludeId(cid int, excludeId int) bool {
+func (r *sellerRepository) CidAlreadyExistsExcludeId(cid int, excludeId int) bool {
 	for _, s := range r.db {
 		if s.Cid == cid && s.Id != excludeId {
-			return false
+			return true
 		}
 	}
-	return true
+	return false
 }
 
 func (r *sellerRepository) ExistsById(id int) bool {
