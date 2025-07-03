@@ -5,7 +5,7 @@ type WarehouseDoc struct {
 	Address            string  `json:"address"`
 	Telephone          string  `json:"telephone"`
 	WarehouseCode      string  `json:"warehouse_code"`
-	MinimumCapacity    int     `json:"minimun_capacity"`
+	MinimumCapacity    int     `json:"minimum_capacity"`
 	MinimumTemperature float64 `json:"minimun_temperature"`
 }
 
