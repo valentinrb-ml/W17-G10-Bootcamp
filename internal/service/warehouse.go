@@ -36,6 +36,7 @@ func (s *WarehouseDefault) Create(w warehouse.Warehouse) (*warehouse.Warehouse, 
 	}
 	if ok {
 		err := api.ServiceErrors[api.ErrConflict]
+		err.Message = "warehouse_code already exists"
 		return nil, &err
 	}
 

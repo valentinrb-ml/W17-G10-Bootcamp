@@ -61,7 +61,8 @@ func (h *WarehouseHandler) FindById(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		err := api.ServiceErrors[api.ErrBadRequest]
-		response.Error(w, err.ResponseCode, "Invalid id")
+		err.Message = "Invalid id"
+		response.Error(w, err.ResponseCode, err.Message)
 		return
 	}
 
@@ -80,7 +81,8 @@ func (h *WarehouseHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		err := api.ServiceErrors[api.ErrBadRequest]
-		response.Error(w, err.ResponseCode, "Invalid id")
+		err.Message = "Invalid id"
+		response.Error(w, err.ResponseCode, err.Message)
 		return
 	}
 
@@ -104,7 +106,8 @@ func (h *WarehouseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		err := api.ServiceErrors[api.ErrBadRequest]
-		response.Error(w, err.ResponseCode, "Invalid id")
+		err.Message = "Invalid id"
+		response.Error(w, err.ResponseCode, err.Message)
 		return
 	}
 

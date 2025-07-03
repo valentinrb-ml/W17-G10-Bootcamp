@@ -10,11 +10,13 @@ import (
 func ValidateWarehouseCreateRequest(req warehouse.WarehouseRequest) *api.ServiceError {
 	if req.Address == "" || req.Telephone == "" || req.WarehouseCode == "" || req.MinimumCapacity <= 0 || req.MinimumTemperature == nil {
 		err := api.ServiceErrors[api.ErrUnprocessableEntity]
+		err.Message = "invalid request body"
 		return &err
 	}
 
 	if !isValidPhone(req.Telephone) {
 		err := api.ServiceErrors[api.ErrUnprocessableEntity]
+		err.Message = "invalid phone number"
 		return &err
 	}
 	return nil
