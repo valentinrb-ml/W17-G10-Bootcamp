@@ -27,3 +27,12 @@ func isValidPhone(phone string) bool {
     return re.MatchString(phone)
 }
 
+func ValidateMinimumCapacity(minimumCapacity int) *api.ServiceError {
+	if minimumCapacity <= 0 {
+		err := api.ServiceErrors[api.ErrUnprocessableEntity]
+		err.Message = "minimum capacity must be greater than 0"
+		return &err
+	}
+	return nil
+}
+

@@ -5,6 +5,7 @@ import (
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
@@ -77,6 +78,12 @@ func (s *WarehouseDefault) Update(id int, patch warehouse.WarehousePatchDTO) (*w
 	existing, err := s.rp.FindById(id)
 	if err != nil {
 		return nil, err
+	}
+
+	if patch.MinimumCapacity != nil {
+		if err := validators.ValidateMinimumCapacity(*patch.MinimumCapacity); err != nil {
+			return nil, err
+		}
 	}
 
 	mappers.ApplyWarehousePatch(existing, patch)
