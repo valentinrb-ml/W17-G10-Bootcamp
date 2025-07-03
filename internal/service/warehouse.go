@@ -86,8 +86,17 @@ func (s *WarehouseDefault) Update(id int, patch warehouse.WarehousePatchDTO) (*w
 		}
 	}
 
+	if patch.WarehouseCode != nil {
+		ok, _ := s.rp.Exist(*patch.WarehouseCode)
+		if ok {
+			err := api.ServiceErrors[api.ErrConflict]
+			err.Message = "warehouse_code already exists"
+			return nil, &err
+		}
+	}
+
 	mappers.ApplyWarehousePatch(existing, patch)
-	
+
 	updated, errRepo := s.rp.Update(id, *existing)
 	if errRepo != nil {
 		return nil, errRepo
