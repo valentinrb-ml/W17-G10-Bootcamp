@@ -10,16 +10,16 @@ INSERT INTO localities (id, locality_name, province_id) VALUES
                                                             (5, 'Campinas', 5), (6, 'Niterói', 6), (7, 'Calama', 7), (8, 'Centro', 8),
                                                             (9, 'Lambaré', 9), (10, 'El Alto', 10);
 INSERT INTO sellers (id, cid, company_name, address, telephone, locality_id) VALUES
-                                                                                 (1, 'S001', 'Frutas del Sur', 'Calle 1', '221-111', 1),
-                                                                                 (2, 'S002', 'Verdulería Norte', 'Calle 2', '221-112', 2),
-                                                                                 (3, 'S003', 'Carnes Argentinas', 'Calle 3', '221-113', 3),
-                                                                                 (4, 'S004', 'Almacén Cordobés', 'Calle 4', '221-114', 4),
-                                                                                 (5, 'S005', 'Exportadora Brasil', 'Calle 5', '11-221', 5),
-                                                                                 (6, 'S006', 'Café do Brasil', 'Calle 6', '21-222', 6),
-                                                                                 (7, 'S007', 'Viña Andina', 'Calle 7', '32-333', 7),
-                                                                                 (8, 'S008', 'Delicatessen Uy', 'Calle 8', '34-444', 8),
-                                                                                 (9, 'S009', 'Maíz PY', 'Calle 9', '41-555', 9),
-                                                                                 (10, 'S010', 'Bolivian Imports', 'Calle 10', '51-666', 10);
+                                                                                 (1, 101, 'Frutas del Sur', 'Calle 1', '221-111', 1),
+                                                                                 (2, 102, 'Verdulería Norte', 'Calle 2', '221-112', 2),
+                                                                                 (3, 103, 'Carnes Argentinas', 'Calle 3', '221-113', 3),
+                                                                                 (4, 104, 'Almacén Cordobés', 'Calle 4', '221-114', 4),
+                                                                                 (5, 105, 'Exportadora Brasil', 'Calle 5', '11-221', 5),
+                                                                                 (6, 106, 'Café do Brasil', 'Calle 6', '21-222', 6),
+                                                                                 (7, 107, 'Viña Andina', 'Calle 7', '32-333', 7),
+                                                                                 (8, 108, 'Delicatessen Uy', 'Calle 8', '34-444', 8),
+                                                                                 (9, 109, 'Maíz PY', 'Calle 9', '41-555', 9),
+                                                                                 (10, 110, 'Bolivian Imports', 'Calle 10', '51-666', 10);
 INSERT INTO carriers (id, cid, company_name, address, telephone, locality_id) VALUES
                                                                                   (1, 'C001', 'Transporte Sureño', 'Av 10', '421-001', 1),
                                                                                   (2, 'C002', 'Logística Pampeana', 'Av 2', '421-002', 2),
