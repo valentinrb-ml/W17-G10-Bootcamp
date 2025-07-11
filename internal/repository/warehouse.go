@@ -1,88 +1,152 @@
 package repository
 
 import (
+	"context"
+	"database/sql"
+	"errors"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
 
 type WarehouseRepository interface {
-	Create(w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError)
-	Exist(wc string) (bool, *api.ServiceError)
-	FindAll() ([]warehouse.Warehouse, *api.ServiceError)
-	FindById(id int) (*warehouse.Warehouse, *api.ServiceError)
-	Update(id int, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError)
-	Delete(id int) *api.ServiceError
+	Create(ctx context.Context, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError)
+	Exist(ctx context.Context, wc string) (bool, *api.ServiceError)
+	FindAll(ctx context.Context) ([]warehouse.Warehouse, *api.ServiceError)
+	FindById(ctx context.Context, id int) (*warehouse.Warehouse, *api.ServiceError)
+	Update(ctx context.Context, id int, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError)
+	Delete(ctx context.Context, id int) *api.ServiceError
 }
 
-type WarehouseMap struct {
-	db map[int]warehouse.Warehouse
+const (
+	queryWarehouseExist    = `SELECT COUNT(*) FROM warehouse WHERE warehouse_code = ?`
+	queryWarehouseCreate   = `INSERT INTO warehouse (warehouse_code, address, minimum_temperature, minimum_capacity, telephone) VALUES (?, ?, ?, ?, ?)`
+	queryWarehouseFindAll  = `SELECT id, warehouse_code, address, minimum_temperature, minimum_capacity, telephone FROM warehouse`
+	queryWarehouseFindById = `SELECT id, warehouse_code, address, minimum_temperature, minimum_capacity, telephone FROM warehouse WHERE id = ?`
+	queryWarehouseUpdate   = `UPDATE warehouse SET warehouse_code = ?, address = ?, minimum_temperature = ?, minimum_capacity = ?, telephone = ? WHERE id = ?`
+	queryWarehouseDelete   = `DELETE FROM warehouse WHERE id = ?`
+)
+
+type WarehouseMySQL struct {
+	db *sql.DB
 }
 
-func NewWarehouseMap(db map[int]warehouse.Warehouse) *WarehouseMap {
-	defaultDb := make(map[int]warehouse.Warehouse)
-	if db != nil {
-		defaultDb = db
-	}
-	return &WarehouseMap{db: defaultDb}
+func NewWarehouseRepository(db *sql.DB) *WarehouseMySQL {
+	return &WarehouseMySQL{db}
 }
 
-func (r *WarehouseMap) Exist(wc string) (bool, *api.ServiceError) {
-	for _, warehouse := range r.db {
-		if warehouse.WarehouseCode == wc {
-			return true, nil
-		}
-	}
-	err := api.ServiceErrors[api.ErrNotFound]
-	return false, &err
-}
-
-func (r *WarehouseMap) Create(w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError) {
-	maxId := 0
-	for _, wh := range r.db {
-		if wh.Id > maxId {
-			maxId = wh.Id
-		}
+func (r *WarehouseMySQL) Exist(ctx context.Context, wc string) (bool, *api.ServiceError) {
+	var count int
+	err := r.db.QueryRowContext(ctx, queryWarehouseExist, wc).Scan(&count)
+	if err != nil {
+		errVal := api.ServiceErrors[api.ErrInternalServer]
+		errVal.InternalError = err
+		return false, &errVal
 	}
 
-	w.Id = maxId + 1
-	r.db[w.Id] = w
+	// Si count > 0, existe; si count = 0, no existe (sin error)
+	return count > 0, nil
+}
+
+func (r *WarehouseMySQL) Create(ctx context.Context, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError) {
+	res, err := r.db.ExecContext(ctx, queryWarehouseCreate, w.WarehouseCode, w.Address, w.MinimumTemperature, w.MinimumCapacity, w.Telephone)
+	if err != nil {
+		errVal := api.ServiceErrors[api.ErrInternalServer]
+		errVal.InternalError = err
+		return nil, &errVal
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		errVal := api.ServiceErrors[api.ErrInternalServer]
+		errVal.InternalError = err
+		return nil, &errVal
+	}
+	w.Id = int(id)
 	return &w, nil
 }
 
-func (r *WarehouseMap) FindAll() ([]warehouse.Warehouse, *api.ServiceError) {
-	w := make([]warehouse.Warehouse, 0, len(r.db))
-
-	for _, wh := range r.db {
-		w = append(w, wh)
+func (r *WarehouseMySQL) FindAll(ctx context.Context) ([]warehouse.Warehouse, *api.ServiceError) {
+	rows, err := r.db.QueryContext(ctx, queryWarehouseFindAll)
+	if err != nil {
+		errVal := api.ServiceErrors[api.ErrInternalServer]
+		errVal.InternalError = err
+		return nil, &errVal
 	}
-	return w, nil
+	defer rows.Close()
+
+	var whs []warehouse.Warehouse
+	for rows.Next() {
+		var wh warehouse.Warehouse
+		err := rows.Scan(&wh.Id, &wh.WarehouseCode, &wh.Address, &wh.MinimumTemperature, &wh.MinimumCapacity, &wh.Telephone)
+		if err != nil {
+			// Log the error but continue processing other rows
+			continue
+		}
+		whs = append(whs, wh)
+	}
+
+	if err := rows.Err(); err != nil {
+		errVal := api.ServiceErrors[api.ErrInternalServer]
+		errVal.InternalError = err
+		return nil, &errVal
+	}
+	return whs, nil
 }
 
-func (r *WarehouseMap) FindById(id int) (*warehouse.Warehouse, *api.ServiceError) {
-	wh, ok := r.db[id]
-	if !ok {
-		err := api.ServiceErrors[api.ErrNotFound]
-		return nil, &err
+func (r *WarehouseMySQL) FindById(ctx context.Context, id int) (*warehouse.Warehouse, *api.ServiceError) {
+	var w warehouse.Warehouse
+	err := r.db.QueryRow(queryWarehouseFindById, id).Scan(
+		&w.Id, &w.WarehouseCode, &w.Address, &w.MinimumTemperature, &w.MinimumCapacity, &w.Telephone,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			errVal := api.ServiceErrors[api.ErrNotFound]
+			return nil, &errVal
+		}
+		errVal := api.ServiceErrors[api.ErrInternalServer]
+		errVal.InternalError = err
+		return nil, &errVal
 	}
-	return &wh, nil
-}
-
-func (r *WarehouseMap) Update(id int, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError) {
-	_, ok := r.db[id]
-	if !ok {
-		err := api.ServiceErrors[api.ErrNotFound]
-		return nil, &err
-	}
-	r.db[id] = w
 	return &w, nil
 }
 
-func (r *WarehouseMap) Delete(id int) *api.ServiceError {
-	_, ok := r.db[id]
-	if !ok {
-		err := api.ServiceErrors[api.ErrNotFound]
-		return &err
+func (r *WarehouseMySQL) Update(ctx context.Context, id int, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError) {
+	res, err := r.db.ExecContext(ctx, queryWarehouseUpdate, w.WarehouseCode, w.Address, w.MinimumTemperature, w.MinimumCapacity, w.Telephone, id)
+	if err != nil {
+		errVal := api.ServiceErrors[api.ErrInternalServer]
+		errVal.InternalError = err
+		return nil, &errVal
 	}
-	delete(r.db, id)
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		errVal := api.ServiceErrors[api.ErrInternalServer]
+		errVal.InternalError = err
+		return nil, &errVal
+	}
+	if rowsAffected == 0 {
+		errVal := api.ServiceErrors[api.ErrNotFound]
+		return nil, &errVal
+	}
+	w.Id = id
+	return &w, nil
+}
+
+func (r *WarehouseMySQL) Delete(ctx context.Context, id int) *api.ServiceError {
+	res, err := r.db.ExecContext(ctx, queryWarehouseDelete, id)
+	if err != nil {
+		errVal := api.ServiceErrors[api.ErrInternalServer]
+		errVal.InternalError = err
+		return &errVal
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		errVal := api.ServiceErrors[api.ErrInternalServer]
+		errVal.InternalError = err
+		return &errVal
+	}
+	if rowsAffected == 0 {
+		errVal := api.ServiceErrors[api.ErrNotFound]
+		return &errVal
+	}
 	return nil
 }
