@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"slices"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
@@ -8,8 +9,8 @@ import (
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
 
-func (sv *sellerService) Create(reqs models.RequestSeller) (*models.ResponseSeller, error) {
-	if sv.rp.CIDExists(*reqs.Cid, 0) {
+func (sv *sellerService) Create(ctx context.Context, reqs models.RequestSeller) (*models.ResponseSeller, error) {
+	if sv.rp.CIDExists(ctx, *reqs.Cid, 0) {
 		err := api.ServiceErrors[api.ErrConflict]
 		return nil, &api.ServiceError{
 			Code:         err.Code,
@@ -20,7 +21,7 @@ func (sv *sellerService) Create(reqs models.RequestSeller) (*models.ResponseSell
 
 	ms := mappers.RequestSellerToSeller(reqs)
 
-	s, err := sv.rp.Create(ms)
+	s, err := sv.rp.Create(ctx, ms)
 	if err != nil {
 		return nil, err
 	}
@@ -30,8 +31,8 @@ func (sv *sellerService) Create(reqs models.RequestSeller) (*models.ResponseSell
 	return &resps, nil
 }
 
-func (sv *sellerService) Update(id int, reqs models.RequestSeller) (*models.ResponseSeller, error) {
-	if sv.rp.CIDExists(*reqs.Cid, id) {
+func (sv *sellerService) Update(ctx context.Context, id int, reqs models.RequestSeller) (*models.ResponseSeller, error) {
+	if sv.rp.CIDExists(ctx, *reqs.Cid, id) {
 		err := api.ServiceErrors[api.ErrConflict]
 		return nil, &api.ServiceError{
 			Code:         err.Code,
@@ -39,21 +40,21 @@ func (sv *sellerService) Update(id int, reqs models.RequestSeller) (*models.Resp
 			Message:      "The CID is in use, use a valid one",
 		}
 	}
-	s, err := sv.rp.FindById(id)
+	s, err := sv.rp.FindById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
 	mappers.ApplySellerPatch(s, &reqs)
 
-	sv.rp.Update(id, *s)
+	sv.rp.Update(ctx, id, *s)
 	resps := models.ResponseSeller(*s)
 
 	return &resps, nil
 }
 
-func (sv *sellerService) Delete(id int) error {
-	err := sv.rp.Delete(id)
+func (sv *sellerService) Delete(ctx context.Context, id int) error {
+	err := sv.rp.Delete(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -61,9 +62,9 @@ func (sv *sellerService) Delete(id int) error {
 	return nil
 }
 
-func (sv *sellerService) FindAll() ([]models.ResponseSeller, error) {
+func (sv *sellerService) FindAll(ctx context.Context) ([]models.ResponseSeller, error) {
 	var rs []models.ResponseSeller
-	s, err := sv.rp.FindAll()
+	s, err := sv.rp.FindAll(ctx)
 	if err != nil {
 		return []models.ResponseSeller{}, err
 	}
@@ -79,8 +80,8 @@ func (sv *sellerService) FindAll() ([]models.ResponseSeller, error) {
 	return rs, nil
 }
 
-func (sv *sellerService) FindById(id int) (*models.ResponseSeller, error) {
-	s, err := sv.rp.FindById(id)
+func (sv *sellerService) FindById(ctx context.Context, id int) (*models.ResponseSeller, error) {
+	s, err := sv.rp.FindById(ctx, id)
 	if err != nil {
 		return nil, err
 	}

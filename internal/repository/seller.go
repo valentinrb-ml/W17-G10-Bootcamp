@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -18,8 +19,9 @@ const (
 	querySellerCIDExists = `SELECT EXISTS(SELECT 1 FROM sellers	WHERE LOWER(cid) = LOWER(?) AND id != ?)`
 )
 
-func (r *sellerRepository) Create(s models.Seller) (*models.Seller, error) {
-	res, err := r.mysql.Exec(
+func (r *sellerRepository) Create(ctx context.Context, s models.Seller) (*models.Seller, error) {
+	res, err := r.mysql.ExecContext(
+		ctx,
 		querySellerCreate,
 		s.Cid, s.CompanyName, s.Address, s.Telephone,
 	)
@@ -37,8 +39,9 @@ func (r *sellerRepository) Create(s models.Seller) (*models.Seller, error) {
 	return &s, nil
 }
 
-func (r *sellerRepository) Update(id int, s models.Seller) error {
-	_, err := r.mysql.Exec(
+func (r *sellerRepository) Update(ctx context.Context, id int, s models.Seller) error {
+	_, err := r.mysql.ExecContext(
+		ctx,
 		querySellerUpdate,
 		s.Cid, s.CompanyName, s.Address, s.Telephone, s.Id,
 	)
@@ -46,8 +49,8 @@ func (r *sellerRepository) Update(id int, s models.Seller) error {
 	return err
 }
 
-func (r *sellerRepository) Delete(id int) error {
-	result, err := r.mysql.Exec(querySellerDelete, id)
+func (r *sellerRepository) Delete(ctx context.Context, id int) error {
+	result, err := r.mysql.ExecContext(ctx, querySellerDelete, id)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1451 {
 			errDef := api.ServiceErrors[api.ErrConflict]
@@ -84,8 +87,8 @@ func (r *sellerRepository) Delete(id int) error {
 	return nil
 }
 
-func (r *sellerRepository) FindAll() ([]models.Seller, error) {
-	rows, err := r.mysql.Query(querySellerFindAll)
+func (r *sellerRepository) FindAll(ctx context.Context) ([]models.Seller, error) {
+	rows, err := r.mysql.QueryContext(ctx, querySellerFindAll)
 	if err != nil {
 		return nil, err
 	}
@@ -108,9 +111,9 @@ func (r *sellerRepository) FindAll() ([]models.Seller, error) {
 	return sellers, nil
 }
 
-func (r *sellerRepository) FindById(id int) (*models.Seller, error) {
+func (r *sellerRepository) FindById(ctx context.Context, id int) (*models.Seller, error) {
 	var s models.Seller
-	row := r.mysql.QueryRow(querySellerFindById, id)
+	row := r.mysql.QueryRowContext(ctx, querySellerFindById, id)
 	err := row.Scan(&s.Id, &s.Cid, &s.CompanyName, &s.Address, &s.Telephone)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -132,9 +135,14 @@ func (r *sellerRepository) FindById(id int) (*models.Seller, error) {
 	return &s, nil
 }
 
-func (r *sellerRepository) CIDExists(cid int, id int) bool {
+func (r *sellerRepository) CIDExists(ctx context.Context, cid int, id int) bool {
 	var exists bool
 
-	r.mysql.QueryRow(querySellerCIDExists, cid, id).Scan(&exists)
+	r.mysql.QueryRowContext(
+		ctx,
+		querySellerCIDExists,
+		cid, id,
+	).Scan(&exists)
+
 	return exists
 }

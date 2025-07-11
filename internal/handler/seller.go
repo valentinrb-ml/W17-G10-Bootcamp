@@ -25,6 +25,8 @@ type SellerHandler struct {
 }
 
 func (h *SellerHandler) Create(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	var sr models.RequestSeller
 	err := request.JSON(r, &sr)
 	if err != nil {
@@ -44,7 +46,7 @@ func (h *SellerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := h.sv.Create(sr)
+	s, err := h.sv.Create(ctx, sr)
 	if handleApiError(w, err) {
 		return
 	}
@@ -53,6 +55,8 @@ func (h *SellerHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -84,7 +88,7 @@ func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := h.sv.Update(id, sr)
+	s, err := h.sv.Update(ctx, id, sr)
 	if handleApiError(w, err) {
 		return
 	}
@@ -93,6 +97,8 @@ func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SellerHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -100,7 +106,7 @@ func (h *SellerHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.sv.Delete(id)
+	err = h.sv.Delete(ctx, id)
 	if handleApiError(w, err) {
 		return
 	}
@@ -109,7 +115,9 @@ func (h *SellerHandler) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SellerHandler) FindAll(w http.ResponseWriter, r *http.Request) {
-	s, err := h.sv.FindAll()
+	ctx := r.Context()
+
+	s, err := h.sv.FindAll(ctx)
 	if handleApiError(w, err) {
 		return
 	}
@@ -118,6 +126,8 @@ func (h *SellerHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SellerHandler) FindById(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -125,7 +135,7 @@ func (h *SellerHandler) FindById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := h.sv.FindById(id)
+	s, err := h.sv.FindById(ctx, id)
 	if handleApiError(w, err) {
 		return
 	}
