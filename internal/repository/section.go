@@ -9,17 +9,6 @@ type SectionMap struct {
 	db map[int]section.Section
 }
 
-// SectionRepository is an interface that represents a section repository
-type SectionRepository interface {
-	FindAllSections() ([]section.Section, *api.ServiceError)
-	FindById(id int) (section.Section, *api.ServiceError)
-	ExistsSectionById(id int) bool
-	DeleteSection(id int) *api.ServiceError
-	CreateSection(sec section.Section) (section.Section, *api.ServiceError)
-	ExistsSectionByNumber(secNum int) bool
-	UpdateSection(id int, sec section.Section) (section.Section, *api.ServiceError)
-}
-
 // NewSectionMap is a function that returns a new instance of SectionMap
 func NewSectionMap(db map[int]section.Section) *SectionMap {
 	defaultDb := make(map[int]section.Section)
