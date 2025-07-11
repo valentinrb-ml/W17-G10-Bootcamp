@@ -2,12 +2,19 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/cmd/server"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/database"
 )
 
 func main() {
 	// env
-	// ...
+	mysql, err := database.InitMysqlDatabase()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer mysql.Close()
 
 	// app
 	// - config
@@ -16,7 +23,7 @@ func main() {
 	}
 	app := server.NewServerChi(cfg)
 	// - run
-	if err := app.Run(); err != nil {
+	if err := app.Run(mysql); err != nil {
 		fmt.Println(err)
 		return
 	}
