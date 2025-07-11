@@ -18,7 +18,7 @@ type SellerRepository interface {
 }
 
 type sellerRepository struct {
-	db map[int]models.Seller
+	db map[int]models.Seller // actualizar este campo por *sql.DB
 }
 
 func NewSellerRepository(db map[int]models.Seller) SellerRepository {
