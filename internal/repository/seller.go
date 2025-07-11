@@ -9,9 +9,18 @@ import (
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
 
+const (
+	querySellerCreate    = `INSERT INTO sellers (cid, company_name, address, telephone) VALUES (?, ?, ?, ?)`
+	querySellerUpdate    = `UPDATE sellers SET cid = ?, company_name = ?, address = ?, telephone = ? WHERE id = ?`
+	querySellerDelete    = `DELETE FROM sellers WHERE id = ?`
+	querySellerFindAll   = `SELECT id, cid, company_name, address, telephone FROM sellers`
+	querySellerFindById  = `SELECT id, cid, company_name, address, telephone FROM sellers WHERE id = ?`
+	querySellerCIDExists = `SELECT EXISTS(SELECT 1 FROM sellers	WHERE LOWER(cid) = LOWER(?) AND id != ?)`
+)
+
 func (r *sellerRepository) Create(s models.Seller) (*models.Seller, error) {
 	res, err := r.mysql.Exec(
-		"INSERT INTO sellers (`cid`, `company_name`, `address`, `telephone`) VALUES  (?, ?, ?, ?)",
+		querySellerCreate,
 		s.Cid, s.CompanyName, s.Address, s.Telephone,
 	)
 	if err != nil {
@@ -30,7 +39,7 @@ func (r *sellerRepository) Create(s models.Seller) (*models.Seller, error) {
 
 func (r *sellerRepository) Update(id int, s models.Seller) error {
 	_, err := r.mysql.Exec(
-		"UPDATE sellers SET `cid`=?, `company_name`=?, `address`=?, `telephone`=? WHERE id=?",
+		querySellerUpdate,
 		s.Cid, s.CompanyName, s.Address, s.Telephone, s.Id,
 	)
 
@@ -38,7 +47,7 @@ func (r *sellerRepository) Update(id int, s models.Seller) error {
 }
 
 func (r *sellerRepository) Delete(id int) error {
-	result, err := r.mysql.Exec("DELETE FROM sellers WHERE id = ?", id)
+	result, err := r.mysql.Exec(querySellerDelete, id)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1451 {
 			errDef := api.ServiceErrors[api.ErrConflict]
@@ -76,9 +85,7 @@ func (r *sellerRepository) Delete(id int) error {
 }
 
 func (r *sellerRepository) FindAll() ([]models.Seller, error) {
-	rows, err := r.mysql.Query(`
-        SELECT id, cid, company_name, address, telephone
-        FROM sellers`)
+	rows, err := r.mysql.Query(querySellerFindAll)
 	if err != nil {
 		return nil, err
 	}
@@ -103,9 +110,7 @@ func (r *sellerRepository) FindAll() ([]models.Seller, error) {
 
 func (r *sellerRepository) FindById(id int) (*models.Seller, error) {
 	var s models.Seller
-	row := r.mysql.QueryRow(`
-        SELECT id, cid, company_name, address, telephone 
-        FROM sellers WHERE id = ?`, id)
+	row := r.mysql.QueryRow(querySellerFindById, id)
 	err := row.Scan(&s.Id, &s.Cid, &s.CompanyName, &s.Address, &s.Telephone)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -129,12 +134,7 @@ func (r *sellerRepository) FindById(id int) (*models.Seller, error) {
 
 func (r *sellerRepository) CIDExists(cid int, id int) bool {
 	var exists bool
-	query := `
-        SELECT EXISTS(
-            SELECT 1 FROM sellers
-            WHERE LOWER(cid) = LOWER(?) AND id != ?
-        )
-    `
-	r.mysql.QueryRow(query, cid, id).Scan(&exists)
+
+	r.mysql.QueryRow(querySellerCIDExists, cid, id).Scan(&exists)
 	return exists
 }
