@@ -20,7 +20,7 @@ type WarehouseRepository interface {
 
 const (
 	queryWarehouseExist    = `SELECT COUNT(*) FROM warehouse WHERE warehouse_code = ?`
-	queryWarehouseCreate   = `INSERT INTO warehouse (warehouse_code, address, minimum_temperature, minimum_capacity, telephone) VALUES (?, ?, ?, ?, ?)`
+	queryWarehouseCreate   = `INSERT INTO warehouse (warehouse_code, address, minimum_temperature, minimum_capacity, telephone, locality_id) VALUES (?, ?, ?, ?, ?, ?)`
 	queryWarehouseFindAll  = `SELECT id, warehouse_code, address, minimum_temperature, minimum_capacity, telephone FROM warehouse`
 	queryWarehouseFindById = `SELECT id, warehouse_code, address, minimum_temperature, minimum_capacity, telephone FROM warehouse WHERE id = ?`
 	queryWarehouseUpdate   = `UPDATE warehouse SET warehouse_code = ?, address = ?, minimum_temperature = ?, minimum_capacity = ?, telephone = ? WHERE id = ?`
@@ -49,7 +49,7 @@ func (r *WarehouseMySQL) Exist(ctx context.Context, wc string) (bool, *api.Servi
 }
 
 func (r *WarehouseMySQL) Create(ctx context.Context, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError) {
-	res, err := r.db.ExecContext(ctx, queryWarehouseCreate, w.WarehouseCode, w.Address, w.MinimumTemperature, w.MinimumCapacity, w.Telephone)
+	res, err := r.db.ExecContext(ctx, queryWarehouseCreate, w.WarehouseCode, w.Address, w.MinimumTemperature, w.MinimumCapacity, w.Telephone, w.LocalityId)
 	if err != nil {
 		errVal := api.ServiceErrors[api.ErrInternalServer]
 		errVal.InternalError = err
@@ -95,7 +95,7 @@ func (r *WarehouseMySQL) FindAll(ctx context.Context) ([]warehouse.Warehouse, *a
 
 func (r *WarehouseMySQL) FindById(ctx context.Context, id int) (*warehouse.Warehouse, *api.ServiceError) {
 	var w warehouse.Warehouse
-	err := r.db.QueryRow(queryWarehouseFindById, id).Scan(
+	err := r.db.QueryRowContext(ctx, queryWarehouseFindById, id).Scan(
 		&w.Id, &w.WarehouseCode, &w.Address, &w.MinimumTemperature, &w.MinimumCapacity, &w.Telephone,
 	)
 	if err != nil {

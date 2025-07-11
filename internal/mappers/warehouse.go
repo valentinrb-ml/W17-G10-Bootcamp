@@ -30,6 +30,7 @@ func RequestToWarehouse(req warehouse.WarehouseRequest) warehouse.Warehouse{
 		Telephone:          req.Telephone,
 		MinimumCapacity:    req.MinimumCapacity,
 		MinimumTemperature: *req.MinimumTemperature,
+		LocalityId: 	   req.LocalityId,
 	}
 }
 
