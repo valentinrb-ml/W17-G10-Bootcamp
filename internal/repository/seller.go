@@ -2,7 +2,9 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
@@ -38,11 +40,19 @@ func (r *sellerRepository) Update(id int, s models.Seller) error {
 func (r *sellerRepository) Delete(id int) error {
 	result, err := r.mysql.Exec("DELETE FROM sellers WHERE id = ?", id)
 	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1451 {
+			errDef := api.ServiceErrors[api.ErrConflict]
+			return &api.ServiceError{
+				Code:         errDef.Code,
+				ResponseCode: errDef.ResponseCode,
+				Message:      "Cannot delete seller: there are products associated with this seller.",
+			}
+		}
 		errDef := api.ServiceErrors[api.ErrInternalServer]
 		return &api.ServiceError{
 			Code:         errDef.Code,
 			ResponseCode: errDef.ResponseCode,
-			Message:      "An internal server error occurred while deleting the seller.",
+			Message:      fmt.Sprintf("An internal server error occurred while deleting the seller: %s", err.Error()),
 		}
 	}
 	rowsAffected, err := result.RowsAffected()
@@ -51,7 +61,7 @@ func (r *sellerRepository) Delete(id int) error {
 		return &api.ServiceError{
 			Code:         errDef.Code,
 			ResponseCode: errDef.ResponseCode,
-			Message:      "An internal server error occurred while deleting the seller.",
+			Message:      fmt.Sprintf("An internal server error occurred while deleting the seller: %s", err.Error()),
 		}
 	}
 	if rowsAffected == 0 {
