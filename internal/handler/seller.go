@@ -39,9 +39,8 @@ func (h *SellerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	er := validators.ValidateRequestSeller(sr)
-	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+	err = validators.ValidateSellerPost(sr)
+	if handleApiError(w, err) {
 		return
 	}
 
@@ -75,9 +74,13 @@ func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	er := validators.ValidateRequestSellerToPatch(sr)
-	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+	err = validators.ValidateSellerPatchNotEmpty(sr)
+	if handleApiError(w, err) {
+		return
+	}
+
+	err = validators.ValidateSellerPatch(sr)
+	if handleApiError(w, err) {
 		return
 	}
 
