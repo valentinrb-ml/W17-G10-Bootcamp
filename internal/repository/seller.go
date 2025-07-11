@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	querySellerCreate    = `INSERT INTO sellers (cid, company_name, address, telephone) VALUES (?, ?, ?, ?)`
-	querySellerUpdate    = `UPDATE sellers SET cid = ?, company_name = ?, address = ?, telephone = ? WHERE id = ?`
+	querySellerCreate    = `INSERT INTO sellers (cid, company_name, address, telephone, locality_id) VALUES (?, ?, ?, ?, ?)`
+	querySellerUpdate    = `UPDATE sellers SET cid = ?, company_name = ?, address = ?, telephone = ?, locality_id = ? WHERE id = ?`
 	querySellerDelete    = `DELETE FROM sellers WHERE id = ?`
 	querySellerFindAll   = `SELECT id, cid, company_name, address, telephone FROM sellers`
 	querySellerFindById  = `SELECT id, cid, company_name, address, telephone FROM sellers WHERE id = ?`
@@ -23,7 +23,7 @@ func (r *sellerRepository) Create(ctx context.Context, s models.Seller) (*models
 	res, err := r.mysql.ExecContext(
 		ctx,
 		querySellerCreate,
-		s.Cid, s.CompanyName, s.Address, s.Telephone,
+		s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId,
 	)
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (r *sellerRepository) Update(ctx context.Context, id int, s models.Seller) 
 	_, err := r.mysql.ExecContext(
 		ctx,
 		querySellerUpdate,
-		s.Cid, s.CompanyName, s.Address, s.Telephone, s.Id,
+		s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId, s.Id,
 	)
 
 	return err

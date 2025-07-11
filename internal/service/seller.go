@@ -26,7 +26,7 @@ func (sv *sellerService) Create(ctx context.Context, reqs models.RequestSeller) 
 		return nil, err
 	}
 
-	resps := models.ResponseSeller(*s)
+	resps := mappers.ToResponseSeller(s)
 
 	return &resps, nil
 }
@@ -48,7 +48,7 @@ func (sv *sellerService) Update(ctx context.Context, id int, reqs models.Request
 	mappers.ApplySellerPatch(s, &reqs)
 
 	sv.rp.Update(ctx, id, *s)
-	resps := models.ResponseSeller(*s)
+	resps := mappers.ToResponseSeller(s)
 
 	return &resps, nil
 }
@@ -63,15 +63,12 @@ func (sv *sellerService) Delete(ctx context.Context, id int) error {
 }
 
 func (sv *sellerService) FindAll(ctx context.Context) ([]models.ResponseSeller, error) {
-	var rs []models.ResponseSeller
 	s, err := sv.rp.FindAll(ctx)
 	if err != nil {
 		return []models.ResponseSeller{}, err
 	}
 
-	for _, s := range s {
-		rs = append(rs, models.ResponseSeller(s))
-	}
+	rs := mappers.ToResponseSellerList(s)
 
 	slices.SortFunc(rs, func(a, b models.ResponseSeller) int {
 		return a.Id - b.Id
@@ -86,7 +83,7 @@ func (sv *sellerService) FindById(ctx context.Context, id int) (*models.Response
 		return nil, err
 	}
 
-	resps := models.ResponseSeller(*s)
+	resps := mappers.ToResponseSeller(s)
 
 	return &resps, nil
 }

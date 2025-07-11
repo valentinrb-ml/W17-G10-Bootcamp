@@ -24,6 +24,10 @@ func ValidateSellerPost(sr models.RequestSeller) error {
 		err.Message = "Telephone is required and cannot be empty."
 		return &err
 	}
+	if sr.LocalityId == nil || *sr.LocalityId <= 0 {
+		err.Message = "Locality is required and must be greater than 0."
+		return &err
+	}
 
 	return nil
 }
@@ -47,6 +51,10 @@ func ValidateSellerPatch(sr models.RequestSeller) error {
 		err.Message = "Telephone cannot be empty."
 		return &err
 	}
+	if sr.LocalityId != nil && *sr.LocalityId <= 0 {
+		err.Message = "Locality cannot be empty."
+		return &err
+	}
 
 	return nil
 }
@@ -57,7 +65,8 @@ func ValidateSellerPatchNotEmpty(sr models.RequestSeller) error {
 	if sr.Cid == nil &&
 		sr.CompanyName == nil &&
 		sr.Address == nil &&
-		sr.Telephone == nil {
+		sr.Telephone == nil &&
+		sr.LocalityId == nil {
 		return &api.ServiceError{
 			Code:         errDef.Code,
 			ResponseCode: errDef.ResponseCode,
