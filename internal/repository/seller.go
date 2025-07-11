@@ -1,104 +1,130 @@
 package repository
 
 import (
+	"database/sql"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
 
-type SellerRepository interface {
-	Create(s models.Seller) models.Seller
-	Update(id int, s models.Seller)
-	Delete(id int)
-	FindAll() []models.Seller
-	FindById(id int) (*models.Seller, *api.ServiceError)
-
-	CidAlreadyExists(cid int) bool
-	CidAlreadyExistsExcludeId(cid int, excludeId int) bool
-	ExistsById(id int) bool
-}
-
-type sellerRepository struct {
-	db map[int]models.Seller // actualizar este campo por *sql.DB
-}
-
-func NewSellerRepository(db map[int]models.Seller) SellerRepository {
-	defaultDb := make(map[int]models.Seller)
-	if db != nil {
-		defaultDb = db
+func (r *sellerRepository) Create(s models.Seller) (*models.Seller, error) {
+	res, err := r.mysql.Exec(
+		"INSERT INTO sellers (`cid`, `company_name`, `address`, `telephone`) VALUES  (?, ?, ?, ?)",
+		s.Cid, s.CompanyName, s.Address, s.Telephone,
+	)
+	if err != nil {
+		return nil, err
 	}
-	return &sellerRepository{db: defaultDb}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	s.Id = int(id)
+
+	return &s, nil
 }
 
-func (r *sellerRepository) Create(s models.Seller) models.Seller {
-	lastId := r.getLastId()
-	s.Id = lastId + 1
+func (r *sellerRepository) Update(id int, s models.Seller) error {
+	_, err := r.mysql.Exec(
+		"UPDATE sellers SET `cid`=?, `company_name`=?, `address`=?, `telephone`=? WHERE id=?",
+		s.Cid, s.CompanyName, s.Address, s.Telephone, s.Id,
+	)
 
-	r.db[s.Id] = s
-
-	return s
+	return err
 }
 
-func (r *sellerRepository) Update(id int, s models.Seller) {
-	r.db[id] = s
+func (r *sellerRepository) Delete(id int) error {
+	result, err := r.mysql.Exec("DELETE FROM sellers WHERE id = ?", id)
+	if err != nil {
+		errDef := api.ServiceErrors[api.ErrInternalServer]
+		return &api.ServiceError{
+			Code:         errDef.Code,
+			ResponseCode: errDef.ResponseCode,
+			Message:      "An internal server error occurred while deleting the seller.",
+		}
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		errDef := api.ServiceErrors[api.ErrInternalServer]
+		return &api.ServiceError{
+			Code:         errDef.Code,
+			ResponseCode: errDef.ResponseCode,
+			Message:      "An internal server error occurred while deleting the seller.",
+		}
+	}
+	if rowsAffected == 0 {
+		errDef := api.ServiceErrors[api.ErrNotFound]
+		return &api.ServiceError{
+			Code:         errDef.Code,
+			ResponseCode: errDef.ResponseCode,
+			Message:      "The seller you are trying to delete does not exist",
+		}
+	}
+	return nil
 }
 
-func (r *sellerRepository) Delete(id int) {
-	delete(r.db, id)
-}
+func (r *sellerRepository) FindAll() ([]models.Seller, error) {
+	rows, err := r.mysql.Query(`
+        SELECT id, cid, company_name, address, telephone
+        FROM sellers`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-func (r *sellerRepository) FindAll() []models.Seller {
-	sellers := make([]models.Seller, 0, len(r.db))
-	for _, s := range r.db {
+	var sellers []models.Seller
+	for rows.Next() {
+		var s models.Seller
+		err := rows.Scan(&s.Id, &s.Cid, &s.CompanyName, &s.Address, &s.Telephone)
+		if err != nil {
+			return nil, err
+		}
 		sellers = append(sellers, s)
 	}
-	return sellers
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return sellers, nil
 }
 
-func (r *sellerRepository) FindById(id int) (*models.Seller, *api.ServiceError) {
-	s, exists := r.db[id]
-	if !exists {
-		err := api.ServiceErrors[api.ErrNotFound]
+func (r *sellerRepository) FindById(id int) (*models.Seller, error) {
+	var s models.Seller
+	row := r.mysql.QueryRow(`
+        SELECT id, cid, company_name, address, telephone 
+        FROM sellers WHERE id = ?`, id)
+	err := row.Scan(&s.Id, &s.Cid, &s.CompanyName, &s.Address, &s.Telephone)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err := api.ServiceErrors[api.ErrNotFound]
+			return nil, &api.ServiceError{
+				Code:         err.Code,
+				ResponseCode: err.ResponseCode,
+				Message:      "The seller you are looking for does not exist.",
+			}
+		}
+		err := api.ServiceErrors[api.ErrInternalServer]
 		return nil, &api.ServiceError{
 			Code:         err.Code,
 			ResponseCode: err.ResponseCode,
-			Message:      "The seller you are looking for does not exist.",
+			Message:      "An internal server error occurred while retrieving the seller.",
 		}
 	}
 
 	return &s, nil
 }
 
-func (r *sellerRepository) CidAlreadyExists(cid int) bool {
-	for _, s := range r.db {
-		if s.Cid == cid {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (r *sellerRepository) CidAlreadyExistsExcludeId(cid int, excludeId int) bool {
-	for _, s := range r.db {
-		if s.Cid == cid && s.Id != excludeId {
-			return true
-		}
-	}
-	return false
-}
-
-func (r *sellerRepository) ExistsById(id int) bool {
-	_, exists := r.db[id]
-
+func (r *sellerRepository) CIDExists(cid int, id int) bool {
+	var exists bool
+	query := `
+        SELECT EXISTS(
+            SELECT 1 FROM sellers
+            WHERE LOWER(cid) = LOWER(?) AND id != ?
+        )
+    `
+	r.mysql.QueryRow(query, cid, id).Scan(&exists)
 	return exists
-}
-
-func (r *sellerRepository) getLastId() int {
-	maxId := 0
-	for id := range r.db {
-		if id > maxId {
-			maxId = id
-		}
-	}
-	return maxId
 }
