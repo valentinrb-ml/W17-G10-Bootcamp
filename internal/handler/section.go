@@ -139,11 +139,12 @@ func (h *SectionDefault) UpdateSection(w http.ResponseWriter, r *http.Request) {
 	secUpd, err2 := h.sv.UpdateSection(ctx, id, sec)
 
 	if handleApiError(w, err2) {
-	if err2 != nil {
-		// response.Error(w, err2.ResponseCode, err2.Message)
-		response.Error(w, err2)
-		return
-	}
-	response.JSON(w, http.StatusOK, mappers.SectionToResponseSection(*secUpd))
+		if err2 != nil {
+			// response.Error(w, err2.ResponseCode, err2.Message)
+			response.Error(w, err2)
+			return
+		}
+		response.JSON(w, http.StatusOK, mappers.SectionToResponseSection(*secUpd))
 
+	}
 }
