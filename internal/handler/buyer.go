@@ -24,6 +24,8 @@ type BuyerHandler struct {
 }
 
 func (h *BuyerHandler) Create(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	var br models.RequestBuyer
 	err := request.JSON(r, &br)
 	if err != nil {
@@ -38,15 +40,13 @@ func (h *BuyerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	er := validators.ValidateRequestBuyer(br)
-	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+	err = validators.ValidateRequestBuyer(br)
+	if handleApiError(w, err) {
 		return
 	}
 
-	b, er := h.sv.Create(br)
-	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+	b, err := h.sv.Create(ctx, br)
+	if handleApiError(w, err) {
 		return
 	}
 
@@ -54,10 +54,12 @@ func (h *BuyerHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BuyerHandler) Update(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid ID parameter")
+		response.Error(w, http.StatusBadRequest, "Invalid ID param.")
 		return
 	}
 
@@ -75,61 +77,61 @@ func (h *BuyerHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if er := validators.ValidateUpdateBuyer(br); er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+	// Validación PATCH puede partirse igual que seller si quieres más granularidad
+	err = validators.ValidateUpdateBuyer(br)
+	if handleApiError(w, err) {
 		return
 	}
 
-	_, er := h.sv.FindById(id)
-	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
-		return
-	}
-
-	updated, er := h.sv.Update(id, br)
-	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+	updated, err := h.sv.Update(ctx, id, br)
+	if handleApiError(w, err) {
 		return
 	}
 
 	response.JSON(w, http.StatusOK, updated)
-
 }
 
 func (h *BuyerHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid ID parameter")
+		response.Error(w, http.StatusBadRequest, "Invalid ID param.")
 		return
 	}
 
-	er := h.sv.Delete(id)
-	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+	err = h.sv.Delete(ctx, id)
+	if handleApiError(w, err) {
 		return
 	}
 
 	response.JSON(w, http.StatusNoContent, nil)
-
 }
 
 func (h *BuyerHandler) FindAll(w http.ResponseWriter, r *http.Request) {
-	response.JSON(w, http.StatusOK, h.sv.FindAll())
+	ctx := r.Context()
 
-}
-
-func (h *BuyerHandler) FindById(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid ID parameter")
+	bs, err := h.sv.FindAll(ctx)
+	if handleApiError(w, err) {
 		return
 	}
 
-	b, er := h.sv.FindById(id)
-	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+	response.JSON(w, http.StatusOK, bs)
+}
+
+func (h *BuyerHandler) FindById(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		response.Error(w, http.StatusBadRequest, "Invalid ID param.")
+		return
+	}
+
+	b, err := h.sv.FindById(ctx, id)
+	if handleApiError(w, err) {
 		return
 	}
 
