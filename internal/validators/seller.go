@@ -5,7 +5,7 @@ import (
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
 
-func ValidateRequestSeller(sr models.RequestSeller) *api.ServiceError {
+func ValidateSellerPost(sr models.RequestSeller) error {
 	err := api.ServiceErrors[api.ErrUnprocessableEntity]
 
 	if sr.Cid == nil || *sr.Cid <= 0 {
@@ -24,11 +24,15 @@ func ValidateRequestSeller(sr models.RequestSeller) *api.ServiceError {
 		err.Message = "Telephone is required and cannot be empty."
 		return &err
 	}
+	if sr.LocalityId == nil || *sr.LocalityId <= 0 {
+		err.Message = "Locality is required and must be greater than 0."
+		return &err
+	}
 
 	return nil
 }
 
-func ValidateRequestSellerToPatch(sr models.RequestSeller) *api.ServiceError {
+func ValidateSellerPatch(sr models.RequestSeller) error {
 	err := api.ServiceErrors[api.ErrUnprocessableEntity]
 
 	if sr.Cid != nil && *sr.Cid <= 0 {
@@ -46,6 +50,28 @@ func ValidateRequestSellerToPatch(sr models.RequestSeller) *api.ServiceError {
 	if sr.Telephone != nil && *sr.Telephone == "" {
 		err.Message = "Telephone cannot be empty."
 		return &err
+	}
+	if sr.LocalityId != nil && *sr.LocalityId <= 0 {
+		err.Message = "Locality cannot be empty."
+		return &err
+	}
+
+	return nil
+}
+
+func ValidateSellerPatchNotEmpty(sr models.RequestSeller) error {
+	errDef := api.ServiceErrors[api.ErrUnprocessableEntity]
+
+	if sr.Cid == nil &&
+		sr.CompanyName == nil &&
+		sr.Address == nil &&
+		sr.Telephone == nil &&
+		sr.LocalityId == nil {
+		return &api.ServiceError{
+			Code:         errDef.Code,
+			ResponseCode: errDef.ResponseCode,
+			Message:      "at least one field is required to be updated.",
+		}
 	}
 
 	return nil
