@@ -13,26 +13,12 @@ import (
 
 
 const (
-	queryWarehouseExist    = `SELECT COUNT(*) FROM warehouse WHERE warehouse_code = ?`
 	queryWarehouseCreate   = `INSERT INTO warehouse (warehouse_code, address, minimum_temperature, minimum_capacity, telephone, locality_id) VALUES (?, ?, ?, ?, ?, ?)`
 	queryWarehouseFindAll  = `SELECT id, warehouse_code, address, minimum_temperature, minimum_capacity, telephone FROM warehouse`
 	queryWarehouseFindById = `SELECT id, warehouse_code, address, minimum_temperature, minimum_capacity, telephone FROM warehouse WHERE id = ?`
 	queryWarehouseUpdate   = `UPDATE warehouse SET warehouse_code = ?, address = ?, minimum_temperature = ?, minimum_capacity = ?, telephone = ? WHERE id = ?`
 	queryWarehouseDelete   = `DELETE FROM warehouse WHERE id = ?`
 )
-
-func (r *WarehouseMySQL) Exist(ctx context.Context, wc string) (bool, *api.ServiceError) {
-	var count int
-	err := r.db.QueryRowContext(ctx, queryWarehouseExist, wc).Scan(&count)
-	if err != nil {
-		errVal := api.ServiceErrors[api.ErrInternalServer]
-		errVal.InternalError = err
-		return false, &errVal
-	}
-
-	// Si count > 0, existe; si count = 0, no existe (sin error)
-	return count > 0, nil
-}
 
 func (r *WarehouseMySQL) Create(ctx context.Context, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError) {
 	res, err := r.db.ExecContext(ctx, queryWarehouseCreate, w.WarehouseCode, w.Address, w.MinimumTemperature, w.MinimumCapacity, w.Telephone, w.LocalityId)
@@ -62,6 +48,14 @@ func (r *WarehouseMySQL) Create(ctx context.Context, w warehouse.Warehouse) (*wa
 func (r *WarehouseMySQL) FindAll(ctx context.Context) ([]warehouse.Warehouse, *api.ServiceError) {
 	rows, err := r.db.QueryContext(ctx, queryWarehouseFindAll)
 	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			if mysqlErr.Number == 1062 {
+				errVal := api.ServiceErrors[api.ErrConflict]
+				errVal.Message = "warehouse_code already exists"
+				errVal.InternalError = err
+				return nil, &errVal
+			}
+		}
 		errVal := api.ServiceErrors[api.ErrInternalServer]
 		errVal.InternalError = err
 		return nil, &errVal
@@ -107,6 +101,7 @@ func (r *WarehouseMySQL) FindById(ctx context.Context, id int) (*warehouse.Wareh
 func (r *WarehouseMySQL) Update(ctx context.Context, id int, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError) {
 	res, err := r.db.ExecContext(ctx, queryWarehouseUpdate, w.WarehouseCode, w.Address, w.MinimumTemperature, w.MinimumCapacity, w.Telephone, id)
 	if err != nil {
+		
 		errVal := api.ServiceErrors[api.ErrInternalServer]
 		errVal.InternalError = err
 		return nil, &errVal
