@@ -3,18 +3,9 @@ package repository
 import (
 	"context"
 	"fmt"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
 )
-
-func serviceErr(code int, internal error, overrideMsg string) error {
-	e := api.ServiceErrors[code]
-	if overrideMsg != "" {
-		e.Message = overrideMsg
-	}
-	e.InternalError = internal
-	return e
-}
 
 type ProductRepository interface {
 	GetAll(ctx context.Context) ([]product.Product, error)
@@ -55,8 +46,7 @@ func (r *productMemoryRepository) GetAll(_ context.Context) ([]product.Product, 
 func (r *productMemoryRepository) GetByID(_ context.Context, id int) (product.Product, error) {
 	currentProduct, found := r.db[id]
 	if !found {
-		return product.Product{}, serviceErr(api.ErrNotFound, nil,
-			fmt.Sprintf("product id=%d not found", id))
+		return product.Product{}, apperrors.NewAppError(apperrors.CodeNotFound, fmt.Sprintf("product with id %d not found", id))
 	}
 	return currentProduct, nil
 }
@@ -74,10 +64,10 @@ func (r *productMemoryRepository) Save(ctx context.Context, currentProduct produ
 	if currentProduct.ID == 0 { // Create
 		exists, err := r.ExistsByCode(ctx, currentProduct.Code)
 		if err != nil {
-			return product.Product{}, err
+			return product.Product{}, apperrors.Wrap(err, "failed to check product code existence")
 		}
 		if exists {
-			return product.Product{}, serviceErr(api.ErrConflict, nil, "product code already exists")
+			return product.Product{}, apperrors.NewAppError(apperrors.CodeConflict, "product code already exists")
 		}
 
 		currentProduct.ID = r.nextID
@@ -90,7 +80,7 @@ func (r *productMemoryRepository) Save(ctx context.Context, currentProduct produ
 
 		for id, existing := range r.db {
 			if existing.Code == currentProduct.Code && id != currentProduct.ID {
-				return product.Product{}, serviceErr(api.ErrConflict, nil, "product code already exists")
+				return product.Product{}, apperrors.NewAppError(apperrors.CodeConflict, "product code already exists")
 			}
 		}
 	}
@@ -153,10 +143,10 @@ func (r *productMemoryRepository) Patch(ctx context.Context, id int, req product
 	if req.ProductCode != nil && *req.ProductCode != current.Code {
 		exists, err := r.ExistsByCode(ctx, *req.ProductCode)
 		if err != nil {
-			return product.Product{}, err
+			return product.Product{}, apperrors.Wrap(err, "failed to check product code existence")
 		}
 		if exists {
-			return product.Product{}, serviceErr(api.ErrConflict, nil, "product code already exists")
+			return product.Product{}, apperrors.NewAppError(apperrors.CodeConflict, "product code already exists")
 		}
 	}
 
