@@ -93,7 +93,7 @@ func (h *SectionDefault) CreateSection(w http.ResponseWriter, r *http.Request) {
 
 	sec := mappers.RequestSectionToSection(sectionReq)
 
-	newSection, err2 := h.sv.CreateSection(sec)
+	newSection, err2 := h.sv.CreateSection(r.Context(), sec)
 
 	if err2 != nil {
 		response.Error(w, err2.ResponseCode, err2.Message)
@@ -125,7 +125,7 @@ func (h *SectionDefault) UpdateSection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	secUpd, err2 := h.sv.UpdateSection(id, sec)
+	secUpd, err2 := h.sv.UpdateSection(r.Context(), id, sec)
 
 	if err2 != nil {
 		response.Error(w, err2.ResponseCode, err2.Message)

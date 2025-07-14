@@ -27,7 +27,7 @@ func (s *EmployeeDefault) Create(ctx context.Context, e *models.Employee) (*mode
 		return nil, err
 	}
 
-	warehouse, whErr := s.warehouseRepo.FindById(e.WarehouseID)
+	warehouse, whErr := s.warehouseRepo.FindById(ctx, e.WarehouseID)
 	if whErr != nil {
 		var se *api.ServiceError
 		if errors.As(whErr, &se) && se.Code == api.ErrNotFound {
@@ -113,7 +113,7 @@ func (s *EmployeeDefault) Update(ctx context.Context, id int, patch *models.Empl
 		found.LastName = *patch.LastName
 	}
 	if patch.WarehouseID != nil && *patch.WarehouseID != 0 {
-		warehouse, whErr := s.warehouseRepo.FindById(*patch.WarehouseID)
+		warehouse, whErr := s.warehouseRepo.FindById(ctx, *patch.WarehouseID)
 		if whErr != nil {
 			var se *api.ServiceError
 			if errors.As(whErr, &se) && se.Code == api.ErrNotFound {
