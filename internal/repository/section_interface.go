@@ -1,17 +1,15 @@
 package repository
 
 import (
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
+	"context"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
 
 // SectionRepository is an interface that represents a section repository
 type SectionRepository interface {
-	FindAllSections() ([]section.Section, *api.ServiceError)
-	FindById(id int) (section.Section, *api.ServiceError)
-	ExistsSectionById(id int) bool
-	DeleteSection(id int) *api.ServiceError
-	CreateSection(sec section.Section) (section.Section, *api.ServiceError)
-	ExistsSectionByNumber(secNum int) bool
-	UpdateSection(id int, sec section.Section) (section.Section, *api.ServiceError)
+	FindAllSections(ctx context.Context) ([]section.Section, error)
+	FindById(ctx context.Context, id int) (*section.Section, error)
+	DeleteSection(ctx context.Context, id int) error
+	CreateSection(ctx context.Context, sec section.Section) (*section.Section, error)
+	UpdateSection(ctx context.Context, id int, sec *section.Section) (*section.Section, error)
 }
