@@ -20,6 +20,6 @@ type WarehouseDefault struct {
 	rp repository.WarehouseRepository
 }
 
-func NewWarehouseDefault(rp repository.WarehouseRepository) *WarehouseDefault {
+func NewWarehouseService(rp repository.WarehouseRepository) *WarehouseDefault {
 	return &WarehouseDefault{rp: rp}
 }

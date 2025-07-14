@@ -68,14 +68,14 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	svcBuyer := service.NewBuyerService(repoBuyer)
 	svcSection := service.NewSectionServer(repoSection, repoWarehouse)
 	svcProduct := service.NewProductService(repoProduct)
-	svcWarehouse := service.NewWarehouseDefault(repoWarehouse)
+	svcWarehouse := service.NewWarehouseService(repoWarehouse)
 	svcEmployee := service.NewEmployeeDefault(repoEmployee, repoWarehouse)
 
 	// - handler
 	hdBuyer := handler.NewBuyerHandler(svcBuyer)
 	hdSection := handler.NewSectionHandler(svcSection)
 	hdSeller := handler.NewSellerHandler(svcSeller)
-	hdWarehouse := handler.NewWarehouseDefault(svcWarehouse)
+	hdWarehouse := handler.NewWarehouseHandler(svcWarehouse)
 	hdProduct := handler.NewProductHandler(svcProduct)
 	hdEmployee := handler.NewEmployeeHandler(svcEmployee)
 
