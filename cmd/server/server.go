@@ -37,7 +37,6 @@ type ServerChi struct {
 func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	ctx := context.Background()
 
-	// borrar
 	ldProduct, err := loader.NewJSONFileProductLoader("docs/db/products.json")
 	if err != nil {
 		return err
@@ -61,26 +60,18 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	if err != nil {
 		return err
 	}
-	ldEmployee := loader.NewEmployeeJSONFile("docs/db/employees.json")
-	dbEmployee, err := ldEmployee.Load()
-	if err != nil {
-		return err
-	}
 	ldSection := loader.NewSectionJSONFile("docs/db/section.json")
 	dbSection, err := ldSection.Load()
 	if err != nil {
 		return err
 	}
-	// borrar
-
-	// actualizar a la mysql db pasar por parametro mysql
 	// - repository
 	repoSection := repository.NewSectionMap(dbSection)
 	repoSeller := repository.NewSellerRepository(dbSeller)
 	repoBuyer := repository.NewBuyerRepository(dbBuyer)
 	repoWarehouse := repository.NewWarehouseMap(dbWarehouse)
 	repoProduct := repository.NewProductRepository(dbProduct)
-	repoEmployee := repository.NewEmployeeMap(dbEmployee)
+	repoEmployee := repository.NewEmployeeMySQLRepository(mysql)
 
 	// - service
 	svcSeller := service.NewSellerService(repoSeller)

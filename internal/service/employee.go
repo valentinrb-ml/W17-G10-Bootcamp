@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
@@ -9,17 +10,14 @@ import (
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
 )
 
-// Interface
 type EmployeeService interface {
-	Create(e *models.Employee) (*models.Employee, error)
-	SaveToFile(filename string) error
-	FindAll() ([]*models.Employee, error)
-	FindByID(id int) (*models.Employee, error)
-	Update(id int, patch *models.EmployeePatch) (*models.Employee, error)
-	Delete(id int) error
+	Create(ctx context.Context, e *models.Employee) (*models.Employee, error)
+	FindAll(ctx context.Context) ([]*models.Employee, error)
+	FindByID(ctx context.Context, id int) (*models.Employee, error)
+	Update(ctx context.Context, id int, patch *models.EmployeePatch) (*models.Employee, error)
+	Delete(ctx context.Context, id int) error
 }
 
-// Implementación
 type EmployeeDefault struct {
 	repo          repository.EmployeeRepository
 	warehouseRepo repository.WarehouseRepository
@@ -32,10 +30,11 @@ func NewEmployeeDefault(r repository.EmployeeRepository, wrepo repository.Wareho
 	}
 }
 
-func (s *EmployeeDefault) Create(e *models.Employee) (*models.Employee, error) {
+func (s *EmployeeDefault) Create(ctx context.Context, e *models.Employee) (*models.Employee, error) {
 	if err := validators.ValidateEmployee(e); err != nil {
 		return nil, err
 	}
+
 	warehouse, whErr := s.warehouseRepo.FindById(e.WarehouseID)
 	if whErr != nil {
 		var se *api.ServiceError
@@ -52,7 +51,7 @@ func (s *EmployeeDefault) Create(e *models.Employee) (*models.Employee, error) {
 		return nil, &se
 	}
 
-	emp, err := s.repo.FindByCardNumberID(e.CardNumberID)
+	emp, err := s.repo.FindByCardNumberID(ctx, e.CardNumberID)
 	if err != nil {
 		return nil, err
 	}
@@ -61,25 +60,18 @@ func (s *EmployeeDefault) Create(e *models.Employee) (*models.Employee, error) {
 		se.Message = "card_number_id already exists"
 		return nil, &se
 	}
-	return s.repo.Create(e)
+	return s.repo.Create(ctx, e)
 }
 
-func (s *EmployeeDefault) SaveToFile(filename string) error {
-	if repo, ok := s.repo.(*repository.EmployeeMap); ok {
-		return repo.SaveToFile(filename)
-	}
-	return errors.New("repository does not support saving to file")
+func (s *EmployeeDefault) FindAll(ctx context.Context) ([]*models.Employee, error) {
+	return s.repo.FindAll(ctx)
 }
 
-func (s *EmployeeDefault) FindAll() ([]*models.Employee, error) {
-	return s.repo.FindAll()
-}
-
-func (s *EmployeeDefault) FindByID(id int) (*models.Employee, error) {
+func (s *EmployeeDefault) FindByID(ctx context.Context, id int) (*models.Employee, error) {
 	if err := validators.ValidateEmployeeID(id); err != nil {
 		return nil, err
 	}
-	emp, err := s.repo.FindByID(id)
+	emp, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +83,7 @@ func (s *EmployeeDefault) FindByID(id int) (*models.Employee, error) {
 	return emp, nil
 }
 
-func (s *EmployeeDefault) Update(id int, patch *models.EmployeePatch) (*models.Employee, error) {
+func (s *EmployeeDefault) Update(ctx context.Context, id int, patch *models.EmployeePatch) (*models.Employee, error) {
 	if id <= 0 {
 		se := api.ServiceErrors[api.ErrUnprocessableEntity]
 		se.Message = "invalid employee id"
@@ -119,7 +111,7 @@ func (s *EmployeeDefault) Update(id int, patch *models.EmployeePatch) (*models.E
 		}
 	}
 
-	found, err := s.repo.FindByID(id)
+	found, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +121,7 @@ func (s *EmployeeDefault) Update(id int, patch *models.EmployeePatch) (*models.E
 		return nil, &se
 	}
 
-	updated, err := s.repo.Update(id, patch)
+	updated, err := s.repo.Update(ctx, id, patch)
 	if err != nil {
 		switch err.Error() {
 		case "card_number_id already exists":
@@ -150,11 +142,11 @@ func (s *EmployeeDefault) Update(id int, patch *models.EmployeePatch) (*models.E
 	return updated, nil
 }
 
-func (s *EmployeeDefault) Delete(id int) error {
+func (s *EmployeeDefault) Delete(ctx context.Context, id int) error {
 	if err := validators.ValidateEmployeeID(id); err != nil {
 		return err
 	}
-	found, err := s.repo.FindByID(id)
+	found, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -163,7 +155,7 @@ func (s *EmployeeDefault) Delete(id int) error {
 		se.Message = "employee not found"
 		return &se
 	}
-	if err := s.repo.Delete(id); err != nil {
+	if err := s.repo.Delete(ctx, id); err != nil {
 		se := api.ServiceErrors[api.ErrInternalServer]
 		se.Message = "failed to delete employee"
 		se.InternalError = err
