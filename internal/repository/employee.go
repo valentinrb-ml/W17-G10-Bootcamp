@@ -40,7 +40,10 @@ func (r *EmployeeMySQLRepository) ExistsByCardNumberID(ctx context.Context, card
 	var count int
 	err := r.db.QueryRowContext(ctx, queryEmployeeCountByCardNumberID, cardNumberID).Scan(&count)
 	if err != nil {
-		return false, err
+		se := api.ServiceErrors[api.ErrInternalServer]
+		se.Message = "database query failed"
+		se.InternalError = err
+		return false, &se
 	}
 	return count > 0, nil
 }
@@ -48,11 +51,17 @@ func (r *EmployeeMySQLRepository) ExistsByCardNumberID(ctx context.Context, card
 func (r *EmployeeMySQLRepository) Create(ctx context.Context, e *models.Employee) (*models.Employee, error) {
 	result, err := r.db.ExecContext(ctx, queryEmployeeInsert, e.CardNumberID, e.FirstName, e.LastName, e.WarehouseID)
 	if err != nil {
-		return nil, err
+		se := api.ServiceErrors[api.ErrInternalServer]
+		se.Message = "database insert failed"
+		se.InternalError = err
+		return nil, &se
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
-		return nil, err
+		se := api.ServiceErrors[api.ErrInternalServer]
+		se.Message = "could not get inserted ID"
+		se.InternalError = err
+		return nil, &se
 	}
 	e.ID = int(id)
 	return e, nil
@@ -66,7 +75,10 @@ func (r *EmployeeMySQLRepository) FindByCardNumberID(ctx context.Context, cardNu
 		return nil, nil
 	}
 	if err != nil {
-		return nil, err
+		se := api.ServiceErrors[api.ErrInternalServer]
+		se.Message = "database scan failed"
+		se.InternalError = err
+		return nil, &se
 	}
 	return e, nil
 }
@@ -74,7 +86,10 @@ func (r *EmployeeMySQLRepository) FindByCardNumberID(ctx context.Context, cardNu
 func (r *EmployeeMySQLRepository) FindAll(ctx context.Context) ([]*models.Employee, error) {
 	rows, err := r.db.QueryContext(ctx, queryEmployeeSelectAll)
 	if err != nil {
-		return nil, err
+		se := api.ServiceErrors[api.ErrInternalServer]
+		se.Message = "database query failed"
+		se.InternalError = err
+		return nil, &se
 	}
 	defer rows.Close()
 
@@ -82,9 +97,18 @@ func (r *EmployeeMySQLRepository) FindAll(ctx context.Context) ([]*models.Employ
 	for rows.Next() {
 		e := &models.Employee{}
 		if err := rows.Scan(&e.ID, &e.CardNumberID, &e.FirstName, &e.LastName, &e.WarehouseID); err != nil {
-			return nil, err
+			se := api.ServiceErrors[api.ErrInternalServer]
+			se.Message = "database scan failed"
+			se.InternalError = err
+			return nil, &se
 		}
 		employees = append(employees, e)
+	}
+	if err := rows.Err(); err != nil {
+		se := api.ServiceErrors[api.ErrInternalServer]
+		se.Message = "row iteration error"
+		se.InternalError = err
+		return nil, &se
 	}
 	return employees, nil
 }
@@ -99,7 +123,10 @@ func (r *EmployeeMySQLRepository) FindByID(ctx context.Context, id int) (*models
 		return nil, &se
 	}
 	if err != nil {
-		return nil, err
+		se := api.ServiceErrors[api.ErrInternalServer]
+		se.Message = "database scan failed"
+		se.InternalError = err
+		return nil, &se
 	}
 	return e, nil
 }
@@ -111,7 +138,10 @@ func (r *EmployeeMySQLRepository) Update(ctx context.Context, id int, e *models.
 		e.CardNumberID, e.FirstName, e.LastName, e.WarehouseID, id,
 	)
 	if err != nil {
-		return nil, err
+		se := api.ServiceErrors[api.ErrInternalServer]
+		se.Message = "database update failed"
+		se.InternalError = err
+		return nil, &se
 	}
 	return r.FindByID(ctx, id)
 }
@@ -119,11 +149,17 @@ func (r *EmployeeMySQLRepository) Update(ctx context.Context, id int, e *models.
 func (r *EmployeeMySQLRepository) Delete(ctx context.Context, id int) error {
 	result, err := r.db.ExecContext(ctx, queryEmployeeDelete, id)
 	if err != nil {
-		return err
+		se := api.ServiceErrors[api.ErrInternalServer]
+		se.Message = "database delete failed"
+		se.InternalError = err
+		return &se
 	}
 	rows, err := result.RowsAffected()
 	if err != nil {
-		return err
+		se := api.ServiceErrors[api.ErrInternalServer]
+		se.Message = "rows affected failed"
+		se.InternalError = err
+		return &se
 	}
 	if rows == 0 {
 		se := api.ServiceErrors[api.ErrNotFound]
