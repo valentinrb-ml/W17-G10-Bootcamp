@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
@@ -50,12 +51,13 @@ func (s *SectionDefault) CreateSection(ctx context.Context, sec section.Section)
 	return newSection, nil
 
 }
+
 func (s *SectionDefault) UpdateSection(ctx context.Context, id int, sec section.PatchSection) (*section.Section, error) {
 	existing, err := s.rp.FindById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-
+  
 	mappers.ApplySectionPatch(sec, existing)
 
 	secUpd, err := s.rp.UpdateSection(ctx, id, existing)

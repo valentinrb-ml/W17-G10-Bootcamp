@@ -10,16 +10,16 @@ INSERT INTO localities (id, locality_name, province_id) VALUES
                                                             (5, 'Campinas', 5), (6, 'Niterói', 6), (7, 'Calama', 7), (8, 'Centro', 8),
                                                             (9, 'Lambaré', 9), (10, 'El Alto', 10);
 INSERT INTO sellers (id, cid, company_name, address, telephone, locality_id) VALUES
-                                                                                 (1, 'S001', 'Frutas del Sur', 'Calle 1', '221-111', 1),
-                                                                                 (2, 'S002', 'Verdulería Norte', 'Calle 2', '221-112', 2),
-                                                                                 (3, 'S003', 'Carnes Argentinas', 'Calle 3', '221-113', 3),
-                                                                                 (4, 'S004', 'Almacén Cordobés', 'Calle 4', '221-114', 4),
-                                                                                 (5, 'S005', 'Exportadora Brasil', 'Calle 5', '11-221', 5),
-                                                                                 (6, 'S006', 'Café do Brasil', 'Calle 6', '21-222', 6),
-                                                                                 (7, 'S007', 'Viña Andina', 'Calle 7', '32-333', 7),
-                                                                                 (8, 'S008', 'Delicatessen Uy', 'Calle 8', '34-444', 8),
-                                                                                 (9, 'S009', 'Maíz PY', 'Calle 9', '41-555', 9),
-                                                                                 (10, 'S010', 'Bolivian Imports', 'Calle 10', '51-666', 10);
+                                                                                 (1, 101, 'Frutas del Sur', 'Calle 1', '221-111', 1),
+                                                                                 (2, 102, 'Verdulería Norte', 'Calle 2', '221-112', 2),
+                                                                                 (3, 103, 'Carnes Argentinas', 'Calle 3', '221-113', 3),
+                                                                                 (4, 104, 'Almacén Cordobés', 'Calle 4', '221-114', 4),
+                                                                                 (5, 105, 'Exportadora Brasil', 'Calle 5', '11-221', 5),
+                                                                                 (6, 106, 'Café do Brasil', 'Calle 6', '21-222', 6),
+                                                                                 (7, 107, 'Viña Andina', 'Calle 7', '32-333', 7),
+                                                                                 (8, 108, 'Delicatessen Uy', 'Calle 8', '34-444', 8),
+                                                                                 (9, 109, 'Maíz PY', 'Calle 9', '41-555', 9),
+                                                                                 (10, 110, 'Bolivian Imports', 'Calle 10', '51-666', 10);
 INSERT INTO carriers (id, cid, company_name, address, telephone, locality_id) VALUES
                                                                                   (1, 'C001', 'Transporte Sureño', 'Av 10', '421-001', 1),
                                                                                   (2, 'C002', 'Logística Pampeana', 'Av 2', '421-002', 2),
@@ -36,17 +36,17 @@ INSERT INTO buyers (id, id_card_number, first_name, last_name) VALUES
                                                                    (4, '4004', 'David', 'Silva'), (5, '4005', 'Esteban', 'Arce'), (6, '4006', 'Felipe', 'Sosa'),
                                                                    (7, '4007', 'Gabriela', 'Campos'), (8, '4008', 'Hugo', 'Castro'), (9, '4009', 'Irene', 'Fernández'),
                                                                    (10, '4010', 'Joaquín', 'de la Vega');
-INSERT INTO warehouse (id, address, telephone, warehouse_code, locality_id) VALUES
-                                                                                (1, 'Depósito Sur', '155-201', 'WS-001', 1),
-                                                                                (2, 'Bodega Central', '155-202', 'WS-002', 2),
-                                                                                (3, 'Frigorifico Norte', '155-203', 'WS-003', 3),
-                                                                                (4, 'Almacén Andes', '155-204', 'WS-004', 4),
-                                                                                (5, 'Galpón SP', '155-205', 'WS-005', 5),
-                                                                                (6, 'Almacen Rj', '155-206', 'WS-006', 6),
-                                                                                (7, 'Depósito Calama', '155-207', 'WS-007', 7),
-                                                                                (8, 'Almacen CentroUy', '155-208', 'WS-008', 8),
-                                                                                (9, 'Depósito Lambaré', '155-209', 'WS-009', 9),
-                                                                                (10, 'Bodega Alto', '155-210', 'WS-010', 10);
+INSERT INTO warehouse (id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id) VALUES
+                                                                                (1, 'Depósito Sur', '155-201', 'WS-001', 100, -10.5, 1),
+                                                                                (2, 'Bodega Central', '155-202', 'WS-002', 150, -8.0, 2),
+                                                                                (3, 'Frigorifico Norte', '155-203', 'WS-003', 200, -18.0, 3),
+                                                                                (4, 'Almacén Andes', '155-204', 'WS-004', 80, -5.0, 4),
+                                                                                (5, 'Galpón SP', '155-205', 'WS-005', 120, -12.0, 5),
+                                                                                (6, 'Almacen Rj', '155-206', 'WS-006', 90, -7.5, 6),
+                                                                                (7, 'Depósito Calama', '155-207', 'WS-007', 110, -15.0, 7),
+                                                                                (8, 'Almacen CentroUy', '155-208', 'WS-008', 95, -6.0, 8),
+                                                                                (9, 'Depósito Lambaré', '155-209', 'WS-009', 130, -9.0, 9),
+                                                                                (10, 'Bodega Alto', '155-210', 'WS-010', 140, -11.0, 10);
 INSERT INTO employees (id, id_card_number, first_name, last_name, warehouse_id) VALUES
                                                                                     (1, 'E001', 'Lucas', 'Martínez', 1),
                                                                                     (2, 'E002', 'Martina', 'García', 2),

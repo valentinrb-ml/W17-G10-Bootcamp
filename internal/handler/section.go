@@ -98,6 +98,7 @@ func (h *SectionDefault) CreateSection(w http.ResponseWriter, r *http.Request) {
 
 	sec := mappers.RequestSectionToSection(sectionReq)
 
+
 	newSection, err2 := h.sv.CreateSection(ctx, sec)
 
 	if handleApiError(w, err2) {
@@ -130,7 +131,9 @@ func (h *SectionDefault) UpdateSection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+
 	secUpd, err2 := h.sv.UpdateSection(ctx, id, sec)
+
 
 	if handleApiError(w, err2) {
 		return
