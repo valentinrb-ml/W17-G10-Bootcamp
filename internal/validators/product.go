@@ -101,7 +101,7 @@ func ValidateCreateRequest(req product.ProductRequest) error {
 
 func ValidatePatchRequest(req product.ProductPatchRequest) error {
 	if !hasAnyPatchField(req) {
-		return apperrors.BadRequest("at least one field must be provided for update")
+		return apperrors.NewAppError(apperrors.CodeBadRequest, "at least one field must be provided for update")
 	}
 
 	validator := NewProductValidator()

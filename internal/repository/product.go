@@ -46,7 +46,7 @@ func (r *productMemoryRepository) GetAll(_ context.Context) ([]product.Product, 
 func (r *productMemoryRepository) GetByID(_ context.Context, id int) (product.Product, error) {
 	currentProduct, found := r.db[id]
 	if !found {
-		return product.Product{}, apperrors.NotFound(fmt.Sprintf("product with id %d not found", id))
+		return product.Product{}, apperrors.NewAppError(apperrors.CodeNotFound, fmt.Sprintf("product with id %d not found", id))
 	}
 	return currentProduct, nil
 }
@@ -67,7 +67,7 @@ func (r *productMemoryRepository) Save(ctx context.Context, currentProduct produ
 			return product.Product{}, apperrors.Wrap(err, "failed to check product code existence")
 		}
 		if exists {
-			return product.Product{}, apperrors.Conflict("product code already exists")
+			return product.Product{}, apperrors.NewAppError(apperrors.CodeConflict, "product code already exists")
 		}
 
 		currentProduct.ID = r.nextID
@@ -80,7 +80,7 @@ func (r *productMemoryRepository) Save(ctx context.Context, currentProduct produ
 
 		for id, existing := range r.db {
 			if existing.Code == currentProduct.Code && id != currentProduct.ID {
-				return product.Product{}, apperrors.Conflict("product code already exists")
+				return product.Product{}, apperrors.NewAppError(apperrors.CodeConflict, "product code already exists")
 			}
 		}
 	}
@@ -146,7 +146,7 @@ func (r *productMemoryRepository) Patch(ctx context.Context, id int, req product
 			return product.Product{}, apperrors.Wrap(err, "failed to check product code existence")
 		}
 		if exists {
-			return product.Product{}, apperrors.Conflict("product code already exists")
+			return product.Product{}, apperrors.NewAppError(apperrors.CodeConflict, "product code already exists")
 		}
 	}
 

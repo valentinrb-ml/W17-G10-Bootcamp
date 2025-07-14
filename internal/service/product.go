@@ -38,7 +38,7 @@ func (s *productService) Create(ctx context.Context, prod product.Product) (prod
 		if errors.As(err, &appErr) {
 			return product.ProductResponse{}, err // Ya es AppError
 		}
-		return product.ProductResponse{}, apperrors.BadRequest(err.Error())
+		return product.ProductResponse{}, apperrors.NewAppError(apperrors.CodeBadRequest, err.Error())
 	}
 
 	savedProduct, err := s.repo.Save(ctx, prod)
