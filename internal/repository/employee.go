@@ -33,8 +33,9 @@ type EmployeeRepository interface {
 	FindByCardNumberID(ctx context.Context, cardNumberID string) (*models.Employee, error)
 	FindAll(ctx context.Context) ([]*models.Employee, error)
 	FindByID(ctx context.Context, id int) (*models.Employee, error)
-	Update(ctx context.Context, id int, patch *models.EmployeePatch) (*models.Employee, error)
+	Update(ctx context.Context, id int, e *models.Employee) (*models.Employee, error)
 	Delete(ctx context.Context, id int) error
+	ExistsByCardNumberID(ctx context.Context, cardNumberID string) (bool, error)
 }
 
 type EmployeeMySQLRepository struct {
@@ -45,18 +46,16 @@ func NewEmployeeMySQLRepository(db *sql.DB) *EmployeeMySQLRepository {
 	return &EmployeeMySQLRepository{db: db}
 }
 
-func (r *EmployeeMySQLRepository) Create(ctx context.Context, e *models.Employee) (*models.Employee, error) {
+func (r *EmployeeMySQLRepository) ExistsByCardNumberID(ctx context.Context, cardNumberID string) (bool, error) {
 	var count int
-	err := r.db.QueryRowContext(ctx, queryEmployeeCountByCardNumberID, e.CardNumberID).Scan(&count)
+	err := r.db.QueryRowContext(ctx, queryEmployeeCountByCardNumberID, cardNumberID).Scan(&count)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
-	if count > 0 {
-		se := api.ServiceErrors[api.ErrConflict]
-		se.Message = "card_number_id already exists"
-		return nil, &se
-	}
+	return count > 0, nil
+}
 
+func (r *EmployeeMySQLRepository) Create(ctx context.Context, e *models.Employee) (*models.Employee, error) {
 	result, err := r.db.ExecContext(ctx, queryEmployeeInsert, e.CardNumberID, e.FirstName, e.LastName, e.WarehouseID)
 	if err != nil {
 		return nil, err
@@ -115,45 +114,16 @@ func (r *EmployeeMySQLRepository) FindByID(ctx context.Context, id int) (*models
 	return e, nil
 }
 
-func (r *EmployeeMySQLRepository) Update(ctx context.Context, id int, patch *models.EmployeePatch) (*models.Employee, error) {
-	emp, err := r.FindByID(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	if emp == nil {
-		se := api.ServiceErrors[api.ErrNotFound]
-		se.Message = "employee not found"
-		return nil, &se
-	}
-
-	if patch.CardNumberID != nil {
-		exist, err := r.FindByCardNumberID(ctx, *patch.CardNumberID)
-		if err != nil {
-			return nil, err
-		}
-		if exist != nil && exist.ID != id {
-			se := api.ServiceErrors[api.ErrConflict]
-			se.Message = "card_number_id already exists"
-			return nil, &se
-		}
-		emp.CardNumberID = *patch.CardNumberID
-	}
-	if patch.FirstName != nil {
-		emp.FirstName = *patch.FirstName
-	}
-	if patch.LastName != nil {
-		emp.LastName = *patch.LastName
-	}
-	if patch.WarehouseID != nil && *patch.WarehouseID != 0 {
-		emp.WarehouseID = *patch.WarehouseID
-	}
-	_, err = r.db.ExecContext(ctx, queryEmployeeUpdate,
-		emp.CardNumberID, emp.FirstName, emp.LastName, emp.WarehouseID, emp.ID,
+func (r *EmployeeMySQLRepository) Update(ctx context.Context, id int, e *models.Employee) (*models.Employee, error) {
+	_, err := r.db.ExecContext(
+		ctx,
+		queryEmployeeUpdate,
+		e.CardNumberID, e.FirstName, e.LastName, e.WarehouseID, id,
 	)
 	if err != nil {
 		return nil, err
 	}
-	return emp, nil
+	return r.FindByID(ctx, id)
 }
 
 func (r *EmployeeMySQLRepository) Delete(ctx context.Context, id int) error {

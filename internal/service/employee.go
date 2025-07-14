@@ -84,33 +84,6 @@ func (s *EmployeeDefault) FindByID(ctx context.Context, id int) (*models.Employe
 }
 
 func (s *EmployeeDefault) Update(ctx context.Context, id int, patch *models.EmployeePatch) (*models.Employee, error) {
-	if id <= 0 {
-		se := api.ServiceErrors[api.ErrUnprocessableEntity]
-		se.Message = "invalid employee id"
-		return nil, &se
-	}
-	if err := validators.ValidateEmployeePatch(patch); err != nil {
-		return nil, err
-	}
-
-	if patch.WarehouseID != nil {
-		warehouse, whErr := s.warehouseRepo.FindById(*patch.WarehouseID)
-		if whErr != nil {
-			var se *api.ServiceError
-			if errors.As(whErr, &se) && se.Code == api.ErrNotFound {
-				se := api.ServiceErrors[api.ErrBadRequest]
-				se.Message = "warehouse_id does not exist"
-				return nil, &se
-			}
-			return nil, whErr
-		}
-		if warehouse == nil {
-			se := api.ServiceErrors[api.ErrBadRequest]
-			se.Message = "warehouse_id does not exist"
-			return nil, &se
-		}
-	}
-
 	found, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -120,26 +93,53 @@ func (s *EmployeeDefault) Update(ctx context.Context, id int, patch *models.Empl
 		se.Message = "employee not found"
 		return nil, &se
 	}
+	if id <= 0 {
+		se := api.ServiceErrors[api.ErrUnprocessableEntity]
+		se.Message = "invalid employee id"
+		return nil, &se
+	}
+	if err := validators.ValidateEmployeePatch(patch); err != nil {
+		return nil, err
+	}
 
-	updated, err := s.repo.Update(ctx, id, patch)
-	if err != nil {
-		switch err.Error() {
-		case "card_number_id already exists":
+	if patch.CardNumberID != nil {
+		emp, err := s.repo.FindByCardNumberID(ctx, *patch.CardNumberID)
+		if err != nil {
+			return nil, err
+		}
+		if emp != nil && emp.ID != id {
 			se := api.ServiceErrors[api.ErrBadRequest]
-			se.Message = err.Error()
-			return nil, &se
-		case "not found":
-			se := api.ServiceErrors[api.ErrNotFound]
-			se.Message = "employee not found"
-			return nil, &se
-		default:
-			se := api.ServiceErrors[api.ErrInternalServer]
-			se.Message = "update failed"
-			se.InternalError = err
+			se.Message = "card_number_id already exists"
 			return nil, &se
 		}
+		found.CardNumberID = *patch.CardNumberID
 	}
-	return updated, nil
+	if patch.FirstName != nil {
+		found.FirstName = *patch.FirstName
+	}
+	if patch.LastName != nil {
+		found.LastName = *patch.LastName
+	}
+	if patch.WarehouseID != nil && *patch.WarehouseID != 0 {
+		warehouse, whErr := s.warehouseRepo.FindById(*patch.WarehouseID)
+		if whErr != nil {
+			var se *api.ServiceError
+			if errors.As(whErr, &se) && se.Code == api.ErrNotFound {
+				se2 := api.ServiceErrors[api.ErrBadRequest]
+				se2.Message = "warehouse_id does not exist"
+				return nil, &se2
+			}
+			return nil, whErr
+		}
+		if warehouse == nil {
+			se := api.ServiceErrors[api.ErrBadRequest]
+			se.Message = "warehouse_id does not exist"
+			return nil, &se
+		}
+		found.WarehouseID = *patch.WarehouseID
+	}
+
+	return s.repo.Update(ctx, id, found)
 }
 
 func (s *EmployeeDefault) Delete(ctx context.Context, id int) error {
