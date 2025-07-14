@@ -6,6 +6,7 @@ type Seller struct {
 	CompanyName string `json:"company_name"`
 	Address     string `json:"address"`
 	Telephone   string `json:"telephone"`
+	LocalityId  int    `json:"locality_id"`
 }
 
 type RequestSeller struct {
@@ -13,6 +14,7 @@ type RequestSeller struct {
 	CompanyName *string `json:"company_name"`
 	Address     *string `json:"address"`
 	Telephone   *string `json:"telephone"`
+	LocalityId  *int    `json:"locality_id"`
 }
 
 type ResponseSeller struct {

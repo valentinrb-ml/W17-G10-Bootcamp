@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 
@@ -33,12 +34,10 @@ type ServerChi struct {
 }
 
 // Run is a method that runs the server
-func (s *ServerChi) Run() (err error) {
+func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	ctx := context.Background()
 
-	// dependencies
-
-	// - loader
+	// borrar
 	ldProduct, err := loader.NewJSONFileProductLoader("docs/db/products.json")
 	if err != nil {
 		return err
@@ -52,16 +51,6 @@ func (s *ServerChi) Run() (err error) {
 	if err != nil {
 		return err
 	}
-	ldWarehouse := loader.NewWarehouseJSONFile("docs/db/warehouse.json")
-	dbWarehouse, err := ldWarehouse.Load()
-	if err != nil {
-		return err
-	}
-	ldSeller := loader.NewSellerJSONFile("docs/db/seller.json")
-	dbSeller, err := ldSeller.Load()
-	if err != nil {
-		return err
-	}
 	ldEmployee := loader.NewEmployeeJSONFile("docs/db/employees.json")
 	dbEmployee, err := ldEmployee.Load()
 	if err != nil {
@@ -72,12 +61,14 @@ func (s *ServerChi) Run() (err error) {
 	if err != nil {
 		return err
 	}
+	// borrar
 
+	// actualizar a la mysql db pasar por parametro mysql
 	// - repository
 	repoSection := repository.NewSectionMap(dbSection)
-	repoSeller := repository.NewSellerRepository(dbSeller)
+	repoSeller := repository.NewSellerRepository(mysql)
 	repoBuyer := repository.NewBuyerRepository(dbBuyer)
-	repoWarehouse := repository.NewWarehouseMap(dbWarehouse)
+	repoWarehouse := repository.NewWarehouseRepository(mysql)
 	repoProduct := repository.NewProductRepository(dbProduct)
 	repoEmployee := repository.NewEmployeeMap(dbEmployee)
 

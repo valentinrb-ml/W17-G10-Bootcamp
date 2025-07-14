@@ -47,7 +47,7 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	} else {
 		emp.WarehouseID = 0
 	}
-	created, err := h.service.Create(emp)
+	created, err := h.service.Create(r.Context(), emp)
 	if err != nil {
 		var se *api.ServiceError
 		if errors.As(err, &se) {
@@ -126,7 +126,7 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request) {
 		response.Error(w, err)
 		return
 	}
-	updated, err := h.service.Update(id, &patch)
+	updated, err := h.service.Update(r.Context(), id, &patch)
 	if err != nil {
 		var se *api.ServiceError
 		if errors.As(err, &se) {
