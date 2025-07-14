@@ -48,8 +48,13 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ProductHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	id, err := httputil.ParseIDParam(r, "id")
+	id, err := httputil.ParseIntParam(r, "id")
 	if err != nil {
+		response.Error(w, err)
+		return
+	}
+
+	if err = validators.ValidateID(id, "product id"); err != nil {
 		response.Error(w, err)
 		return
 	}
@@ -64,8 +69,13 @@ func (h *ProductHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	id, err := httputil.ParseIDParam(r, "id")
+	id, err := httputil.ParseIntParam(r, "id")
 	if err != nil {
+		response.Error(w, err)
+		return
+	}
+
+	if err = validators.ValidateID(id, "product id"); err != nil {
 		response.Error(w, err)
 		return
 	}
@@ -80,8 +90,13 @@ func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ProductHandler) Patch(w http.ResponseWriter, r *http.Request) {
-	id, err := httputil.ParseIDParam(r, "id")
+	id, err := httputil.ParseIntParam(r, "id")
 	if err != nil {
+		response.Error(w, err)
+		return
+	}
+
+	if err = validators.ValidateID(id, "product id"); err != nil {
 		response.Error(w, err)
 		return
 	}
