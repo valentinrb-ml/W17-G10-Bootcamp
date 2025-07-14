@@ -5,7 +5,6 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/request"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
@@ -98,7 +97,6 @@ func (h *SectionDefault) CreateSection(w http.ResponseWriter, r *http.Request) {
 
 	sec := mappers.RequestSectionToSection(sectionReq)
 
-
 	newSection, err2 := h.sv.CreateSection(ctx, sec)
 
 	if handleApiError(w, err2) {
@@ -131,26 +129,11 @@ func (h *SectionDefault) UpdateSection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	secUpd, err2 := h.sv.UpdateSection(ctx, id, sec)
-
 
 	if handleApiError(w, err2) {
 		return
 	}
 	response.JSON(w, http.StatusOK, mappers.SectionToResponseSection(*secUpd))
 
-}
-
-func handleApiError(w http.ResponseWriter, err error) bool {
-	if err == nil {
-		return false
-	}
-	if errorResp, ok := err.(*api.ServiceError); ok {
-		response.Error(w, errorResp.ResponseCode, errorResp.Message)
-	} else {
-		response.Error(w, http.StatusInternalServerError, err.Error())
-	}
-
-	return true
 }
