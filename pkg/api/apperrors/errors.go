@@ -33,31 +33,6 @@ func NewAppError(code, message string) *AppError {
 	}
 }
 
-// Constructors for common cases
-func BadRequest(message string) *AppError {
-	return NewAppError(CodeBadRequest, message)
-}
-
-func Unauthorized(message string) *AppError {
-	return NewAppError(CodeUnauthorized, message)
-}
-
-func Forbidden(message string) *AppError {
-	return NewAppError(CodeForbidden, message)
-}
-
-func NotFound(message string) *AppError {
-	return NewAppError(CodeNotFound, message)
-}
-
-func Conflict(message string) *AppError {
-	return NewAppError(CodeConflict, message)
-}
-
-func Internal(message string) *AppError {
-	return NewAppError(CodeInternal, message)
-}
-
 // Wrap for external errors
 func Wrap(err error, message string) *AppError {
 	if err == nil {
@@ -69,7 +44,7 @@ func Wrap(err error, message string) *AppError {
 		return appErr
 	}
 
-	return Internal(message)
+	return NewAppError(CodeInternal, message)
 }
 
 // WithDetail - Thread-safe for correct functionality in asynchronism
