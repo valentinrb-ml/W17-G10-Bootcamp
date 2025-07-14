@@ -9,7 +9,26 @@ func RequestSellerToSeller(rs models.RequestSeller) models.Seller {
 		CompanyName: *rs.CompanyName,
 		Address:     *rs.Address,
 		Telephone:   *rs.Telephone,
+		LocalityId:  *rs.LocalityId,
 	}
+}
+
+func ToResponseSeller(s *models.Seller) models.ResponseSeller {
+	return models.ResponseSeller{
+		Id:          s.Id,
+		Cid:         s.Cid,
+		CompanyName: s.CompanyName,
+		Address:     s.Address,
+		Telephone:   s.Telephone,
+	}
+}
+
+func ToResponseSellerList(ss []models.Seller) []models.ResponseSeller {
+	res := make([]models.ResponseSeller, len(ss))
+	for i, s := range ss {
+		res[i] = ToResponseSeller(&s)
+	}
+	return res
 }
 
 func ApplySellerPatch(seller *models.Seller, patch *models.RequestSeller) {
@@ -24,5 +43,8 @@ func ApplySellerPatch(seller *models.Seller, patch *models.RequestSeller) {
 	}
 	if patch.Telephone != nil {
 		seller.Telephone = *patch.Telephone
+	}
+	if patch.LocalityId != nil {
+		seller.LocalityId = *patch.LocalityId
 	}
 }

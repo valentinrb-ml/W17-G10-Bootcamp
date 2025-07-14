@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/request"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
@@ -24,6 +25,8 @@ type SellerHandler struct {
 }
 
 func (h *SellerHandler) Create(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	var sr models.RequestSeller
 	err := request.JSON(r, &sr)
 	if err != nil {
@@ -38,15 +41,13 @@ func (h *SellerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	er := validators.ValidateRequestSeller(sr)
-	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+	err = validators.ValidateSellerPost(sr)
+	if handleApiError(w, err) {
 		return
 	}
 
-	s, er := h.sv.Create(sr)
-	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+	s, err := h.sv.Create(ctx, sr)
+	if handleApiError(w, err) {
 		return
 	}
 
@@ -54,6 +55,8 @@ func (h *SellerHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -75,15 +78,18 @@ func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	er := validators.ValidateRequestSellerToPatch(sr)
-	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+	err = validators.ValidateSellerPatchNotEmpty(sr)
+	if handleApiError(w, err) {
 		return
 	}
 
-	s, er := h.sv.Update(id, sr)
-	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+	err = validators.ValidateSellerPatch(sr)
+	if handleApiError(w, err) {
+		return
+	}
+
+	s, err := h.sv.Update(ctx, id, sr)
+	if handleApiError(w, err) {
 		return
 	}
 
@@ -91,6 +97,8 @@ func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SellerHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -98,9 +106,8 @@ func (h *SellerHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	er := h.sv.Delete(id)
-	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+	err = h.sv.Delete(ctx, id)
+	if handleApiError(w, err) {
 		return
 	}
 
@@ -108,10 +115,19 @@ func (h *SellerHandler) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SellerHandler) FindAll(w http.ResponseWriter, r *http.Request) {
-	response.JSON(w, http.StatusOK, h.sv.FindAll())
+	ctx := r.Context()
+
+	s, err := h.sv.FindAll(ctx)
+	if handleApiError(w, err) {
+		return
+	}
+
+	response.JSON(w, http.StatusOK, s)
 }
 
 func (h *SellerHandler) FindById(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -119,11 +135,23 @@ func (h *SellerHandler) FindById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, er := h.sv.FindById(id)
-	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+	s, err := h.sv.FindById(ctx, id)
+	if handleApiError(w, err) {
 		return
 	}
 
 	response.JSON(w, http.StatusOK, s)
+}
+
+func handleApiError(w http.ResponseWriter, err error) bool {
+	if err == nil {
+		return false
+	}
+	if errorResp, ok := err.(*api.ServiceError); ok {
+		response.Error(w, errorResp.ResponseCode, errorResp.Message)
+	} else {
+		response.Error(w, http.StatusInternalServerError, err.Error())
+	}
+
+	return true
 }
