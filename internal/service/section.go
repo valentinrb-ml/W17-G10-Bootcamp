@@ -1,9 +1,11 @@
 package service
 
 import (
+	"context"
 	"fmt"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"net/http"
+
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
@@ -14,8 +16,8 @@ type SectionService interface {
 	FindAllSections() ([]section.Section, *api.ServiceError)
 	FindById(id int) (section.Section, *api.ServiceError)
 	DeleteSection(id int) *api.ServiceError
-	CreateSection(sec section.Section) (section.Section, *api.ServiceError)
-	UpdateSection(id int, sec section.RequestSection) (section.Section, *api.ServiceError)
+	CreateSection(ctx context.Context, sec section.Section) (section.Section, *api.ServiceError)
+	UpdateSection(ctx context.Context, id int, sec section.RequestSection) (section.Section, *api.ServiceError)
 }
 
 type SectionDefault struct {
@@ -54,8 +56,8 @@ func (s *SectionDefault) DeleteSection(id int) *api.ServiceError {
 	return nil
 }
 
-func (s *SectionDefault) CreateSection(sec section.Section) (section.Section, *api.ServiceError) {
-	if _, err1 := s.rpWareHouse.FindById(sec.WarehouseId); err1 != nil {
+func (s *SectionDefault) CreateSection(ctx context.Context, sec section.Section) (section.Section, *api.ServiceError) {
+	if _, err1 := s.rpWareHouse.FindById(ctx, sec.WarehouseId); err1 != nil {
 		fmt.Println("no hay tin")
 		return section.Section{}, &api.ServiceError{
 			Code:         err1.Code,
@@ -70,7 +72,7 @@ func (s *SectionDefault) CreateSection(sec section.Section) (section.Section, *a
 	return newSection, nil
 
 }
-func (s *SectionDefault) UpdateSection(id int, sec section.RequestSection) (section.Section, *api.ServiceError) {
+func (s *SectionDefault) UpdateSection(ctx context.Context, id int, sec section.RequestSection) (section.Section, *api.ServiceError) {
 	existing, err := s.rp.FindById(id)
 	if err != nil {
 		return section.Section{}, err
@@ -86,7 +88,7 @@ func (s *SectionDefault) UpdateSection(id int, sec section.RequestSection) (sect
 		}
 	}
 	if sec.WarehouseId != nil {
-		if _, err1 := s.rpWareHouse.FindById(*sec.WarehouseId); err1 != nil {
+		if _, err1 := s.rpWareHouse.FindById(ctx, *sec.WarehouseId); err1 != nil {
 			return section.Section{}, &api.ServiceError{
 				Code:         err1.Code,
 				ResponseCode: err1.ResponseCode,

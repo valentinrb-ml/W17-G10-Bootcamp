@@ -37,7 +37,7 @@ func (h *WarehouseHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	wh := mappers.RequestToWarehouse(req)
 
-	newW, err := h.sv.Create(wh)
+	newW, err := h.sv.Create(r.Context(), wh)
 	if err != nil {
 		response.Error(w, err.ResponseCode, err.Message)
 		return
@@ -47,7 +47,7 @@ func (h *WarehouseHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *WarehouseHandler) FindAll(w http.ResponseWriter, r *http.Request) {
-	whs, err := h.sv.FindAll()
+	whs, err := h.sv.FindAll(r.Context())
 	if err != nil {
 		response.Error(w, err.ResponseCode, err.Message)
 		return
@@ -66,7 +66,7 @@ func (h *WarehouseHandler) FindById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	wh, er := h.sv.FindById(id)
+	wh, er := h.sv.FindById(r.Context(), id)
 	if er != nil {
 		response.Error(w, er.ResponseCode, er.Message)
 		return
@@ -92,7 +92,7 @@ func (h *WarehouseHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updated, serviceErr := h.sv.Update(id, req)
+	updated, serviceErr := h.sv.Update(r.Context(), id, req)
 	if serviceErr != nil {
 		response.Error(w, serviceErr.ResponseCode, serviceErr.Message)
 		return
@@ -111,7 +111,7 @@ func (h *WarehouseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serviceErr := h.sv.Delete(id)
+	serviceErr := h.sv.Delete(r.Context(), id)
 	if serviceErr != nil {
 		response.Error(w, serviceErr.ResponseCode, serviceErr.Message)
 		return
