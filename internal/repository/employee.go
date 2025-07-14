@@ -42,7 +42,7 @@ type EmployeeMySQLRepository struct {
 	db *sql.DB
 }
 
-func NewEmployeeMySQLRepository(db *sql.DB) *EmployeeMySQLRepository {
+func NewEmployeeRepository(db *sql.DB) *EmployeeMySQLRepository {
 	return &EmployeeMySQLRepository{db: db}
 }
 

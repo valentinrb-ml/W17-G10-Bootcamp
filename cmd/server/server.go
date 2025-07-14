@@ -71,7 +71,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoBuyer := repository.NewBuyerRepository(dbBuyer)
 	repoWarehouse := repository.NewWarehouseMap(dbWarehouse)
 	repoProduct := repository.NewProductRepository(dbProduct)
-	repoEmployee := repository.NewEmployeeMySQLRepository(mysql)
+	repoEmployee := repository.NewEmployeeRepository(mysql)
 
 	// - service
 	svcSeller := service.NewSellerService(repoSeller)
