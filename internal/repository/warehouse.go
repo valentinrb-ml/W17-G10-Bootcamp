@@ -9,14 +9,7 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
 
-type WarehouseRepository interface {
-	Create(ctx context.Context, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError)
-	Exist(ctx context.Context, wc string) (bool, *api.ServiceError)
-	FindAll(ctx context.Context) ([]warehouse.Warehouse, *api.ServiceError)
-	FindById(ctx context.Context, id int) (*warehouse.Warehouse, *api.ServiceError)
-	Update(ctx context.Context, id int, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError)
-	Delete(ctx context.Context, id int) *api.ServiceError
-}
+
 
 const (
 	queryWarehouseExist    = `SELECT COUNT(*) FROM warehouse WHERE warehouse_code = ?`
@@ -26,14 +19,6 @@ const (
 	queryWarehouseUpdate   = `UPDATE warehouse SET warehouse_code = ?, address = ?, minimum_temperature = ?, minimum_capacity = ?, telephone = ? WHERE id = ?`
 	queryWarehouseDelete   = `DELETE FROM warehouse WHERE id = ?`
 )
-
-type WarehouseMySQL struct {
-	db *sql.DB
-}
-
-func NewWarehouseRepository(db *sql.DB) *WarehouseMySQL {
-	return &WarehouseMySQL{db}
-}
 
 func (r *WarehouseMySQL) Exist(ctx context.Context, wc string) (bool, *api.ServiceError) {
 	var count int
