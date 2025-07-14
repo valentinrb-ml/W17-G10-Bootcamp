@@ -8,7 +8,7 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/request"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
@@ -60,8 +60,7 @@ func (h *WarehouseHandler) FindById(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		err := api.ServiceErrors[api.ErrBadRequest]
-		err.Message = "Invalid id"
+		err := apperrors.NewAppError(apperrors.CodeBadRequest, "Invalid id")
 		response.Error(w, err)
 		return
 	}
@@ -80,8 +79,7 @@ func (h *WarehouseHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		err := api.ServiceErrors[api.ErrBadRequest]
-		err.Message = "Invalid id"
+		err := apperrors.NewAppError(apperrors.CodeBadRequest, "Invalid id")
 		response.Error(w, err)
 		return
 	}
@@ -105,8 +103,7 @@ func (h *WarehouseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		err := api.ServiceErrors[api.ErrBadRequest]
-		err.Message = "Invalid id"
+		err := apperrors.NewAppError(apperrors.CodeBadRequest, "Invalid id")
 		response.Error(w, err)
 		return
 	}

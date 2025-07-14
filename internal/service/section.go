@@ -3,12 +3,12 @@ package service
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
 
@@ -16,8 +16,8 @@ type SectionService interface {
 	FindAllSections() ([]section.Section, *api.ServiceError)
 	FindById(id int) (section.Section, *api.ServiceError)
 	DeleteSection(id int) *api.ServiceError
-	CreateSection(ctx context.Context, sec section.Section) (section.Section, *api.ServiceError)
-	UpdateSection(ctx context.Context, id int, sec section.RequestSection) (section.Section, *api.ServiceError)
+	CreateSection(ctx context.Context, sec section.Section) (section.Section, error)
+	UpdateSection(ctx context.Context, id int, sec section.RequestSection) (section.Section, error)
 }
 
 type SectionDefault struct {
@@ -56,14 +56,10 @@ func (s *SectionDefault) DeleteSection(id int) *api.ServiceError {
 	return nil
 }
 
-func (s *SectionDefault) CreateSection(ctx context.Context, sec section.Section) (section.Section, *api.ServiceError) {
+func (s *SectionDefault) CreateSection(ctx context.Context, sec section.Section) (section.Section, error) {
 	if _, err1 := s.rpWareHouse.FindById(ctx, sec.WarehouseId); err1 != nil {
 		fmt.Println("no hay tin")
-		return section.Section{}, &api.ServiceError{
-			Code:         err1.Code,
-			ResponseCode: http.StatusBadRequest,
-			Message:      "The warehouse does not exist",
-		}
+		return section.Section{}, apperrors.NewAppError(apperrors.CodeNotFound, "The warehouse does not exist")
 	}
 	newSection, err := s.rp.CreateSection(sec)
 	if err != nil {
@@ -72,7 +68,7 @@ func (s *SectionDefault) CreateSection(ctx context.Context, sec section.Section)
 	return newSection, nil
 
 }
-func (s *SectionDefault) UpdateSection(ctx context.Context, id int, sec section.RequestSection) (section.Section, *api.ServiceError) {
+func (s *SectionDefault) UpdateSection(ctx context.Context, id int, sec section.RequestSection) (section.Section, error) {
 	existing, err := s.rp.FindById(id)
 	if err != nil {
 		return section.Section{}, err
@@ -89,11 +85,7 @@ func (s *SectionDefault) UpdateSection(ctx context.Context, id int, sec section.
 	}
 	if sec.WarehouseId != nil {
 		if _, err1 := s.rpWareHouse.FindById(ctx, *sec.WarehouseId); err1 != nil {
-			return section.Section{}, &api.ServiceError{
-				Code:         err1.Code,
-				ResponseCode: err1.ResponseCode,
-				Message:      "The warehouse does not exist",
-			}
+			return section.Section{}, apperrors.NewAppError(apperrors.CodeNotFound, "The warehouse does not exist")
 		}
 	}
 

@@ -6,11 +6,10 @@ import (
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
 
-func (s *WarehouseDefault) Create(ctx context.Context, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError) {
+func (s *WarehouseDefault) Create(ctx context.Context, w warehouse.Warehouse) (*warehouse.Warehouse, error) {
 	wh, err := s.rp.Create(ctx, w)
 	if err != nil {
 		return nil, err
@@ -18,7 +17,7 @@ func (s *WarehouseDefault) Create(ctx context.Context, w warehouse.Warehouse) (*
 	return wh, nil
 }
 
-func (s *WarehouseDefault) FindAll(ctx context.Context) ([]warehouse.Warehouse, *api.ServiceError) {
+func (s *WarehouseDefault) FindAll(ctx context.Context) ([]warehouse.Warehouse, error) {
 	whs, err := s.rp.FindAll(ctx)
 	if err != nil {
 		return nil, err
@@ -35,7 +34,7 @@ func (s *WarehouseDefault) FindAll(ctx context.Context) ([]warehouse.Warehouse, 
 	return whs, err
 }
 
-func (s *WarehouseDefault) FindById(ctx context.Context, id int) (*warehouse.Warehouse, *api.ServiceError) {
+func (s *WarehouseDefault) FindById(ctx context.Context, id int) (*warehouse.Warehouse, error) {
 	w, err := s.rp.FindById(ctx, id)
 	if err != nil {
 		return nil, err
@@ -43,7 +42,7 @@ func (s *WarehouseDefault) FindById(ctx context.Context, id int) (*warehouse.War
 	return w, nil
 }
 
-func (s *WarehouseDefault) Update(ctx context.Context, id int, patch warehouse.WarehousePatchDTO) (*warehouse.Warehouse, *api.ServiceError) {
+func (s *WarehouseDefault) Update(ctx context.Context, id int, patch warehouse.WarehousePatchDTO) (*warehouse.Warehouse, error) {
 	existing, err := s.rp.FindById(ctx, id)
 	if err != nil {
 		return nil, err
@@ -64,7 +63,7 @@ func (s *WarehouseDefault) Update(ctx context.Context, id int, patch warehouse.W
 	return updated, nil
 }
 
-func (s *WarehouseDefault) Delete(ctx context.Context, id int) *api.ServiceError {
+func (s *WarehouseDefault) Delete(ctx context.Context, id int) error {
 	_, err := s.rp.FindById(ctx, id)
 	if err != nil {
 		return err
