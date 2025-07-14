@@ -131,7 +131,7 @@ func (r *EmployeeMySQLRepository) FindByID(ctx context.Context, id int) (*models
 	return e, nil
 }
 
-func (r *EmployeeMySQLRepository) Update(ctx context.Context, id int, e *models.Employee) (*models.Employee, error) {
+func (r *EmployeeMySQLRepository) Update(ctx context.Context, id int, e *models.Employee) error {
 	_, err := r.db.ExecContext(
 		ctx,
 		queryEmployeeUpdate,
@@ -141,9 +141,9 @@ func (r *EmployeeMySQLRepository) Update(ctx context.Context, id int, e *models.
 		se := api.ServiceErrors[api.ErrInternalServer]
 		se.Message = "database update failed"
 		se.InternalError = err
-		return nil, &se
+		return &se
 	}
-	return r.FindByID(ctx, id)
+	return nil
 }
 
 func (r *EmployeeMySQLRepository) Delete(ctx context.Context, id int) error {

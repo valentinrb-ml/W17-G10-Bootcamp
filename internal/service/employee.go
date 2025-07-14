@@ -131,7 +131,14 @@ func (s *EmployeeDefault) Update(ctx context.Context, id int, patch *models.Empl
 		found.WarehouseID = *patch.WarehouseID
 	}
 
-	return s.repo.Update(ctx, id, found)
+	if err := s.repo.Update(ctx, id, found); err != nil {
+		return nil, err
+	}
+	updated, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return updated, nil
 }
 
 func (s *EmployeeDefault) Delete(ctx context.Context, id int) error {

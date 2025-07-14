@@ -11,7 +11,7 @@ type EmployeeRepository interface {
 	FindByCardNumberID(ctx context.Context, cardNumberID string) (*models.Employee, error)
 	FindAll(ctx context.Context) ([]*models.Employee, error)
 	FindByID(ctx context.Context, id int) (*models.Employee, error)
-	Update(ctx context.Context, id int, e *models.Employee) (*models.Employee, error)
+	Update(ctx context.Context, id int, e *models.Employee) error
 	Delete(ctx context.Context, id int) error
 	ExistsByCardNumberID(ctx context.Context, cardNumberID string) (bool, error)
 }
