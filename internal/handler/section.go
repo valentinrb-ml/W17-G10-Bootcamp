@@ -24,7 +24,8 @@ func (h *SectionDefault) FindAllSections(w http.ResponseWriter, r *http.Request)
 
 	sections, err := h.sv.FindAllSections()
 	if err != nil {
-		response.Error(w, err.ResponseCode, err.Message)
+		// response.Error(w, err.ResponseCode, err.Message)
+		response.Error(w, err)
 		return
 	}
 	sectionDoc := make([]section.ResponseSection, 0, len(sections))
@@ -41,14 +42,16 @@ func (h *SectionDefault) FindById(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "invalid ID param.")
+		// response.Error(w, http.StatusBadRequest, "invalid ID param.")
+		response.Error(w, err)
 		return
 	}
 
 	sec, err1 := h.sv.FindById(id)
 
 	if err1 != nil {
-		response.Error(w, err1.ResponseCode, err1.Message)
+		// response.Error(w, err1.ResponseCode, err1.Message)
+		response.Error(w, err1)
 		return
 	}
 
@@ -61,14 +64,16 @@ func (h *SectionDefault) DeleteSection(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "invalid ID param.")
+		// response.Error(w, http.StatusBadRequest, "invalid ID param.")
+		response.Error(w, err)
 		return
 	}
 
 	err1 := h.sv.DeleteSection(id)
 
 	if err1 != nil {
-		response.Error(w, err1.ResponseCode, err1.Message)
+		// response.Error(w, err1.ResponseCode, err1.Message)
+		response.Error(w, err1)
 		return
 	}
 
@@ -81,13 +86,15 @@ func (h *SectionDefault) CreateSection(w http.ResponseWriter, r *http.Request) {
 	err := request.JSON(r, &sectionReq)
 
 	if err != nil {
-		response.Error(w, http.StatusUnprocessableEntity, err.Error())
+		// response.Error(w, http.StatusUnprocessableEntity, err.Error())
+		response.Error(w, err)
 		return
 	}
 
 	err1 := validators.ValidateSectionRequest(sectionReq)
 	if err1 != nil {
-		response.Error(w, err1.ResponseCode, err1.Message)
+		// response.Error(w, err1.ResponseCode, err1.Message)
+		response.Error(w, err1)
 		return
 	}
 
@@ -96,7 +103,8 @@ func (h *SectionDefault) CreateSection(w http.ResponseWriter, r *http.Request) {
 	newSection, err2 := h.sv.CreateSection(r.Context(), sec)
 
 	if err2 != nil {
-		response.Error(w, err2.ResponseCode, err2.Message)
+		// response.Error(w, err2.ResponseCode, err2.Message)
+		response.Error(w, err2)
 		return
 	}
 
@@ -108,7 +116,8 @@ func (h *SectionDefault) UpdateSection(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "invalid ID param.")
+		// response.Error(w, http.StatusBadRequest, "invalid ID param.")
+		response.Error(w, err)
 		return
 	}
 
@@ -116,19 +125,22 @@ func (h *SectionDefault) UpdateSection(w http.ResponseWriter, r *http.Request) {
 	err = request.JSON(r, &sec)
 
 	if err != nil {
-		response.Error(w, http.StatusUnprocessableEntity, err.Error())
+		// response.Error(w, http.StatusUnprocessableEntity, err.Error())
+		response.Error(w, err)
 		return
 	}
 
 	if err1 := validators.ValidateSectionPatch(sec); err1 != nil {
-		response.Error(w, err1.ResponseCode, err1.Message)
+		// response.Error(w, err1.ResponseCode, err1.Message)
+		response.Error(w, err1)
 		return
 	}
 
 	secUpd, err2 := h.sv.UpdateSection(r.Context(), id, sec)
 
 	if err2 != nil {
-		response.Error(w, err2.ResponseCode, err2.Message)
+		// response.Error(w, err2.ResponseCode, err2.Message)
+		response.Error(w, err2)
 		return
 	}
 

@@ -8,9 +8,12 @@ import (
 func MountProductRoutes(api chi.Router, hd *handler.ProductHandler) {
 	api.Route("/products", func(r chi.Router) {
 		r.Get("/", hd.GetAll)
-		r.Get("/{id}", hd.GetByID)
 		r.Post("/", hd.Create)
-		r.Patch("/{id}", hd.Patch)
-		r.Delete("/{id}", hd.Delete)
+
+		r.Route("/{id}", func(r chi.Router) {
+			r.Get("/", hd.GetByID)
+			r.Patch("/", hd.Patch)
+			r.Delete("/", hd.Delete)
+		})
 	})
 }
