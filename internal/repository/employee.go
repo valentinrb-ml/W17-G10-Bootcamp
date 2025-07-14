@@ -5,22 +5,18 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
-)
-
-var (
-	ErrCardNumberIDExists = errors.New("card_number_id already exists")
-	ErrNotFound           = errors.New("not found")
 )
 
 const (
 	queryEmployeeCountByCardNumberID = `
 		SELECT COUNT(*) FROM employees WHERE id_card_number=?`
 	queryEmployeeInsert = `
-		INSERT INTO employees (id_card_number, first_name, last_name, warehouse_id) 
+		INSERT INTO employees (id_card_number, first_name, last_name, warehouse_id)
 		VALUES (?, ?, ?, ?)`
 	queryEmployeeSelectByCardNumberID = `
-		SELECT id, id_card_number, first_name, last_name, warehouse_id 
+		SELECT id, id_card_number, first_name, last_name, warehouse_id
 		FROM employees WHERE id_card_number=?`
 	queryEmployeeSelectAll = `
 		SELECT id, id_card_number, first_name, last_name, warehouse_id FROM employees`
@@ -56,7 +52,9 @@ func (r *EmployeeMySQLRepository) Create(ctx context.Context, e *models.Employee
 		return nil, err
 	}
 	if count > 0 {
-		return nil, ErrCardNumberIDExists
+		se := api.ServiceErrors[api.ErrConflict]
+		se.Message = "card_number_id already exists"
+		return nil, &se
 	}
 
 	result, err := r.db.ExecContext(ctx, queryEmployeeInsert, e.CardNumberID, e.FirstName, e.LastName, e.WarehouseID)
@@ -107,7 +105,9 @@ func (r *EmployeeMySQLRepository) FindByID(ctx context.Context, id int) (*models
 	e := &models.Employee{}
 	err := row.Scan(&e.ID, &e.CardNumberID, &e.FirstName, &e.LastName, &e.WarehouseID)
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
+		se := api.ServiceErrors[api.ErrNotFound]
+		se.Message = "employee not found"
+		return nil, &se
 	}
 	if err != nil {
 		return nil, err
@@ -121,7 +121,9 @@ func (r *EmployeeMySQLRepository) Update(ctx context.Context, id int, patch *mod
 		return nil, err
 	}
 	if emp == nil {
-		return nil, ErrNotFound
+		se := api.ServiceErrors[api.ErrNotFound]
+		se.Message = "employee not found"
+		return nil, &se
 	}
 
 	if patch.CardNumberID != nil {
@@ -130,7 +132,9 @@ func (r *EmployeeMySQLRepository) Update(ctx context.Context, id int, patch *mod
 			return nil, err
 		}
 		if exist != nil && exist.ID != id {
-			return nil, ErrCardNumberIDExists
+			se := api.ServiceErrors[api.ErrConflict]
+			se.Message = "card_number_id already exists"
+			return nil, &se
 		}
 		emp.CardNumberID = *patch.CardNumberID
 	}
@@ -162,7 +166,9 @@ func (r *EmployeeMySQLRepository) Delete(ctx context.Context, id int) error {
 		return err
 	}
 	if rows == 0 {
-		return ErrNotFound
+		se := api.ServiceErrors[api.ErrNotFound]
+		se.Message = "employee not found"
+		return &se
 	}
 	return nil
 }
