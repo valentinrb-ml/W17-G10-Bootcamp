@@ -50,13 +50,10 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	if err != nil {
 		return err
 	}
-	ldSection := loader.NewSectionJSONFile("docs/db/section.json")
-	dbSection, err := ldSection.Load()
-	if err != nil {
-		return err
-	}
+
 	// - repository
-	repoSection := repository.NewSectionMap(dbSection)
+
+	repoSection := repository.NewSectionMap(mysql)
 	repoSeller := repository.NewSellerRepository(mysql)
 	repoBuyer := repository.NewBuyerRepository(dbBuyer)
 	repoWarehouse := repository.NewWarehouseRepository(mysql)
@@ -66,7 +63,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	// - service
 	svcSeller := service.NewSellerService(repoSeller)
 	svcBuyer := service.NewBuyerService(repoBuyer)
-	svcSection := service.NewSectionServer(repoSection, repoWarehouse)
+	svcSection := service.NewSectionServer(repoSection)
 	svcProduct := service.NewProductService(repoProduct)
 	svcWarehouse := service.NewWarehouseDefault(repoWarehouse)
 	svcEmployee := service.NewEmployeeDefault(repoEmployee, repoWarehouse)

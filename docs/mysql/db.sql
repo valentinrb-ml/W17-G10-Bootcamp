@@ -86,7 +86,7 @@ CREATE TABLE products (
 -- Tabla: sections
 CREATE TABLE sections (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    section_number VARCHAR(255) NOT NULL,
+    section_number INT NOT NULL UNIQUE,
     current_capacity INT,
     current_temperature DECIMAL(19,2),
     maximum_capacity INT,

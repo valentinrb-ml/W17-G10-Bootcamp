@@ -45,7 +45,7 @@ func (l *SectionJSONFile) Load() (map[int]section.Section, error) {
 			MinimumCapacity:    s.MinimumCapacity,
 			MaximumCapacity:    s.MaximumCapacity,
 			WarehouseId:        s.WarehouseId,
-			ProductId:          s.ProductId,
+			ProductTypeId:      s.ProductTypeId,
 		}
 		sectionMap[s.Id] = sec
 

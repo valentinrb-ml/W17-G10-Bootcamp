@@ -21,13 +21,14 @@ func NewSectionHandler(sv service.SectionService) *SectionDefault {
 }
 
 func (h *SectionDefault) FindAllSections(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
-	sections, err := h.sv.FindAllSections()
-	if err != nil {
-		// response.Error(w, err.ResponseCode, err.Message)
-		response.Error(w, err)
+	sections, err := h.sv.FindAllSections(ctx)
+
+	if handleApiError(w, err) {
 		return
 	}
+
 	sectionDoc := make([]section.ResponseSection, 0, len(sections))
 	for _, s := range sections {
 		secDoc := mappers.SectionToResponseSection(s)
@@ -39,6 +40,8 @@ func (h *SectionDefault) FindAllSections(w http.ResponseWriter, r *http.Request)
 
 func (h *SectionDefault) FindById(w http.ResponseWriter, r *http.Request) {
 
+	ctx := r.Context()
+
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -47,19 +50,18 @@ func (h *SectionDefault) FindById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sec, err1 := h.sv.FindById(id)
+	sec, err1 := h.sv.FindById(ctx, id)
 
-	if err1 != nil {
-		// response.Error(w, err1.ResponseCode, err1.Message)
-		response.Error(w, err1)
+	if handleApiError(w, err1) {
 		return
 	}
 
-	response.JSON(w, http.StatusOK, mappers.SectionToResponseSection(sec))
+	response.JSON(w, http.StatusOK, mappers.SectionToResponseSection(*sec))
 
 }
 
 func (h *SectionDefault) DeleteSection(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -69,11 +71,9 @@ func (h *SectionDefault) DeleteSection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err1 := h.sv.DeleteSection(id)
+	err1 := h.sv.DeleteSection(ctx, id)
 
-	if err1 != nil {
-		// response.Error(w, err1.ResponseCode, err1.Message)
-		response.Error(w, err1)
+	if handleApiError(w, err1) {
 		return
 	}
 
@@ -81,8 +81,9 @@ func (h *SectionDefault) DeleteSection(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SectionDefault) CreateSection(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
-	var sectionReq section.RequestSection
+	var sectionReq section.PostSection
 	err := request.JSON(r, &sectionReq)
 
 	if err != nil {
@@ -100,18 +101,17 @@ func (h *SectionDefault) CreateSection(w http.ResponseWriter, r *http.Request) {
 
 	sec := mappers.RequestSectionToSection(sectionReq)
 
-	newSection, err2 := h.sv.CreateSection(r.Context(), sec)
+	newSection, err2 := h.sv.CreateSection(ctx, sec)
 
-	if err2 != nil {
-		// response.Error(w, err2.ResponseCode, err2.Message)
-		response.Error(w, err2)
+	if handleApiError(w, err2) {
 		return
 	}
 
-	response.JSON(w, http.StatusCreated, mappers.SectionToResponseSection(newSection))
+	response.JSON(w, http.StatusCreated, mappers.SectionToResponseSection(*newSection))
 }
 
 func (h *SectionDefault) UpdateSection(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -121,7 +121,7 @@ func (h *SectionDefault) UpdateSection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var sec section.RequestSection
+	var sec section.PatchSection
 	err = request.JSON(r, &sec)
 
 	if err != nil {
@@ -136,14 +136,15 @@ func (h *SectionDefault) UpdateSection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	secUpd, err2 := h.sv.UpdateSection(r.Context(), id, sec)
+	secUpd, err2 := h.sv.UpdateSection(ctx, id, sec)
 
-	if err2 != nil {
-		// response.Error(w, err2.ResponseCode, err2.Message)
-		response.Error(w, err2)
-		return
+	if handleApiError(w, err2) {
+		if err2 != nil {
+			// response.Error(w, err2.ResponseCode, err2.Message)
+			response.Error(w, err2)
+			return
+		}
+		response.JSON(w, http.StatusOK, mappers.SectionToResponseSection(*secUpd))
+
 	}
-
-	response.JSON(w, http.StatusOK, mappers.SectionToResponseSection(secUpd))
-
 }
