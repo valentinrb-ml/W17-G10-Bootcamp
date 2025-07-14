@@ -13,8 +13,6 @@ type SellerRepository interface {
 	Delete(ctx context.Context, id int) error
 	FindAll(ctx context.Context) ([]models.Seller, error)
 	FindById(ctx context.Context, id int) (*models.Seller, error)
-
-	CIDExists(ctx context.Context, cid int, id int) bool
 }
 
 type sellerRepository struct {

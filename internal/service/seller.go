@@ -5,20 +5,10 @@ import (
 	"slices"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
 
 func (sv *sellerService) Create(ctx context.Context, reqs models.RequestSeller) (*models.ResponseSeller, error) {
-	if sv.rp.CIDExists(ctx, *reqs.Cid, 0) {
-		err := api.ServiceErrors[api.ErrConflict]
-		return nil, &api.ServiceError{
-			Code:         err.Code,
-			ResponseCode: err.ResponseCode,
-			Message:      "The CID is in use, use a valid one",
-		}
-	}
-
 	ms := mappers.RequestSellerToSeller(reqs)
 
 	s, err := sv.rp.Create(ctx, ms)
@@ -32,14 +22,6 @@ func (sv *sellerService) Create(ctx context.Context, reqs models.RequestSeller) 
 }
 
 func (sv *sellerService) Update(ctx context.Context, id int, reqs models.RequestSeller) (*models.ResponseSeller, error) {
-	if sv.rp.CIDExists(ctx, *reqs.Cid, id) {
-		err := api.ServiceErrors[api.ErrConflict]
-		return nil, &api.ServiceError{
-			Code:         err.Code,
-			ResponseCode: err.ResponseCode,
-			Message:      "The CID is in use, use a valid one",
-		}
-	}
 	s, err := sv.rp.FindById(ctx, id)
 	if err != nil {
 		return nil, err
@@ -47,7 +29,11 @@ func (sv *sellerService) Update(ctx context.Context, id int, reqs models.Request
 
 	mappers.ApplySellerPatch(s, &reqs)
 
-	sv.rp.Update(ctx, id, *s)
+	err = sv.rp.Update(ctx, id, *s)
+	if err != nil {
+		return nil, err
+	}
+
 	resps := mappers.ToResponseSeller(s)
 
 	return &resps, nil
