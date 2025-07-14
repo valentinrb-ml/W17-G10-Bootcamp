@@ -51,6 +51,8 @@ CREATE TABLE warehouse (
     address VARCHAR(255) NOT NULL,
     telephone VARCHAR(255),
     warehouse_code VARCHAR(255) NOT NULL,
+    minimum_capacity INT NOT NULL,
+    minimum_temperature DECIMAL(19,2) NOT NULL,
     locality_id INT NOT NULL
 );
 -- Tabla: employees

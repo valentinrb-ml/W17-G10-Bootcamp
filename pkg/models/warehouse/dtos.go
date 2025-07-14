@@ -6,7 +6,7 @@ type WarehouseDoc struct {
 	Telephone          string  `json:"telephone"`
 	WarehouseCode      string  `json:"warehouse_code"`
 	MinimumCapacity    int     `json:"minimum_capacity"`
-	MinimumTemperature float64 `json:"minimun_temperature"`
+	MinimumTemperature float64 `json:"minimum_temperature"`
 }
 
 type WarehouseRequest struct {
@@ -16,12 +16,13 @@ type WarehouseRequest struct {
 	WarehouseCode      string   `json:"warehouse_code,omitempty"`
 	MinimumCapacity    int      `json:"minimum_capacity,omitempty"`
 	MinimumTemperature *float64 `json:"minimum_temperature,omitempty"`
+	LocalityId         int      `json:"locality_id"`
 }
 
 type WarehousePatchDTO struct {
-	Address            *string 		`json:"address,omitempty"`
-	Telephone          *string 		`json:"telephone,omitempty"`
-	WarehouseCode      *string 		`json:"warehouse_code,omitempty"`
-	MinimumCapacity    *int    		`json:"minimum_capacity,omitempty"`
-	MinimumTemperature *float64    	`json:"minimum_temperature,omitempty"`
+	Address            *string  `json:"address,omitempty"`
+	Telephone          *string  `json:"telephone,omitempty"`
+	WarehouseCode      *string  `json:"warehouse_code,omitempty"`
+	MinimumCapacity    *int     `json:"minimum_capacity,omitempty"`
+	MinimumTemperature *float64 `json:"minimum_temperature,omitempty"`
 }

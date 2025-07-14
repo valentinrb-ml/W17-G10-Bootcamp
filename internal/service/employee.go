@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
@@ -11,11 +12,11 @@ import (
 
 // Interface
 type EmployeeService interface {
-	Create(e *models.Employee) (*models.Employee, error)
+	Create(ctx context.Context, e *models.Employee) (*models.Employee, error)
 	SaveToFile(filename string) error
 	FindAll() ([]*models.Employee, error)
 	FindByID(id int) (*models.Employee, error)
-	Update(id int, patch *models.EmployeePatch) (*models.Employee, error)
+	Update(ctx context.Context, id int, patch *models.EmployeePatch) (*models.Employee, error)
 	Delete(id int) error
 }
 
@@ -32,11 +33,11 @@ func NewEmployeeDefault(r repository.EmployeeRepository, wrepo repository.Wareho
 	}
 }
 
-func (s *EmployeeDefault) Create(e *models.Employee) (*models.Employee, error) {
+func (s *EmployeeDefault) Create(ctx context.Context, e *models.Employee) (*models.Employee, error) {
 	if err := validators.ValidateEmployee(e); err != nil {
 		return nil, err
 	}
-	warehouse, whErr := s.warehouseRepo.FindById(e.WarehouseID)
+	warehouse, whErr := s.warehouseRepo.FindById(ctx, e.WarehouseID)
 	if whErr != nil {
 		var se *api.ServiceError
 		if errors.As(whErr, &se) && se.Code == api.ErrNotFound {
@@ -91,7 +92,7 @@ func (s *EmployeeDefault) FindByID(id int) (*models.Employee, error) {
 	return emp, nil
 }
 
-func (s *EmployeeDefault) Update(id int, patch *models.EmployeePatch) (*models.Employee, error) {
+func (s *EmployeeDefault) Update(ctx context.Context, id int, patch *models.EmployeePatch) (*models.Employee, error) {
 	if id <= 0 {
 		se := api.ServiceErrors[api.ErrUnprocessableEntity]
 		se.Message = "invalid employee id"
@@ -102,7 +103,7 @@ func (s *EmployeeDefault) Update(id int, patch *models.EmployeePatch) (*models.E
 	}
 
 	if patch.WarehouseID != nil {
-		warehouse, whErr := s.warehouseRepo.FindById(*patch.WarehouseID)
+		warehouse, whErr := s.warehouseRepo.FindById(ctx, *patch.WarehouseID)
 		if whErr != nil {
 			var se *api.ServiceError
 			if errors.As(whErr, &se) && se.Code == api.ErrNotFound {
