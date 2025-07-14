@@ -46,11 +46,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	if err != nil {
 		return err
 	}
-	ldBuyer := loader.NewBuyerJSONFile("docs/db/buyers.json")
-	dbBuyer, err := ldBuyer.Load()
-	if err != nil {
-		return err
-	}
+
 	ldWarehouse := loader.NewWarehouseJSONFile("docs/db/warehouse.json")
 	dbWarehouse, err := ldWarehouse.Load()
 	if err != nil {
@@ -72,7 +68,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	// - repository
 	repoSection := repository.NewSectionMap(dbSection)
 	repoSeller := repository.NewSellerRepository(mysql)
-	repoBuyer := repository.NewBuyerRepository(dbBuyer)
+	repoBuyer := repository.NewBuyerRepository(mysql)
 	repoWarehouse := repository.NewWarehouseMap(dbWarehouse)
 	repoProduct := repository.NewProductRepository(dbProduct)
 	repoEmployee := repository.NewEmployeeMap(dbEmployee)
