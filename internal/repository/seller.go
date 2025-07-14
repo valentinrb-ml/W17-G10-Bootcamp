@@ -11,12 +11,11 @@ import (
 )
 
 const (
-	querySellerCreate    = `INSERT INTO sellers (cid, company_name, address, telephone, locality_id) VALUES (?, ?, ?, ?, ?)`
-	querySellerUpdate    = `UPDATE sellers SET cid = ?, company_name = ?, address = ?, telephone = ?, locality_id = ? WHERE id = ?`
-	querySellerDelete    = `DELETE FROM sellers WHERE id = ?`
-	querySellerFindAll   = `SELECT id, cid, company_name, address, telephone FROM sellers`
-	querySellerFindById  = `SELECT id, cid, company_name, address, telephone FROM sellers WHERE id = ?`
-	querySellerCIDExists = `SELECT EXISTS(SELECT 1 FROM sellers	WHERE LOWER(cid) = LOWER(?) AND id != ?)`
+	querySellerCreate   = `INSERT INTO sellers (cid, company_name, address, telephone, locality_id) VALUES (?, ?, ?, ?, ?)`
+	querySellerUpdate   = `UPDATE sellers SET cid = ?, company_name = ?, address = ?, telephone = ?, locality_id = ? WHERE id = ?`
+	querySellerDelete   = `DELETE FROM sellers WHERE id = ?`
+	querySellerFindAll  = `SELECT id, cid, company_name, address, telephone FROM sellers`
+	querySellerFindById = `SELECT id, cid, company_name, address, telephone FROM sellers WHERE id = ?`
 )
 
 func (r *sellerRepository) Create(ctx context.Context, s models.Seller) (*models.Seller, error) {
@@ -26,6 +25,14 @@ func (r *sellerRepository) Create(ctx context.Context, s models.Seller) (*models
 		s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId,
 	)
 	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
+			errDef := api.ServiceErrors[api.ErrConflict]
+			return nil, &api.ServiceError{
+				Code:         errDef.Code,
+				ResponseCode: errDef.ResponseCode,
+				Message:      "Could not create seller due to a data conflict. Please verify your input and try again.",
+			}
+		}
 		return nil, err
 	}
 
@@ -33,9 +40,7 @@ func (r *sellerRepository) Create(ctx context.Context, s models.Seller) (*models
 	if err != nil {
 		return nil, err
 	}
-
 	s.Id = int(id)
-
 	return &s, nil
 }
 
@@ -45,8 +50,18 @@ func (r *sellerRepository) Update(ctx context.Context, id int, s models.Seller) 
 		querySellerUpdate,
 		s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId, s.Id,
 	)
-
-	return err
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
+			errDef := api.ServiceErrors[api.ErrConflict]
+			return &api.ServiceError{
+				Code:         errDef.Code,
+				ResponseCode: errDef.ResponseCode,
+				Message:      "Could not update seller due to a data conflict. Please verify your input and try again.",
+			}
+		}
+		return err
+	}
+	return nil
 }
 
 func (r *sellerRepository) Delete(ctx context.Context, id int) error {
@@ -133,16 +148,4 @@ func (r *sellerRepository) FindById(ctx context.Context, id int) (*models.Seller
 	}
 
 	return &s, nil
-}
-
-func (r *sellerRepository) CIDExists(ctx context.Context, cid int, id int) bool {
-	var exists bool
-
-	r.mysql.QueryRowContext(
-		ctx,
-		querySellerCIDExists,
-		cid, id,
-	).Scan(&exists)
-
-	return exists
 }

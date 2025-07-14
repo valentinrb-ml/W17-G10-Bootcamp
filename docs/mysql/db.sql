@@ -23,7 +23,7 @@ CREATE TABLE localities (
 -- Tabla: sellers
 CREATE TABLE sellers (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    cid INT NOT NULL,
+    cid INT NOT NULL UNIQUE,
     company_name VARCHAR(255) NOT NULL,
     address VARCHAR(255),
     telephone VARCHAR(255),
@@ -51,6 +51,8 @@ CREATE TABLE warehouse (
     address VARCHAR(255) NOT NULL,
     telephone VARCHAR(255),
     warehouse_code VARCHAR(255) NOT NULL,
+    minimum_capacity INT NOT NULL,
+    minimum_temperature DECIMAL(19,2) NOT NULL,
     locality_id INT NOT NULL
 );
 -- Tabla: employees
@@ -84,7 +86,7 @@ CREATE TABLE products (
 -- Tabla: sections
 CREATE TABLE sections (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    section_number VARCHAR(255) NOT NULL,
+    section_number INT NOT NULL UNIQUE,
     current_capacity INT,
     current_temperature DECIMAL(19,2),
     maximum_capacity INT,

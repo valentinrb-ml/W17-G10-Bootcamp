@@ -33,7 +33,8 @@ type EmployeeRequest struct {
 func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req EmployeeRequest
 	if err := request.JSON(r, &req); err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid request body: "+err.Error())
+		// response.Error(w, http.StatusBadRequest, "Invalid request body: "+err.Error())
+		response.Error(w, err)
 		return
 	}
 	emp := &models.Employee{
@@ -46,18 +47,16 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	} else {
 		emp.WarehouseID = 0
 	}
-	created, err := h.service.Create(emp)
+	created, err := h.service.Create(r.Context(), emp)
 	if err != nil {
 		var se *api.ServiceError
 		if errors.As(err, &se) {
-			response.Error(w, se.ResponseCode, se.Message)
+			// response.Error(w, se.ResponseCode, se.Message)
+			response.Error(w, err)
 		} else {
-			response.Error(w, http.StatusInternalServerError, "Internal error")
+			// response.Error(w, http.StatusInternalServerError, "Internal error")
+			response.Error(w, err)
 		}
-		return
-	}
-	if err := h.service.SaveToFile("docs/db/employees.json"); err != nil {
-		response.Error(w, http.StatusInternalServerError, "Employee created but failed to persist")
 		return
 	}
 	employeeDoc := mappers.MapEmployeeToEmployeeDoc(created)
@@ -65,9 +64,10 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *EmployeeHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	employees, err := h.service.FindAll()
+	employees, err := h.service.FindAll(r.Context())
 	if err != nil {
-		response.Error(w, http.StatusInternalServerError, "cannot get employees")
+		// response.Error(w, http.StatusInternalServerError, "cannot get employees")
+		response.Error(w, err)
 		return
 	}
 	if len(employees) == 0 {
@@ -80,21 +80,24 @@ func (h *EmployeeHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 	response.JSON(w, http.StatusOK, employeeDocs)
 }
+
 func (h *EmployeeHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "id must be a number")
+		// response.Error(w, http.StatusBadRequest, "id must be a number")
+		response.Error(w, err)
 		return
 	}
-
-	emp, err := h.service.FindByID(id)
+	emp, err := h.service.FindByID(r.Context(), id)
 	if err != nil {
 		var se *api.ServiceError
 		if errors.As(err, &se) {
-			response.Error(w, se.ResponseCode, se.Message)
+			// response.Error(w, se.ResponseCode, se.Message)
+			response.Error(w, err)
 		} else {
-			response.Error(w, http.StatusInternalServerError, "Internal error")
+			// response.Error(w, http.StatusInternalServerError, "Internal error")
+			response.Error(w, err)
 		}
 		return
 	}
@@ -106,28 +109,28 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid id")
+		// response.Error(w, http.StatusBadRequest, "Invalid id")
+		response.Error(w, err)
 		return
 	}
 	var patch models.EmployeePatch
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&patch); err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid JSON or unknown field: "+err.Error())
+		// response.Error(w, http.StatusBadRequest, "Invalid JSON or unknown field: "+err.Error())
+		response.Error(w, err)
 		return
 	}
-	updated, err := h.service.Update(id, &patch)
+	updated, err := h.service.Update(r.Context(), id, &patch)
 	if err != nil {
 		var se *api.ServiceError
 		if errors.As(err, &se) {
-			response.Error(w, se.ResponseCode, se.Message)
+			// response.Error(w, se.ResponseCode, se.Message)
+			response.Error(w, err)
 		} else {
-			response.Error(w, http.StatusInternalServerError, "Internal error")
+			// response.Error(w, http.StatusInternalServerError, "Internal error")
+			response.Error(w, err)
 		}
-		return
-	}
-	if err := h.service.SaveToFile("docs/db/employees.json"); err != nil {
-		response.Error(w, http.StatusInternalServerError, "Employee updated but failed to persist")
 		return
 	}
 	employeeDoc := mappers.MapEmployeeToEmployeeDoc(updated)
@@ -138,20 +141,19 @@ func (h *EmployeeHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid id")
+		// response.Error(w, http.StatusBadRequest, "Invalid id")
+		response.Error(w, err)
 		return
 	}
-	if err := h.service.Delete(id); err != nil {
+	if err := h.service.Delete(r.Context(), id); err != nil {
 		var se *api.ServiceError
 		if errors.As(err, &se) {
-			response.Error(w, se.ResponseCode, se.Message)
+			// response.Error(w, se.ResponseCode, se.Message)
+			response.Error(w, err)
 		} else {
-			response.Error(w, http.StatusInternalServerError, "Internal error")
+			// response.Error(w, http.StatusInternalServerError, "Internal error")
+			response.Error(w, err)
 		}
-		return
-	}
-	if err := h.service.SaveToFile("docs/db/employees.json"); err != nil {
-		response.Error(w, http.StatusInternalServerError, "Employee deleted but failed to persist")
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)

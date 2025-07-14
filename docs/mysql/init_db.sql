@@ -36,17 +36,17 @@ INSERT INTO buyers (id, id_card_number, first_name, last_name) VALUES
                                                                    (4, '4004', 'David', 'Silva'), (5, '4005', 'Esteban', 'Arce'), (6, '4006', 'Felipe', 'Sosa'),
                                                                    (7, '4007', 'Gabriela', 'Campos'), (8, '4008', 'Hugo', 'Castro'), (9, '4009', 'Irene', 'Fernández'),
                                                                    (10, '4010', 'Joaquín', 'de la Vega');
-INSERT INTO warehouse (id, address, telephone, warehouse_code, locality_id) VALUES
-                                                                                (1, 'Depósito Sur', '155-201', 'WS-001', 1),
-                                                                                (2, 'Bodega Central', '155-202', 'WS-002', 2),
-                                                                                (3, 'Frigorifico Norte', '155-203', 'WS-003', 3),
-                                                                                (4, 'Almacén Andes', '155-204', 'WS-004', 4),
-                                                                                (5, 'Galpón SP', '155-205', 'WS-005', 5),
-                                                                                (6, 'Almacen Rj', '155-206', 'WS-006', 6),
-                                                                                (7, 'Depósito Calama', '155-207', 'WS-007', 7),
-                                                                                (8, 'Almacen CentroUy', '155-208', 'WS-008', 8),
-                                                                                (9, 'Depósito Lambaré', '155-209', 'WS-009', 9),
-                                                                                (10, 'Bodega Alto', '155-210', 'WS-010', 10);
+INSERT INTO warehouse (id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id) VALUES
+                                                                                (1, 'Depósito Sur', '155-201', 'WS-001', 100, -10.5, 1),
+                                                                                (2, 'Bodega Central', '155-202', 'WS-002', 150, -8.0, 2),
+                                                                                (3, 'Frigorifico Norte', '155-203', 'WS-003', 200, -18.0, 3),
+                                                                                (4, 'Almacén Andes', '155-204', 'WS-004', 80, -5.0, 4),
+                                                                                (5, 'Galpón SP', '155-205', 'WS-005', 120, -12.0, 5),
+                                                                                (6, 'Almacen Rj', '155-206', 'WS-006', 90, -7.5, 6),
+                                                                                (7, 'Depósito Calama', '155-207', 'WS-007', 110, -15.0, 7),
+                                                                                (8, 'Almacen CentroUy', '155-208', 'WS-008', 95, -6.0, 8),
+                                                                                (9, 'Depósito Lambaré', '155-209', 'WS-009', 130, -9.0, 9),
+                                                                                (10, 'Bodega Alto', '155-210', 'WS-010', 140, -11.0, 10);
 INSERT INTO employees (id, id_card_number, first_name, last_name, warehouse_id) VALUES
                                                                                     (1, 'E001', 'Lucas', 'Martínez', 1),
                                                                                     (2, 'E002', 'Martina', 'García', 2),
@@ -76,16 +76,16 @@ VALUES
     (10, 'Arroz', 730, 0, 8, 14, 9.0, 'P010', 0, 10, 10, 10);
 INSERT INTO sections (id, section_number, current_capacity, current_temperature, maximum_capacity, minimum_capacity, minimum_temperature, product_type_id, warehouse_id)
 VALUES
-    (1, 'A1', 100, 5, 200, 50, 4, 1, 1),
-    (2, 'A2', 120, 1, 200, 60, 0, 2, 2),
-    (3, 'B1', 70, 5, 100, 30, 5, 3, 3),
-    (4, 'B2', 90, 8, 120, 40, 6, 4, 4),
-    (5, 'C1', 50, 4, 80, 20, 4, 5, 5),
-    (6, 'D1', 200, 6, 400, 100, 5, 6, 6),
-    (7, 'D2', 80, 12, 150, 30, 10, 7, 7),
-    (8, 'E1', 60, 15, 200, 40, 12, 8, 8),
-    (9, 'F1', 40, 3, 70, 10, 3, 9, 9),
-    (10, 'G1', 180, 7, 250, 70, 6, 10, 10);
+    (1, 1, 100, 5, 200, 50, 4, 1, 1),
+    (2, 2, 120, 1, 200, 60, 0, 2, 2),
+    (3, 3, 70, 5, 100, 30, 5, 3, 3),
+    (4, 4, 90, 8, 120, 40, 6, 4, 4),
+    (5, 5, 50, 4, 80, 20, 4, 5, 5),
+    (6, 6, 200, 6, 400, 100, 5, 6, 6),
+    (7, 7, 80, 12, 150, 30, 10, 7, 7),
+    (8, 8, 60, 15, 200, 40, 12, 8, 8),
+    (9, 9, 40, 3, 70, 10, 3, 9, 9),
+    (10, 10, 180, 7, 250, 70, 6, 10, 10);
 INSERT INTO order_status (id, description) VALUES
                                                (1, 'Pendiente'), (2, 'Confirmada'), (3, 'Cancelada'), (4, 'En reparto'),
                                                (5, 'Entregada'), (6, 'En preparación'), (7, 'Facturada'), (8, 'Devuelta'),
