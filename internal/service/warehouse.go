@@ -11,18 +11,6 @@ import (
 )
 
 func (s *WarehouseDefault) Create(ctx context.Context, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError) {
-	ok, err := s.rp.Exist(ctx, w.WarehouseCode)
-	if err != nil {
-		serviceErr := api.ServiceErrors[api.ErrInternalServer]
-		serviceErr.Message = err.Message
-		return nil, &serviceErr
-	}
-	if ok {
-		err := api.ServiceErrors[api.ErrConflict]
-		err.Message = "warehouse_code already exists"
-		return nil, &err
-	}
-
 	wh, err := s.rp.Create(ctx, w)
 	if err != nil {
 		return nil, err

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
@@ -36,6 +37,14 @@ func (r *WarehouseMySQL) Exist(ctx context.Context, wc string) (bool, *api.Servi
 func (r *WarehouseMySQL) Create(ctx context.Context, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError) {
 	res, err := r.db.ExecContext(ctx, queryWarehouseCreate, w.WarehouseCode, w.Address, w.MinimumTemperature, w.MinimumCapacity, w.Telephone, w.LocalityId)
 	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+        if mysqlErr.Number == 1062 {
+            errVal := api.ServiceErrors[api.ErrConflict]
+			errVal.Message = "warehouse_code already exists"
+			errVal.InternalError = err
+			return nil, &errVal
+        }
+    }
 		errVal := api.ServiceErrors[api.ErrInternalServer]
 		errVal.InternalError = err
 		return nil, &errVal
