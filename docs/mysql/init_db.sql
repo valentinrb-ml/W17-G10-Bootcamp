@@ -1,11 +1,11 @@
-INSERT INTO countries (id, country_name) VALUES
+INSERT INTO countries (id, name) VALUES
                                              (1, 'Argentina'), (2, 'Brasil'), (3, 'Chile'), (4, 'Uruguay'), (5, 'Paraguay'),
                                              (6, 'Bolivia'), (7, 'Perú'), (8, 'Ecuador'), (9, 'Colombia'), (10, 'Venezuela');
-INSERT INTO provinces (id, province_name, id_country_fk) VALUES
+INSERT INTO provinces (id, name, id_country_fk) VALUES
                                                              (1, 'Buenos Aires', 1), (2, 'Córdoba', 1), (3, 'Santa Fe', 1), (4, 'Mendoza', 1),
                                                              (5, 'San Pablo', 2), (6, 'Rio de Janeiro', 2), (7, 'Antofagasta', 3), (8, 'Montevideo', 4),
                                                              (9, 'Asunción', 5), (10, 'La Paz', 6);
-INSERT INTO localities (id, locality_name, province_id) VALUES
+INSERT INTO localities (id, name, province_id) VALUES
                                                             (1, 'La Plata', 1), (2, 'Córdoba Capital', 2), (3, 'Rosario', 3), (4, 'Godoy Cruz', 4),
                                                             (5, 'Campinas', 5), (6, 'Niterói', 6), (7, 'Calama', 7), (8, 'Centro', 8),
                                                             (9, 'Lambaré', 9), (10, 'El Alto', 10);

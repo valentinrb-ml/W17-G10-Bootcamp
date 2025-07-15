@@ -6,18 +6,18 @@ USE db_warehouse;
 -- Tabla: countries
 CREATE TABLE countries (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    country_name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL
 );
 -- Tabla: provinces
 CREATE TABLE provinces (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    province_name VARCHAR(255) NOT NULL,
-    id_country_fk INT NOT NULL
+    name VARCHAR(255) NOT NULL,
+    country_id INT NOT NULL
 );
 -- Tabla: localities
 CREATE TABLE localities (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    locality_name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
     province_id INT NOT NULL
 );
 -- Tabla: sellers
