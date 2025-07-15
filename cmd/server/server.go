@@ -45,17 +45,12 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	if err != nil {
 		return err
 	}
-	ldBuyer := loader.NewBuyerJSONFile("docs/db/buyers.json")
-	dbBuyer, err := ldBuyer.Load()
-	if err != nil {
-		return err
-	}
 
 	// - repository
 
 	repoSection := repository.NewSectionMap(mysql)
 	repoSeller := repository.NewSellerRepository(mysql)
-	repoBuyer := repository.NewBuyerRepository(dbBuyer)
+	repoBuyer := repository.NewBuyerRepository(mysql)
 	repoWarehouse := repository.NewWarehouseRepository(mysql)
 	repoProduct := repository.NewProductRepository(dbProduct)
 	repoEmployee := repository.NewEmployeeRepository(mysql)

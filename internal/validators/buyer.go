@@ -34,3 +34,17 @@ func createValidationError(message string) *api.ServiceError {
 	err.Message = message
 	return &err
 }
+
+func ValidateBuyerPatchNotEmpty(br models.RequestBuyer) error {
+	errDef := api.ServiceErrors[api.ErrUnprocessableEntity]
+
+	if br.CardNumberId == nil && br.FirstName == nil && br.LastName == nil {
+		return &api.ServiceError{
+			Code:         errDef.Code,
+			ResponseCode: errDef.ResponseCode,
+			Message:      "at least one field is required to be updated.",
+		}
+	}
+
+	return nil
+}
