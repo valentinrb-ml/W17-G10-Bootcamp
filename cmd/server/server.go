@@ -46,12 +46,11 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 		return err
 	}
 
-
 	// - repository
 
 	repoSection := repository.NewSectionMap(mysql)
 	repoSeller := repository.NewSellerRepository(mysql)
-	repoBuyer := repository.NewBuyerRepository(dbBuyer)
+	repoBuyer := repository.NewBuyerRepository(mysql)
 	repoWarehouse := repository.NewWarehouseRepository(mysql)
 	repoProduct := repository.NewProductRepository(dbProduct)
 	repoEmployee := repository.NewEmployeeRepository(mysql)
