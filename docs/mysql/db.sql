@@ -27,7 +27,7 @@ CREATE TABLE sellers (
     company_name VARCHAR(255) NOT NULL,
     address VARCHAR(255),
     telephone VARCHAR(255),
-    locality_id INT NOT NULL
+    locality_id VARCHAR(255) NOT NULL
 );
 -- Tabla: carriers
 CREATE TABLE carriers (
@@ -36,7 +36,7 @@ CREATE TABLE carriers (
     company_name VARCHAR(255) NOT NULL,
     address VARCHAR(255),
     telephone VARCHAR(255),
-    locality_id INT NOT NULL
+    locality_id VARCHAR(255) NOT NULL
 );
 -- Tabla: buyers
 CREATE TABLE buyers (
@@ -53,7 +53,7 @@ CREATE TABLE warehouse (
     warehouse_code VARCHAR(255) NOT NULL,
     minimum_capacity INT NOT NULL,
     minimum_temperature DECIMAL(19,2) NOT NULL,
-    locality_id INT NOT NULL
+    locality_id VARCHAR(255) NOT NULL
 );
 -- Tabla: employees
 CREATE TABLE employees (
