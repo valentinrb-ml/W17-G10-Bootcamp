@@ -12,9 +12,6 @@ type InboundOrderDefault struct {
 	repo         repository.InboundOrderRepository
 	employeeRepo repository.EmployeeRepository
 }
-type InboundOrderService interface {
-	Create(ctx context.Context, o *models.InboundOrder) (*models.InboundOrder, error)
-}
 
 func NewInboundOrderService(r repository.InboundOrderRepository, er repository.EmployeeRepository) *InboundOrderDefault {
 	return &InboundOrderDefault{
@@ -39,4 +36,11 @@ func (s *InboundOrderDefault) Create(ctx context.Context, o *models.InboundOrder
 		return nil, apperrors.NewAppError(apperrors.CodeConflict, "employee_id does not exist")
 	}
 	return s.repo.Create(ctx, o)
+}
+
+func (s *InboundOrderDefault) Report(ctx context.Context, employeeID *int) (interface{}, error) {
+	if employeeID == nil {
+		return s.repo.ReportAll(ctx)
+	}
+	return s.repo.ReportByID(ctx, *employeeID)
 }

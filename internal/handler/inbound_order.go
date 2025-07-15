@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
@@ -33,4 +34,23 @@ func (h *InboundOrderHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response.JSON(w, http.StatusCreated, created)
+}
+
+// GET /api/v1/employees/reportInboundOrders?id=1
+func (h *InboundOrderHandler) Report(w http.ResponseWriter, r *http.Request) {
+	var idPtr *int
+	if idStr := r.URL.Query().Get("id"); idStr != "" {
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			response.Error(w, apperrors.NewAppError(apperrors.CodeBadRequest, "id must be int"))
+			return
+		}
+		idPtr = &id
+	}
+	report, err := h.service.Report(r.Context(), idPtr)
+	if err != nil {
+		response.Error(w, err)
+		return
+	}
+	response.JSON(w, http.StatusOK, report)
 }

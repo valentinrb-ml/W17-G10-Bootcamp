@@ -9,4 +9,5 @@ func MountInboundOrderRoutes(api chi.Router, hd *handler.InboundOrderHandler) {
 	api.Route("/inboundOrders", func(r chi.Router) {
 		r.Post("/", hd.Create)
 	})
+	api.Get("/employees/reportInboundOrders", hd.Report)
 }
