@@ -93,7 +93,8 @@ CREATE TABLE sections (
     minimum_capacity INT,
     minimum_temperature DECIMAL(19,2),
     product_type_id INT NOT NULL,
-    warehouse_id INT NOT NULL
+    warehouse_id INT NOT NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 -- Tabla: order_status
 CREATE TABLE order_status (

@@ -1,15 +1,14 @@
 package handler
 
 import (
-	"github.com/go-chi/chi/v5"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/request"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 	"net/http"
-	"strconv"
 )
 
 type SectionDefault struct {
@@ -25,7 +24,8 @@ func (h *SectionDefault) FindAllSections(w http.ResponseWriter, r *http.Request)
 
 	sections, err := h.sv.FindAllSections(ctx)
 
-	if handleApiError(w, err) {
+	if err != nil {
+		response.Error(w, err)
 		return
 	}
 
@@ -41,18 +41,15 @@ func (h *SectionDefault) FindAllSections(w http.ResponseWriter, r *http.Request)
 func (h *SectionDefault) FindById(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
-
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
+	id, err := httputil.ParseIDParam(r, "id")
 	if err != nil {
-		// response.Error(w, http.StatusBadRequest, "invalid ID param.")
 		response.Error(w, err)
 		return
 	}
 
-	sec, err1 := h.sv.FindById(ctx, id)
-
-	if handleApiError(w, err1) {
+	sec, err := h.sv.FindById(ctx, id)
+	if err != nil {
+		response.Error(w, err)
 		return
 	}
 
@@ -63,17 +60,16 @@ func (h *SectionDefault) FindById(w http.ResponseWriter, r *http.Request) {
 func (h *SectionDefault) DeleteSection(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
+	id, err := httputil.ParseIDParam(r, "id")
 	if err != nil {
-		// response.Error(w, http.StatusBadRequest, "invalid ID param.")
 		response.Error(w, err)
 		return
 	}
 
 	err1 := h.sv.DeleteSection(ctx, id)
 
-	if handleApiError(w, err1) {
+	if err1 != nil {
+		response.Error(w, err1)
 		return
 	}
 
@@ -87,22 +83,18 @@ func (h *SectionDefault) CreateSection(w http.ResponseWriter, r *http.Request) {
 	err := request.JSON(r, &sectionReq)
 
 	if err != nil {
-		// response.Error(w, http.StatusUnprocessableEntity, err.Error())
 		response.Error(w, err)
 		return
 	}
 
 	err1 := validators.ValidateSectionRequest(sectionReq)
 	if err1 != nil {
-		// response.Error(w, err1.ResponseCode, err1.Message)
 		response.Error(w, err1)
 		return
 	}
 
 	sec := mappers.RequestSectionToSection(sectionReq)
-
 	newSection, err2 := h.sv.CreateSection(ctx, sec)
-
 	if handleApiError(w, err2) {
 		return
 	}
@@ -112,39 +104,28 @@ func (h *SectionDefault) CreateSection(w http.ResponseWriter, r *http.Request) {
 
 func (h *SectionDefault) UpdateSection(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
+	id, err := httputil.ParseIDParam(r, "id")
 	if err != nil {
-		// response.Error(w, http.StatusBadRequest, "invalid ID param.")
 		response.Error(w, err)
 		return
 	}
 
 	var sec section.PatchSection
-	err = request.JSON(r, &sec)
-
-	if err != nil {
-		// response.Error(w, http.StatusUnprocessableEntity, err.Error())
+	if err := httputil.DecodeJSON(r, &sec); err != nil {
 		response.Error(w, err)
 		return
 	}
 
 	if err1 := validators.ValidateSectionPatch(sec); err1 != nil {
-		// response.Error(w, err1.ResponseCode, err1.Message)
 		response.Error(w, err1)
 		return
 	}
 
 	secUpd, err2 := h.sv.UpdateSection(ctx, id, sec)
 
-	if handleApiError(w, err2) {
-		if err2 != nil {
-			// response.Error(w, err2.ResponseCode, err2.Message)
-			response.Error(w, err2)
-			return
-		}
-		response.JSON(w, http.StatusOK, mappers.SectionToResponseSection(*secUpd))
-
+	if err2 != nil {
+		response.Error(w, err2)
+		return
 	}
+	response.JSON(w, http.StatusOK, mappers.SectionToResponseSection(*secUpd))
 }

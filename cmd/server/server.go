@@ -53,7 +53,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// - repository
 
-	repoSection := repository.NewSectionMap(mysql)
+	repoSection := repository.NewSectionRepository(mysql)
 	repoSeller := repository.NewSellerRepository(mysql)
 	repoBuyer := repository.NewBuyerRepository(dbBuyer)
 	repoWarehouse := repository.NewWarehouseRepository(mysql)
