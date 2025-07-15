@@ -8,5 +8,6 @@ import (
 func MountGeographyRoutes(api chi.Router, hd *handler.GeographyHandler) {
 	api.Route("/localities", func(r chi.Router) {
 		r.Post("/", hd.Create)
+		r.Get("/reportSellers", hd.CountSellersByLocality)
 	})
 }

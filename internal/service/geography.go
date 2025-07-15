@@ -49,6 +49,15 @@ func (s *geographyService) Create(ctx context.Context, gr models.RequestGeograph
 	}, nil
 }
 
+func (s *geographyService) CountSellersByLocality(ctx context.Context, id string) (*models.ResponseLocalitySellers, error) {
+	resp, err := s.rp.CountSellersByLocality(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
 func (s *geographyService) handleCountry(ctx context.Context, tx *sql.Tx, countryName string) (*models.Country, error) {
 	country, err := s.rp.FindCountryByName(ctx, tx, countryName)
 	if err != nil {

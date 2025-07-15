@@ -10,12 +10,16 @@ import (
 )
 
 const (
-	queryCountryCreate    = `INSERT INTO countries (name) VALUES (?)`
-	queryCountryFindById  = `SELECT id, name FROM countries WHERE LOWER(name) = LOWER(?)`
-	queryProvinceCreate   = `INSERT INTO provinces (name, country_id) VALUES (?, ?)`
-	queryProvinceFindById = `SELECT id, name, country_id FROM provinces WHERE LOWER(name) = LOWER(?) AND country_id = ?`
-	queryLocalityCreate   = `INSERT INTO localities (id, name, province_id) VALUES (?, ?, ?)`
-	queryLocalityFindById = `SELECT id, name, province_id FROM localities WHERE id = ?`
+	queryCountryCreate       = `INSERT INTO countries (name) VALUES (?)`
+	queryCountryFindById     = `SELECT id, name FROM countries WHERE LOWER(name) = LOWER(?)`
+	queryProvinceCreate      = `INSERT INTO provinces (name, country_id) VALUES (?, ?)`
+	queryProvinceFindById    = `SELECT id, name, country_id FROM provinces WHERE LOWER(name) = LOWER(?) AND country_id = ?`
+	queryLocalityCreate      = `INSERT INTO localities (id, name, province_id) VALUES (?, ?, ?)`
+	queryLocalityFindById    = `SELECT id, name, province_id FROM localities WHERE id = ?`
+	queryLocalityWithSellers = `SELECT l.id , l.name, COUNT(s.id) FROM localities l
+								LEFT JOIN sellers s ON l.id = s.locality_id
+								WHERE l.id = ?
+								GROUP BY l.id, l.name`
 )
 
 func (r *geographyRepository) CreateCountry(ctx context.Context, exec Executor, c models.Country) (*models.Country, error) {
@@ -96,4 +100,17 @@ func (r *geographyRepository) FindLocalityById(ctx context.Context, exec Executo
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "failed to find locality").WithDetail("error", err.Error())
 	}
 	return &locality, nil
+}
+
+func (r *geographyRepository) CountSellersByLocality(ctx context.Context, id string) (*models.ResponseLocalitySellers, error) {
+	var resp models.ResponseLocalitySellers
+	row := r.mysql.QueryRowContext(ctx, queryLocalityWithSellers, id)
+	err := row.Scan(&resp.LocalityId, &resp.LocalityName, &resp.SellersCount)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "The locality you are looking for does not exist.")
+		}
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the locality sellers count.")
+	}
+	return &resp, nil
 }
