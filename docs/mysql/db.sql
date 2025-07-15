@@ -107,9 +107,8 @@ CREATE TABLE purchase_orders (
     order_date DATETIME(6) NOT NULL,
     tracking_code VARCHAR(255),
     buyer_id INT NOT NULL,
-    carrier_id INT NOT NULL,
-    order_status_id INT NOT NULL,
-    warehouse_id INT NOT NULL
+    product_record_id INT NOT NULL
+
 );
 -- Tabla: product_batches
 CREATE TABLE product_batches (
@@ -193,22 +192,17 @@ FOREIGN KEY(product_type_id) REFERENCES products_types(id);
 ALTER TABLE sections
 ADD CONSTRAINT fk_sections_warehouse
 FOREIGN KEY(warehouse_id) REFERENCES warehouse(id);
+
 -- Purchase_orders -> buyers
 ALTER TABLE purchase_orders
 ADD CONSTRAINT fk_purchase_orders_buyer
 FOREIGN KEY(buyer_id) REFERENCES buyers(id);
--- Purchase_orders -> carriers
+-- Purchase_orders -> product_record_id
 ALTER TABLE purchase_orders
-ADD CONSTRAINT fk_purchase_orders_carrier
-FOREIGN KEY(carrier_id) REFERENCES carriers(id);
--- Purchase_orders -> order_status
-ALTER TABLE purchase_orders
-ADD CONSTRAINT fk_purchase_orders_status
-FOREIGN KEY(order_status_id) REFERENCES order_status(id);
--- Purchase_orders -> warehouse
-ALTER TABLE purchase_orders
-ADD CONSTRAINT fk_purchase_orders_warehouse
-FOREIGN KEY(warehouse_id) REFERENCES warehouse(id);
+ADD CONSTRAINT fk_purchase_orders_product_record
+FOREIGN KEY(product_record_id) REFERENCES product_records(id);
+
+
 -- Product_batches -> products
 ALTER TABLE product_batches
 ADD CONSTRAINT fk_product_batches_product

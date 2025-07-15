@@ -90,18 +90,7 @@ INSERT INTO order_status (id, description) VALUES
                                                (1, 'Pendiente'), (2, 'Confirmada'), (3, 'Cancelada'), (4, 'En reparto'),
                                                (5, 'Entregada'), (6, 'En preparación'), (7, 'Facturada'), (8, 'Devuelta'),
                                                (9, 'Revisión'), (10, 'Cerrada');
-INSERT INTO purchase_orders (id, order_number, order_date, tracking_code, buyer_id, carrier_id, order_status_id, warehouse_id)
-VALUES
-    (1, 'PO001', '2024-01-01 10:00:00', 'TK001', 1, 1, 1, 1),
-    (2, 'PO002', '2024-01-02 11:30:00', 'TK002', 2, 2, 2, 2),
-    (3, 'PO003', '2024-01-03 09:15:00', 'TK003', 3, 3, 1, 3),
-    (4, 'PO004', '2024-01-04 15:20:00', 'TK004', 4, 4, 4, 4),
-    (5, 'PO005', '2024-01-05 17:45:00', 'TK005', 5, 5, 5, 5),
-    (6, 'PO006', '2024-01-06 13:10:00', 'TK006', 6, 6, 1, 6),
-    (7, 'PO007', '2024-01-07 14:00:00', 'TK007', 7, 7, 2, 7),
-    (8, 'PO008', '2024-01-08 08:30:00', 'TK008', 8, 8, 6, 8),
-    (9, 'PO009', '2024-01-09 16:10:00', 'TK009', 9, 9, 4, 9),
-    (10, 'PO010', '2024-01-10 10:50:00', 'TK010', 10, 10, 1, 10);
+
 INSERT INTO product_batches (id, batch_number, current_quantity, current_temperature, due_date, initial_quantity, manufacturing_date, manufacturing_hour, minimum_temperature, product_id, section_id)
 VALUES
     (1, 'B001', 50, 3, '2024-06-10 00:00:00', 70, '2024-05-10 00:00:00', '2024-05-10 08:00:00', 2, 1, 1),
@@ -140,6 +129,20 @@ VALUES
     (8, '2024-06-03 12:00:00', 10, 14, 8),
     (9, '2024-05-01 09:00:00', 23, 28, 9),
     (10, '2024-05-25 11:30:00', 3, 5, 10);
+    
+    
+INSERT INTO purchase_orders (id, order_number, order_date, tracking_code, buyer_id, product_record_id)
+VALUES
+    (1, 'PO001', '2024-01-01 10:00:00', 'TK001', 1, 1),
+    (2, 'PO002', '2024-01-02 11:30:00', 'TK002', 2, 2),
+    (3, 'PO003', '2024-01-03 09:15:00', 'TK003', 3, 3),
+    (4, 'PO004', '2024-01-04 15:20:00', 'TK004', 4, 4),
+    (5, 'PO005', '2024-01-05 17:45:00', 'TK005', 5, 5),
+    (6, 'PO006', '2024-01-06 13:10:00', 'TK006', 6, 6),
+    (7, 'PO007', '2024-01-07 14:00:00', 'TK007', 7, 7),
+    (8, 'PO008', '2024-01-08 08:30:00', 'TK008', 8, 8),
+    (9, 'PO009', '2024-01-09 16:10:00', 'TK009', 9, 9),
+    (10, 'PO010', '2024-01-10 10:50:00', 'TK010', 10, 10);
 
 INSERT INTO order_details (id, clean_liness_status, quantity, temperature, product_record_id, purchase_order_id)
 VALUES
