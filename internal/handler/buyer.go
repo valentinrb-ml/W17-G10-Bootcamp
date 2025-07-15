@@ -1,52 +1,42 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
-	"strconv"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/request"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
-func NewBuyerHandler(sv service.BuyerService) *BuyerHandler {
-	return &BuyerHandler{
-		sv: sv,
-	}
-}
-
 type BuyerHandler struct {
 	sv service.BuyerService
+}
+
+func NewBuyerHandler(sv service.BuyerService) *BuyerHandler {
+	return &BuyerHandler{sv: sv}
 }
 
 func (h *BuyerHandler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var br models.RequestBuyer
-	err := request.JSON(r, &br)
-	if err != nil {
-		switch {
-		case errors.Is(err, request.ErrRequestContentTypeNotJSON):
-			response.Error(w, http.StatusUnsupportedMediaType, err.Error())
-		case errors.Is(err, request.ErrRequestJSONInvalid):
-			response.Error(w, http.StatusBadRequest, err.Error())
-		default:
-			response.Error(w, http.StatusInternalServerError, err.Error())
-		}
+	if err := httputil.DecodeJSON(r, &br); err != nil {
+		response.Error(w, err)
 		return
 	}
 
-	err = validators.ValidateRequestBuyer(br)
-	if handleApiError(w, err) {
+	if err := validators.ValidateRequestBuyer(br); err != nil {
+		response.Error(w, convertServiceErrorToAppError(err))
 		return
 	}
 
 	b, err := h.sv.Create(ctx, br)
-	if handleApiError(w, err) {
+	if err != nil {
+		response.Error(w, convertServiceErrorToAppError(err))
 		return
 	}
 
@@ -56,35 +46,30 @@ func (h *BuyerHandler) Create(w http.ResponseWriter, r *http.Request) {
 func (h *BuyerHandler) Update(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
+	id, err := httputil.ParseIDParam(r, "id")
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid ID param.")
+		response.Error(w, err)
 		return
 	}
 
 	var br models.RequestBuyer
-	err = request.JSON(r, &br)
-	if err != nil {
-		switch {
-		case errors.Is(err, request.ErrRequestContentTypeNotJSON):
-			response.Error(w, http.StatusUnsupportedMediaType, err.Error())
-		case errors.Is(err, request.ErrRequestJSONInvalid):
-			response.Error(w, http.StatusBadRequest, err.Error())
-		default:
-			response.Error(w, http.StatusInternalServerError, err.Error())
-		}
+	if err := httputil.DecodeJSON(r, &br); err != nil {
+		response.Error(w, err)
 		return
 	}
 
-	// Validación PATCH puede partirse igual que seller si quieres más granularidad
-	err = validators.ValidateUpdateBuyer(br)
-	if handleApiError(w, err) {
+	if err := validators.ValidateUpdateBuyer(br); err != nil {
+		response.Error(w, convertServiceErrorToAppError(err))
+		return
+	}
+	if err := validators.ValidateBuyerPatchNotEmpty(br); err != nil {
+		response.Error(w, convertServiceErrorToAppError(err))
 		return
 	}
 
 	updated, err := h.sv.Update(ctx, id, br)
-	if handleApiError(w, err) {
+	if err != nil {
+		response.Error(w, convertServiceErrorToAppError(err))
 		return
 	}
 
@@ -94,15 +79,12 @@ func (h *BuyerHandler) Update(w http.ResponseWriter, r *http.Request) {
 func (h *BuyerHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid ID param.")
+	id, err := httputil.ParseIDParam(r, "id")
+	if handleError(w, err) {
 		return
 	}
 
-	err = h.sv.Delete(ctx, id)
-	if handleApiError(w, err) {
+	if err := h.sv.Delete(ctx, id); handleError(w, err) {
 		return
 	}
 
@@ -112,28 +94,72 @@ func (h *BuyerHandler) Delete(w http.ResponseWriter, r *http.Request) {
 func (h *BuyerHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	bs, err := h.sv.FindAll(ctx)
-	if handleApiError(w, err) {
+	result, err := h.sv.FindAll(ctx)
+	if handleError(w, err) {
 		return
 	}
 
-	response.JSON(w, http.StatusOK, bs)
+	response.JSON(w, http.StatusOK, result)
 }
 
 func (h *BuyerHandler) FindById(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
+	id, err := httputil.ParseIDParam(r, "id")
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid ID param.")
+		response.Error(w, err)
 		return
 	}
 
 	b, err := h.sv.FindById(ctx, id)
-	if handleApiError(w, err) {
+	if err != nil {
+		response.Error(w, convertServiceErrorToAppError(err))
 		return
 	}
 
 	response.JSON(w, http.StatusOK, b)
+}
+
+// --- Utilidades ---
+
+func handleError(w http.ResponseWriter, err error) bool {
+	if err != nil {
+		response.Error(w, convertServiceErrorToAppError(err))
+		return true
+	}
+	return false
+}
+
+func convertServiceErrorToAppError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	switch e := err.(type) {
+	case *apperrors.AppError:
+		return e
+	case *api.ServiceError:
+		return apperrors.NewAppError(mapServiceErrorCode(e.Code), e.Message)
+	default:
+		return apperrors.Wrap(err, "internal server error")
+	}
+}
+
+func mapServiceErrorCode(code int) string {
+	switch code {
+	case http.StatusBadRequest:
+		return apperrors.CodeBadRequest
+	case http.StatusUnauthorized:
+		return apperrors.CodeUnauthorized
+	case http.StatusForbidden:
+		return apperrors.CodeForbidden
+	case http.StatusNotFound:
+		return apperrors.CodeNotFound
+	case http.StatusConflict:
+		return apperrors.CodeConflict
+	case http.StatusUnprocessableEntity:
+		return apperrors.CodeValidationError
+	default:
+		return apperrors.CodeBadRequest
+	}
 }
