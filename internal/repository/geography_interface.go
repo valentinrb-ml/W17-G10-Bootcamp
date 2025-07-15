@@ -13,7 +13,7 @@ type GeographyRepository interface {
 	CreateProvince(ctx context.Context, exec Executor, p models.Province) (*models.Province, error)
 	FindProvinceByName(ctx context.Context, exec Executor, name string, countryId int) (*models.Province, error)
 	CreateLocality(ctx context.Context, exec Executor, l models.Locality) (*models.Locality, error)
-	FindLocalityById(ctx context.Context, exec Executor, id int) (*models.Locality, error)
+	FindLocalityById(ctx context.Context, exec Executor, id string) (*models.Locality, error)
 
 	BeginTx(ctx context.Context) (*sql.Tx, error)
 	CommitTx(tx *sql.Tx) error

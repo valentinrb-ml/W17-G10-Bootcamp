@@ -86,7 +86,7 @@ func (r *geographyRepository) CreateLocality(ctx context.Context, exec Executor,
 	return &l, nil
 }
 
-func (r *geographyRepository) FindLocalityById(ctx context.Context, exec Executor, id int) (*models.Locality, error) {
+func (r *geographyRepository) FindLocalityById(ctx context.Context, exec Executor, id string) (*models.Locality, error) {
 	var locality models.Locality
 	err := exec.QueryRowContext(ctx, queryLocalityFindById, id).Scan(&locality.Id, &locality.Name, &locality.ProvinceId)
 	if err != nil {

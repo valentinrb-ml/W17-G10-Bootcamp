@@ -81,7 +81,7 @@ func (s *geographyService) handleProvince(ctx context.Context, tx *sql.Tx, provi
 	return province, nil
 }
 
-func (s *geographyService) handleLocality(ctx context.Context, tx *sql.Tx, localityId int, localityName string, provinceId int) (*models.Locality, error) {
+func (s *geographyService) handleLocality(ctx context.Context, tx *sql.Tx, localityId string, localityName string, provinceId int) (*models.Locality, error) {
 	_, err := s.rp.FindLocalityById(ctx, tx, localityId)
 
 	if err == nil {
