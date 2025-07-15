@@ -7,6 +7,8 @@ import (
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/inbound_order"
 )
 
+// Validates required fields of an InboundOrder for the Create operation.
+// Returns a 422 VALIDATION_ERROR if any required field is missing or invalid.
 func ValidateInboundOrder(o *models.InboundOrder) error {
 	if o == nil {
 		return apperrors.NewAppError(apperrors.CodeValidationError, "inbound order cannot be nil")
