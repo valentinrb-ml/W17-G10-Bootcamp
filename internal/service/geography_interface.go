@@ -10,6 +10,7 @@ import (
 type GeographyService interface {
 	Create(ctx context.Context, gr models.RequestGeography) (*models.ResponseGeography, error)
 	CountSellersByLocality(ctx context.Context, id string) (*models.ResponseLocalitySellers, error)
+	CountSellersGroupedByLocality(ctx context.Context) ([]models.ResponseLocalitySellers, error)
 }
 
 type geographyService struct {

@@ -20,6 +20,9 @@ const (
 								LEFT JOIN sellers s ON l.id = s.locality_id
 								WHERE l.id = ?
 								GROUP BY l.id, l.name`
+	queryAllLocalitiesWithSellers = `SELECT l.id, l.name, COUNT(s.id) FROM localities l
+									 LEFT JOIN sellers s ON l.id = s.locality_id
+									 GROUP BY l.id, l.name`
 )
 
 func (r *geographyRepository) CreateCountry(ctx context.Context, exec Executor, c models.Country) (*models.Country, error) {
@@ -113,4 +116,26 @@ func (r *geographyRepository) CountSellersByLocality(ctx context.Context, id str
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the locality sellers count.")
 	}
 	return &resp, nil
+}
+
+func (r *geographyRepository) CountSellersGroupedByLocality(ctx context.Context) ([]models.ResponseLocalitySellers, error) {
+	rows, err := r.mysql.QueryContext(ctx, queryAllLocalitiesWithSellers)
+	if err != nil {
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the sellers count by locality.")
+	}
+	defer rows.Close()
+
+	var results []models.ResponseLocalitySellers
+	for rows.Next() {
+		var resp models.ResponseLocalitySellers
+		if err := rows.Scan(&resp.LocalityId, &resp.LocalityName, &resp.SellersCount); err != nil {
+			return nil, apperrors.NewAppError(apperrors.CodeInternal, "Failed to scan locality sellers count.")
+		}
+		results = append(results, resp)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An error occurred while iterating over the localities.")
+	}
+
+	return results, nil
 }

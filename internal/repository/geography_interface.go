@@ -15,6 +15,7 @@ type GeographyRepository interface {
 	CreateLocality(ctx context.Context, exec Executor, l models.Locality) (*models.Locality, error)
 	FindLocalityById(ctx context.Context, exec Executor, id string) (*models.Locality, error)
 	CountSellersByLocality(ctx context.Context, id string) (*models.ResponseLocalitySellers, error)
+	CountSellersGroupedByLocality(ctx context.Context) ([]models.ResponseLocalitySellers, error)
 
 	BeginTx(ctx context.Context) (*sql.Tx, error)
 	CommitTx(tx *sql.Tx) error

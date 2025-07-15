@@ -49,6 +49,10 @@ func (s *geographyService) Create(ctx context.Context, gr models.RequestGeograph
 	}, nil
 }
 
+func (s *geographyService) CountSellersGroupedByLocality(ctx context.Context) ([]models.ResponseLocalitySellers, error) {
+	return s.rp.CountSellersGroupedByLocality(ctx)
+}
+
 func (s *geographyService) CountSellersByLocality(ctx context.Context, id string) (*models.ResponseLocalitySellers, error) {
 	resp, err := s.rp.CountSellersByLocality(ctx, id)
 	if err != nil {

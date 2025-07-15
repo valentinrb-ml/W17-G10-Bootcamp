@@ -5,7 +5,6 @@ import (
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/geography"
@@ -47,10 +46,14 @@ func (h *GeographyHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h *GeographyHandler) CountSellersByLocality(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
 	id := r.URL.Query().Get("id")
+
 	if id == "" {
-		response.Error(w, apperrors.NewAppError(apperrors.CodeBadRequest, "id parameter is required"))
+		resp, err := h.sv.CountSellersGroupedByLocality(ctx)
+		if handleApiError(w, err) {
+			return
+		}
+		response.JSON(w, http.StatusOK, resp)
 		return
 	}
 
