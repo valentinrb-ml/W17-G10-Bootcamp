@@ -6,7 +6,7 @@ import (
 )
 
 func ValidateCarryCreateRequest(req carry.CarryRequest) error {
-	if req.Address == "" || req.Telephone == "" || req.Cid == "" || req.CompanyName == "" || req.LocalityId <= 0 {
+	if req.Address == "" || req.Telephone == "" || req.Cid == "" || req.CompanyName == "" || req.LocalityId == "" {
 		return apperrors.NewAppError(apperrors.CodeValidationError, "invalid request body")
 	}
 

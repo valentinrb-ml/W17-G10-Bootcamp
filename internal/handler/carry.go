@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
@@ -46,14 +45,9 @@ func (h *CarryHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h *CarryHandler) ReportCarries(w http.ResponseWriter, r *http.Request) {
 	idParam := r.URL.Query().Get("id")
-	var localityID *int = nil
+	var localityID *string = nil
 	if idParam != "" {
-		if id, err := strconv.Atoi(idParam); err == nil {
-			localityID = &id
-		} else {
-			http.Error(w, "Invalid 'id' param", http.StatusBadRequest)
-			return
-		}
+		localityID = &idParam
 	}
 
 	result, err := h.sv.GetCarriesReport(r.Context(), localityID)

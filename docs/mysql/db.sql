@@ -6,18 +6,18 @@ USE db_warehouse;
 -- Tabla: countries
 CREATE TABLE countries (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    country_name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL
 );
 -- Tabla: provinces
 CREATE TABLE provinces (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    province_name VARCHAR(255) NOT NULL,
-    id_country_fk INT NOT NULL
+    name VARCHAR(255) NOT NULL,
+    country_id INT NOT NULL
 );
 -- Tabla: localities
 CREATE TABLE localities (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    locality_name VARCHAR(255) NOT NULL,
+    id VARCHAR(255) UNIQUE PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
     province_id INT NOT NULL
 );
 -- Tabla: sellers
@@ -27,7 +27,7 @@ CREATE TABLE sellers (
     company_name VARCHAR(255) NOT NULL,
     address VARCHAR(255),
     telephone VARCHAR(255),
-    locality_id INT NOT NULL
+    locality_id VARCHAR(255) NOT NULL
 );
 -- Tabla: carriers
 CREATE TABLE carriers (
@@ -36,7 +36,7 @@ CREATE TABLE carriers (
     company_name VARCHAR(255) NOT NULL,
     address VARCHAR(255),
     telephone VARCHAR(255),
-    locality_id INT NOT NULL
+    locality_id VARCHAR(255) NOT NULL
 );
 -- Tabla: buyers
 CREATE TABLE buyers (
@@ -53,7 +53,7 @@ CREATE TABLE warehouse (
     warehouse_code VARCHAR(255) NOT NULL,
     minimum_capacity INT NOT NULL,
     minimum_temperature DECIMAL(19,2) NOT NULL,
-    locality_id INT NOT NULL
+    locality_id VARCHAR(255) NOT NULL
 );
 -- Tabla: employees
 CREATE TABLE employees (
@@ -86,7 +86,7 @@ CREATE TABLE products (
 -- Tabla: sections
 CREATE TABLE sections (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    section_number VARCHAR(255) NOT NULL,
+    section_number INT NOT NULL UNIQUE,
     current_capacity INT,
     current_temperature DECIMAL(19,2),
     maximum_capacity INT,

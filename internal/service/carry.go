@@ -14,7 +14,7 @@ func (s *CarryDefault) Create(ctx context.Context, c carry.Carry) (*carry.Carry,
 	return ca, nil
 }
 
-func (s *CarryDefault) GetCarriesReport(ctx context.Context, localityID *int) (interface{}, error) {
+func (s *CarryDefault) GetCarriesReport(ctx context.Context, localityID *string) (interface{}, error) {
 	if localityID == nil {
 		return s.rp.GetCarriesCountByAllLocalities(ctx)
 	}

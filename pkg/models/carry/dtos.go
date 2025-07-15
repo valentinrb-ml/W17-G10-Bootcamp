@@ -6,7 +6,7 @@ type CarryRequest struct {
 	CompanyName string `json:"company_name"`
 	Address     string `json:"address,omitempty"`
 	Telephone   string `json:"telephone,omitempty"`
-	LocalityId  int    `json:"locality_id"`
+	LocalityId  string    `json:"locality_id"`
 }
 
 type CarryDoc struct {
@@ -15,11 +15,11 @@ type CarryDoc struct {
 	CompanyName string `json:"company_name"`
 	Address     string `json:"address"`
 	Telephone   string `json:"telephone"`
-	LocalityId  int    `json:"locality_id"`
+	LocalityId  string    `json:"locality_id"`
 }
 
 type CarriesReport struct {
-	LocalityID   int `json:"locality_id"`
+	LocalityID   string `json:"locality_id"`
 	LocalityName string `json:"locality_name"`
 	CarriesCount int `json:"carries_count"`
 }

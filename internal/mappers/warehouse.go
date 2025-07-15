@@ -51,4 +51,7 @@ func ApplyWarehousePatch(existing *warehouse.Warehouse, patch warehouse.Warehous
 	if patch.MinimumTemperature != nil {
 		existing.MinimumTemperature = float64(*patch.MinimumTemperature)
 	}
+	if patch.LocalityId != nil {
+		existing.LocalityId = *patch.LocalityId
+	}
 }

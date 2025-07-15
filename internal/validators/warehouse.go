@@ -8,7 +8,7 @@ import (
 )
 
 func ValidateWarehouseCreateRequest(req warehouse.WarehouseRequest) error {
-	if req.Address == "" || req.Telephone == "" || req.WarehouseCode == "" || req.MinimumCapacity <= 0 || req.MinimumTemperature == nil {
+	if req.Address == "" || req.Telephone == "" || req.WarehouseCode == "" || req.MinimumCapacity <= 0 || req.MinimumTemperature == nil || req.LocalityId == "" {
 		return apperrors.NewAppError(apperrors.CodeValidationError, "invalid request body")
 	}
 
