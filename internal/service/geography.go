@@ -63,7 +63,7 @@ func (s *geographyService) CountSellersByLocality(ctx context.Context, id string
 }
 
 func (s *geographyService) handleCountry(ctx context.Context, tx *sql.Tx, countryName string) (*models.Country, error) {
-	country, err := s.rp.FindCountryByName(ctx, tx, countryName)
+	country, err := s.rp.FindCountryByName(ctx, countryName)
 	if err != nil {
 		if apperrors.IsAppError(err, apperrors.CodeNotFound) {
 			newCountry := models.Country{Name: countryName}
@@ -79,7 +79,7 @@ func (s *geographyService) handleCountry(ctx context.Context, tx *sql.Tx, countr
 }
 
 func (s *geographyService) handleProvince(ctx context.Context, tx *sql.Tx, provinceName string, countryId int) (*models.Province, error) {
-	province, err := s.rp.FindProvinceByName(ctx, tx, provinceName, countryId)
+	province, err := s.rp.FindProvinceByName(ctx, provinceName, countryId)
 	if err != nil {
 		if apperrors.IsAppError(err, apperrors.CodeNotFound) {
 			newProvince := models.Province{Name: provinceName, CountryId: countryId}
@@ -95,7 +95,7 @@ func (s *geographyService) handleProvince(ctx context.Context, tx *sql.Tx, provi
 }
 
 func (s *geographyService) handleLocality(ctx context.Context, tx *sql.Tx, localityId string, localityName string, provinceId int) (*models.Locality, error) {
-	_, err := s.rp.FindLocalityById(ctx, tx, localityId)
+	_, err := s.rp.FindLocalityById(ctx, localityId)
 
 	if err == nil {
 		return nil, apperrors.NewAppError(apperrors.CodeConflict, "locality already exists")

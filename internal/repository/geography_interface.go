@@ -9,11 +9,11 @@ import (
 
 type GeographyRepository interface {
 	CreateCountry(ctx context.Context, exec Executor, c models.Country) (*models.Country, error)
-	FindCountryByName(ctx context.Context, exec Executor, name string) (*models.Country, error)
+	FindCountryByName(ctx context.Context, name string) (*models.Country, error)
 	CreateProvince(ctx context.Context, exec Executor, p models.Province) (*models.Province, error)
-	FindProvinceByName(ctx context.Context, exec Executor, name string, countryId int) (*models.Province, error)
+	FindProvinceByName(ctx context.Context, name string, countryId int) (*models.Province, error)
 	CreateLocality(ctx context.Context, exec Executor, l models.Locality) (*models.Locality, error)
-	FindLocalityById(ctx context.Context, exec Executor, id string) (*models.Locality, error)
+	FindLocalityById(ctx context.Context, id string) (*models.Locality, error)
 	CountSellersByLocality(ctx context.Context, id string) (*models.ResponseLocalitySellers, error)
 	CountSellersGroupedByLocality(ctx context.Context) ([]models.ResponseLocalitySellers, error)
 

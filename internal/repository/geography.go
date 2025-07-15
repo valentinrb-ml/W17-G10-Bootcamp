@@ -40,9 +40,9 @@ func (r *geographyRepository) CreateCountry(ctx context.Context, exec Executor, 
 	return &c, nil
 }
 
-func (r *geographyRepository) FindCountryByName(ctx context.Context, exec Executor, name string) (*models.Country, error) {
+func (r *geographyRepository) FindCountryByName(ctx context.Context, name string) (*models.Country, error) {
 	var country models.Country
-	err := exec.QueryRowContext(ctx, queryCountryFindById, name).Scan(&country.Id, &country.Name)
+	err := r.mysql.QueryRowContext(ctx, queryCountryFindById, name).Scan(&country.Id, &country.Name)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "country not found")
@@ -67,9 +67,9 @@ func (r *geographyRepository) CreateProvince(ctx context.Context, exec Executor,
 	return &p, nil
 }
 
-func (r *geographyRepository) FindProvinceByName(ctx context.Context, exec Executor, name string, countryId int) (*models.Province, error) {
+func (r *geographyRepository) FindProvinceByName(ctx context.Context, name string, countryId int) (*models.Province, error) {
 	var province models.Province
-	err := exec.QueryRowContext(ctx, queryProvinceFindById, name, countryId).Scan(&province.Id, &province.Name, &province.CountryId)
+	err := r.mysql.QueryRowContext(ctx, queryProvinceFindById, name, countryId).Scan(&province.Id, &province.Name, &province.CountryId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "province not found")
@@ -93,9 +93,9 @@ func (r *geographyRepository) CreateLocality(ctx context.Context, exec Executor,
 	return &l, nil
 }
 
-func (r *geographyRepository) FindLocalityById(ctx context.Context, exec Executor, id string) (*models.Locality, error) {
+func (r *geographyRepository) FindLocalityById(ctx context.Context, id string) (*models.Locality, error) {
 	var locality models.Locality
-	err := exec.QueryRowContext(ctx, queryLocalityFindById, id).Scan(&locality.Id, &locality.Name, &locality.ProvinceId)
+	err := r.mysql.QueryRowContext(ctx, queryLocalityFindById, id).Scan(&locality.Id, &locality.Name, &locality.ProvinceId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "The locality you are looking for does not exist.")
