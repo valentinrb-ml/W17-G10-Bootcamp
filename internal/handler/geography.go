@@ -1,12 +1,11 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/request"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/geography"
 )
@@ -25,26 +24,20 @@ func (h *GeographyHandler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var rg models.RequestGeography
-	err := request.JSON(r, &rg)
-	if err != nil {
-		switch {
-		case errors.Is(err, request.ErrRequestContentTypeNotJSON):
-			response.Error(w, http.StatusUnsupportedMediaType, err.Error())
-		case errors.Is(err, request.ErrRequestJSONInvalid):
-			response.Error(w, http.StatusBadRequest, err.Error())
-		default:
-			response.Error(w, http.StatusInternalServerError, err.Error())
-		}
+	if err := httputil.DecodeJSON(r, &rg); err != nil {
+		response.Error(w, err)
 		return
 	}
 
-	err = validators.ValidateGeographyPost(rg)
-	if handleApiError(w, err) {
+	err := validators.ValidateGeographyPost(rg)
+	if err != nil {
+		response.Error(w, err)
 		return
 	}
 
 	s, err := h.sv.Create(ctx, rg)
-	if handleApiError(w, err) {
+	if err != nil {
+		response.Error(w, err)
 		return
 	}
 

@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
 
@@ -26,19 +26,14 @@ func (r *sellerRepository) Create(ctx context.Context, s models.Seller) (*models
 	)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
-			errDef := api.ServiceErrors[api.ErrConflict]
-			return nil, &api.ServiceError{
-				Code:         errDef.Code,
-				ResponseCode: errDef.ResponseCode,
-				Message:      "Could not create seller due to a data conflict. Please verify your input and try again.",
-			}
+			return nil, apperrors.NewAppError(apperrors.CodeConflict, "Could not create seller due to a data conflict. Please verify your input and try again.")
 		}
-		return nil, err
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while creating a seller: %s", err.Error()))
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return nil, err
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while creating a seller: %s", err.Error()))
 	}
 	s.Id = int(id)
 	return &s, nil
@@ -50,17 +45,14 @@ func (r *sellerRepository) Update(ctx context.Context, id int, s models.Seller) 
 		querySellerUpdate,
 		s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId, s.Id,
 	)
+
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
-			errDef := api.ServiceErrors[api.ErrConflict]
-			return &api.ServiceError{
-				Code:         errDef.Code,
-				ResponseCode: errDef.ResponseCode,
-				Message:      "Could not update seller due to a data conflict. Please verify your input and try again.",
-			}
+			return apperrors.NewAppError(apperrors.CodeConflict, "Could not update seller due to a data conflict. Please verify your input and try again.")
 		}
-		return err
+		return apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while updating the seller: %s", err.Error()))
 	}
+
 	return nil
 }
 
@@ -68,44 +60,26 @@ func (r *sellerRepository) Delete(ctx context.Context, id int) error {
 	result, err := r.mysql.ExecContext(ctx, querySellerDelete, id)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1451 {
-			errDef := api.ServiceErrors[api.ErrConflict]
-			return &api.ServiceError{
-				Code:         errDef.Code,
-				ResponseCode: errDef.ResponseCode,
-				Message:      "Cannot delete seller: there are products associated with this seller.",
-			}
+			return apperrors.NewAppError(apperrors.CodeConflict, "Cannot delete seller: there are products associated with this seller.")
 		}
-		errDef := api.ServiceErrors[api.ErrInternalServer]
-		return &api.ServiceError{
-			Code:         errDef.Code,
-			ResponseCode: errDef.ResponseCode,
-			Message:      fmt.Sprintf("An internal server error occurred while deleting the seller: %s", err.Error()),
-		}
+		return apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while deleting the seller: %s", err.Error()))
 	}
+
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		errDef := api.ServiceErrors[api.ErrInternalServer]
-		return &api.ServiceError{
-			Code:         errDef.Code,
-			ResponseCode: errDef.ResponseCode,
-			Message:      fmt.Sprintf("An internal server error occurred while deleting the seller: %s", err.Error()),
-		}
+		return apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while deleting the seller: %s", err.Error()))
 	}
 	if rowsAffected == 0 {
-		errDef := api.ServiceErrors[api.ErrNotFound]
-		return &api.ServiceError{
-			Code:         errDef.Code,
-			ResponseCode: errDef.ResponseCode,
-			Message:      "The seller you are trying to delete does not exist",
-		}
+		return apperrors.NewAppError(apperrors.CodeNotFound, "The seller you are trying to delete does not exist")
 	}
+
 	return nil
 }
 
 func (r *sellerRepository) FindAll(ctx context.Context) ([]models.Seller, error) {
 	rows, err := r.mysql.QueryContext(ctx, querySellerFindAll)
 	if err != nil {
-		return nil, err
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while finding all sellers: %s", err.Error()))
 	}
 	defer rows.Close()
 
@@ -114,13 +88,13 @@ func (r *sellerRepository) FindAll(ctx context.Context) ([]models.Seller, error)
 		var s models.Seller
 		err := rows.Scan(&s.Id, &s.Cid, &s.CompanyName, &s.Address, &s.Telephone)
 		if err != nil {
-			return nil, err
+			return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while finding all sellers: %s", err.Error()))
 		}
 		sellers = append(sellers, s)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while finding all sellers: %s", err.Error()))
 	}
 
 	return sellers, nil
@@ -132,19 +106,9 @@ func (r *sellerRepository) FindById(ctx context.Context, id int) (*models.Seller
 	err := row.Scan(&s.Id, &s.Cid, &s.CompanyName, &s.Address, &s.Telephone)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			err := api.ServiceErrors[api.ErrNotFound]
-			return nil, &api.ServiceError{
-				Code:         err.Code,
-				ResponseCode: err.ResponseCode,
-				Message:      "The seller you are looking for does not exist.",
-			}
+			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "The seller you are looking for does not exist.")
 		}
-		err := api.ServiceErrors[api.ErrInternalServer]
-		return nil, &api.ServiceError{
-			Code:         err.Code,
-			ResponseCode: err.ResponseCode,
-			Message:      "An internal server error occurred while retrieving the seller.",
-		}
+		return nil, apperrors.NewAppError(apperrors.CodeNotFound, "An internal server error occurred while retrieving the seller.")
 	}
 
 	return &s, nil
