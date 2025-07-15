@@ -3,15 +3,16 @@ package service
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/geography"
 )
 
 func (s *geographyService) Create(ctx context.Context, gr models.RequestGeography) (*models.ResponseGeography, error) {
 	tx, err := s.rp.BeginTx(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("error starting transaction: %w", err)
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "failed to start transaction").
+			WithDetail("error", err.Error())
 	}
 
 	defer func() {
@@ -20,47 +21,24 @@ func (s *geographyService) Create(ctx context.Context, gr models.RequestGeograph
 		}
 	}()
 
-	country, err := s.rp.FindCountryByName(ctx, tx, *gr.CountryName)
+	country, err := s.handleCountry(ctx, tx, *gr.CountryName)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			newCountry := models.Country{Name: *gr.CountryName}
-			country, err = s.rp.CreateCountry(ctx, tx, newCountry)
-			if err != nil {
-				return nil, fmt.Errorf("error creating country: %w", err)
-			}
-		} else {
-			return nil, fmt.Errorf("error finding country: %w", err)
-		}
+		return nil, err
 	}
 
-	province, err := s.rp.FindProvinceByName(ctx, tx, *gr.ProvinceName, country.Id)
+	province, err := s.handleProvince(ctx, tx, *gr.ProvinceName, country.Id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			newProvince := models.Province{Name: *gr.ProvinceName, CountryId: country.Id}
-			province, err = s.rp.CreateProvince(ctx, tx, newProvince)
-			if err != nil {
-				return nil, fmt.Errorf("error creating province: %w", err)
-			}
-		} else {
-			return nil, fmt.Errorf("error finding province: %w", err)
-		}
+		return nil, err
 	}
 
-	locality, err := s.rp.FindLocalityByName(ctx, tx, *gr.LocalityName, province.Id)
+	locality, err := s.handleLocality(ctx, tx, *gr.Id, *gr.LocalityName, province.Id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			newLocality := models.Locality{Name: *gr.LocalityName, ProvinceId: province.Id}
-			locality, err = s.rp.CreateLocality(ctx, tx, newLocality)
-			if err != nil {
-				return nil, fmt.Errorf("error creating locality: %w", err)
-			}
-		} else {
-			return nil, fmt.Errorf("error finding locality: %w", err)
-		}
+		return nil, err
 	}
 
 	if err = s.rp.CommitTx(tx); err != nil {
-		return nil, fmt.Errorf("error committing transaction: %w", err)
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "failed to commit transaction").
+			WithDetail("error", err.Error())
 	}
 
 	return &models.ResponseGeography{
@@ -69,4 +47,55 @@ func (s *geographyService) Create(ctx context.Context, gr models.RequestGeograph
 		ProvinceName: province.Name,
 		CountryName:  country.Name,
 	}, nil
+}
+
+func (s *geographyService) handleCountry(ctx context.Context, tx *sql.Tx, countryName string) (*models.Country, error) {
+	country, err := s.rp.FindCountryByName(ctx, tx, countryName)
+	if err != nil {
+		if apperrors.IsAppError(err, apperrors.CodeNotFound) {
+			newCountry := models.Country{Name: countryName}
+			country, err = s.rp.CreateCountry(ctx, tx, newCountry)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
+	}
+	return country, nil
+}
+
+func (s *geographyService) handleProvince(ctx context.Context, tx *sql.Tx, provinceName string, countryId int) (*models.Province, error) {
+	province, err := s.rp.FindProvinceByName(ctx, tx, provinceName, countryId)
+	if err != nil {
+		if apperrors.IsAppError(err, apperrors.CodeNotFound) {
+			newProvince := models.Province{Name: provinceName, CountryId: countryId}
+			province, err = s.rp.CreateProvince(ctx, tx, newProvince)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
+	}
+	return province, nil
+}
+
+func (s *geographyService) handleLocality(ctx context.Context, tx *sql.Tx, localityId int, localityName string, provinceId int) (*models.Locality, error) {
+	_, err := s.rp.FindLocalityById(ctx, tx, localityId)
+
+	if err == nil {
+		return nil, apperrors.NewAppError(apperrors.CodeConflict, "locality already exists")
+	}
+
+	if apperrors.IsAppError(err, apperrors.CodeNotFound) {
+		newLocality := models.Locality{Id: localityId, Name: localityName, ProvinceId: provinceId}
+		locality, err := s.rp.CreateLocality(ctx, tx, newLocality)
+		if err != nil {
+			return nil, err
+		}
+		return locality, nil
+	}
+
+	return nil, err
 }

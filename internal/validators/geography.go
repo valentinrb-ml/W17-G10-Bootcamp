@@ -8,6 +8,10 @@ import (
 func ValidateGeographyPost(rg models.RequestGeography) error {
 	err := apperrors.NewAppError(apperrors.CodeValidationError, "")
 
+	if rg.Id == nil || *rg.Id <= 0 {
+		err.Message = "Id (Postal Code) is required and cannot be empty."
+		return err
+	}
 	if rg.CountryName == nil || *rg.CountryName == "" {
 		err.Message = "Country Name is required and cannot be empty."
 		return err
