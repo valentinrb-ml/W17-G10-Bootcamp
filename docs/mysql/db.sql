@@ -156,7 +156,7 @@ CREATE TABLE order_details (
 -- Provincias -> countries
 ALTER TABLE provinces
 ADD CONSTRAINT fk_provinces_country
-FOREIGN KEY(id_country_fk) REFERENCES countries(id);
+FOREIGN KEY(country_id) REFERENCES countries(id);
 -- Localities -> provinces
 ALTER TABLE localities
 ADD CONSTRAINT fk_localities_province
