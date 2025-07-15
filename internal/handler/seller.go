@@ -32,11 +32,14 @@ func (h *SellerHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, request.ErrRequestContentTypeNotJSON):
-			response.Error(w, http.StatusUnsupportedMediaType, err.Error())
+			// response.Error(w, http.StatusUnsupportedMediaType, err.Error())
+			response.Error(w, err)
 		case errors.Is(err, request.ErrRequestJSONInvalid):
-			response.Error(w, http.StatusBadRequest, err.Error())
+			// response.Error(w, http.StatusBadRequest, err.Error())
+			response.Error(w, err)
 		default:
-			response.Error(w, http.StatusInternalServerError, err.Error())
+			// response.Error(w, http.StatusInternalServerError, err.Error())
+			response.Error(w, err)
 		}
 		return
 	}
@@ -60,7 +63,8 @@ func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid ID param.")
+		// response.Error(w, http.StatusBadRequest, "Invalid ID param.")
+		response.Error(w, err)
 		return
 	}
 
@@ -69,11 +73,14 @@ func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, request.ErrRequestContentTypeNotJSON):
-			response.Error(w, http.StatusUnsupportedMediaType, err.Error())
+			// response.Error(w, http.StatusUnsupportedMediaType, err.Error())
+			response.Error(w, err)
 		case errors.Is(err, request.ErrRequestJSONInvalid):
-			response.Error(w, http.StatusBadRequest, err.Error())
+			// response.Error(w, http.StatusBadRequest, err.Error())
+			response.Error(w, err)
 		default:
-			response.Error(w, http.StatusInternalServerError, err.Error())
+			// response.Error(w, http.StatusInternalServerError, err.Error())
+			response.Error(w, err)
 		}
 		return
 	}
@@ -102,7 +109,8 @@ func (h *SellerHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid ID param.")
+		// response.Error(w, http.StatusBadRequest, "Invalid ID param.")
+		response.Error(w, err)
 		return
 	}
 
@@ -131,7 +139,8 @@ func (h *SellerHandler) FindById(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid ID param.")
+		// response.Error(w, http.StatusBadRequest, "Invalid ID param.")
+		response.Error(w, err)
 		return
 	}
 
@@ -148,9 +157,11 @@ func handleApiError(w http.ResponseWriter, err error) bool {
 		return false
 	}
 	if errorResp, ok := err.(*api.ServiceError); ok {
-		response.Error(w, errorResp.ResponseCode, errorResp.Message)
+		// response.Error(w, errorResp.ResponseCode, errorResp.Message)
+		response.Error(w, errorResp)
 	} else {
-		response.Error(w, http.StatusInternalServerError, err.Error())
+		// response.Error(w, http.StatusInternalServerError, err.Error())
+		response.Error(w, err)
 	}
 
 	return true

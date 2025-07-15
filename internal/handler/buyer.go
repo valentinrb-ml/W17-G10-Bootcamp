@@ -29,24 +29,29 @@ func (h *BuyerHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, request.ErrRequestContentTypeNotJSON):
-			response.Error(w, http.StatusUnsupportedMediaType, err.Error())
+			// response.Error(w, http.StatusUnsupportedMediaType, err.Error())
+			response.Error(w, err)
 		case errors.Is(err, request.ErrRequestJSONInvalid):
-			response.Error(w, http.StatusBadRequest, err.Error())
+			// response.Error(w, http.StatusBadRequest, err.Error())
+			response.Error(w, err)
 		default:
-			response.Error(w, http.StatusInternalServerError, err.Error())
+			// response.Error(w, http.StatusInternalServerError, err.Error())
+			response.Error(w, err)
 		}
 		return
 	}
 
 	er := validators.ValidateRequestBuyer(br)
 	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+		// response.Error(w, er.ResponseCode, er.Message)
+		response.Error(w, er)
 		return
 	}
 
 	b, er := h.sv.Create(br)
 	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+		// response.Error(w, er.ResponseCode, er.Message)
+		response.Error(w, er)
 		return
 	}
 
@@ -57,7 +62,8 @@ func (h *BuyerHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid ID parameter")
+		// response.Error(w, http.StatusBadRequest, "Invalid ID parameter")
+		response.Error(w, err)
 		return
 	}
 
@@ -66,29 +72,35 @@ func (h *BuyerHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, request.ErrRequestContentTypeNotJSON):
-			response.Error(w, http.StatusUnsupportedMediaType, err.Error())
+			// response.Error(w, http.StatusUnsupportedMediaType, err.Error())
+			response.Error(w, err)
 		case errors.Is(err, request.ErrRequestJSONInvalid):
-			response.Error(w, http.StatusBadRequest, err.Error())
+			// response.Error(w, http.StatusBadRequest, err.Error())
+			response.Error(w, err)
 		default:
-			response.Error(w, http.StatusInternalServerError, err.Error())
+			// response.Error(w, http.StatusInternalServerError, err.Error())
+			response.Error(w, err)
 		}
 		return
 	}
 
 	if er := validators.ValidateUpdateBuyer(br); er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+		// response.Error(w, er.ResponseCode, er.Message)
+		response.Error(w, er)
 		return
 	}
 
 	_, er := h.sv.FindById(id)
 	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+		// response.Error(w, er.ResponseCode, er.Message)
+		response.Error(w, er)
 		return
 	}
 
 	updated, er := h.sv.Update(id, br)
 	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+		// response.Error(w, er.ResponseCode, er.Message)
+		response.Error(w, er)
 		return
 	}
 
@@ -100,13 +112,15 @@ func (h *BuyerHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid ID parameter")
+		// response.Error(w, http.StatusBadRequest, "Invalid ID parameter")
+		response.Error(w, err)
 		return
 	}
 
 	er := h.sv.Delete(id)
 	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+		// response.Error(w, er.ResponseCode, er.Message)
+		response.Error(w, er)
 		return
 	}
 
@@ -123,13 +137,15 @@ func (h *BuyerHandler) FindById(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid ID parameter")
+		// response.Error(w, http.StatusBadRequest, "Invalid ID parameter")
+		response.Error(w, err)
 		return
 	}
 
 	b, er := h.sv.FindById(id)
 	if er != nil {
-		response.Error(w, er.ResponseCode, er.Message)
+		// response.Error(w, er.ResponseCode, er.Message)
+		response.Error(w, er)
 		return
 	}
 

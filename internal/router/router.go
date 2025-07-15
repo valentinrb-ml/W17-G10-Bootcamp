@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 )
 
 func NewAPIRouter(
@@ -17,6 +18,9 @@ func NewAPIRouter(
 ) *chi.Mux {
 	root := chi.NewRouter()
 	root.Use(middleware.Logger, middleware.Recoverer)
+
+	root.MethodNotAllowed(httputil.MethodNotAllowedHandler)
+	root.NotFound(httputil.NotFoundHandler)
 
 	root.Route("/api/v1", func(api chi.Router) {
 		MountProductRoutes(api, hdProduct)
