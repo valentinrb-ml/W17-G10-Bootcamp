@@ -17,3 +17,9 @@ type CarryDoc struct {
 	Telephone   string `json:"telephone"`
 	LocalityId  int    `json:"locality_id"`
 }
+
+type CarriesReport struct {
+	LocalityID   int `json:"locality_id"`
+	LocalityName string `json:"locality_name"`
+	CarriesCount int `json:"carries_count"`
+}

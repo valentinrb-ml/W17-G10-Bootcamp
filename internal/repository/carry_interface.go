@@ -9,6 +9,8 @@ import (
 
 type CarryRepository interface {
 	Create(ctx context.Context, c carry.Carry) (*carry.Carry, error)
+	GetCarriesCountByAllLocalities(ctx context.Context) ([]carry.CarriesReport, error)
+	GetCarriesCountByLocalityID(ctx context.Context, localityID int) (*carry.CarriesReport, error)
 }
 
 type CarryMySQL struct {

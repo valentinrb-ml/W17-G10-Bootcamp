@@ -30,6 +30,7 @@ func NewAPIRouter(
 		MountSellerRoutes(api, hdSeller)
 		MountEmployeeRoutes(api, hdEmployee)
 		MountCarryRoutes(api, hdCarry)
+		MountCarryReportRoutes(api, hdCarry)
 	})
 
 	return root

@@ -9,6 +9,7 @@ import (
 
 type CarryService interface {
 	Create(ctx context.Context, c carry.Carry) (*carry.Carry, error)
+	GetCarriesReport(ctx context.Context, localityID *int) (interface{}, error)
 }
 
 type CarryDefault struct {
