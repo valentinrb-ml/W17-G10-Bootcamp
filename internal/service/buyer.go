@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"slices"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
@@ -80,9 +82,25 @@ func (sv *buyerService) FindAll(ctx context.Context) ([]models.ResponseBuyer, er
 func (sv *buyerService) FindById(ctx context.Context, id int) (*models.ResponseBuyer, error) {
 	b, err := sv.rp.FindById(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, convertToServiceError(err)
 	}
 
 	resp := mappers.ToResponseBuyer(b)
 	return &resp, nil
+}
+func convertToServiceError(err error) *api.ServiceError {
+	if err == nil {
+		return nil
+	}
+
+	var svcErr *api.ServiceError
+	if errors.As(err, &svcErr) {
+		return svcErr
+	}
+
+	return &api.ServiceError{
+		Code:         500,
+		ResponseCode: http.StatusInternalServerError,
+		Message:      err.Error(),
+	}
 }
