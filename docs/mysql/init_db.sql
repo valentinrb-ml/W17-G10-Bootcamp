@@ -31,11 +31,11 @@ INSERT INTO carriers (id, cid, company_name, address, telephone, locality_id) VA
                                                                                   (8, 'C008', 'Uy Delivery', 'Av U', '12-904', 8),
                                                                                   (9, 'C009', 'PY Truck', 'Ruta PY', '37-105', 9),
                                                                                   (10, 'C010', 'Cargas Bolívar', 'Av Bolivia', '53-207', 10);
-INSERT INTO buyers (id, id_card_number, first_name, last_name) VALUES
-                                                                   (1, '4001', 'Ana', 'Pérez'), (2, '4002', 'Bernardo', 'Gómez'), (3, '4003', 'Camila', 'Ríos'),
-                                                                   (4, '4004', 'David', 'Silva'), (5, '4005', 'Esteban', 'Arce'), (6, '4006', 'Felipe', 'Sosa'),
-                                                                   (7, '4007', 'Gabriela', 'Campos'), (8, '4008', 'Hugo', 'Castro'), (9, '4009', 'Irene', 'Fernández'),
-                                                                   (10, '4010', 'Joaquín', 'de la Vega');
+INSERT INTO buyers (id_card_number, first_name, last_name) VALUES
+                                                                   ('4001', 'Ana', 'Pérez'), ('4002', 'Bernardo', 'Gómez'), ('4003', 'Camila', 'Ríos'),
+                                                                   ('4004', 'David', 'Silva'), ('4005', 'Esteban', 'Arce'), ('4006', 'Felipe', 'Sosa'),
+                                                                   ('4007', 'Gabriela', 'Campos'), ('4008', 'Hugo', 'Castro'), ('4009', 'Irene', 'Fernández'),
+                                                                   ('4010', 'Joaquín', 'de la Vega');
 INSERT INTO warehouse (id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id) VALUES
                                                                                 (1, 'Depósito Sur', '155-201', 'WS-001', 100, -10.5, 1),
                                                                                 (2, 'Bodega Central', '155-202', 'WS-002', 150, -8.0, 2),
