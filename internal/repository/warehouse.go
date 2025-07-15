@@ -14,8 +14,8 @@ import (
 
 const (
 	queryWarehouseCreate   = `INSERT INTO warehouse (warehouse_code, address, minimum_temperature, minimum_capacity, telephone, locality_id) VALUES (?, ?, ?, ?, ?, ?)`
-	queryWarehouseFindAll  = `SELECT id, warehouse_code, address, minimum_temperature, minimum_capacity, telephone FROM warehouse`
-	queryWarehouseFindById = `SELECT id, warehouse_code, address, minimum_temperature, minimum_capacity, telephone FROM warehouse WHERE id = ?`
+	queryWarehouseFindAll  = `SELECT id, warehouse_code, address, minimum_temperature, minimum_capacity, telephone, locality_id FROM warehouse`
+	queryWarehouseFindById = `SELECT id, warehouse_code, address, minimum_temperature, minimum_capacity, telephone, locality_id FROM warehouse WHERE id = ?`
 	queryWarehouseUpdate   = `UPDATE warehouse SET warehouse_code = ?, address = ?, minimum_temperature = ?, minimum_capacity = ?, telephone = ? WHERE id = ?`
 	queryWarehouseDelete   = `DELETE FROM warehouse WHERE id = ?`
 )
@@ -49,7 +49,7 @@ func (r *WarehouseMySQL) FindAll(ctx context.Context) ([]warehouse.Warehouse, er
 	var whs []warehouse.Warehouse
 	for rows.Next() {
 		var wh warehouse.Warehouse
-		err := rows.Scan(&wh.Id, &wh.WarehouseCode, &wh.Address, &wh.MinimumTemperature, &wh.MinimumCapacity, &wh.Telephone)
+		err := rows.Scan(&wh.Id, &wh.WarehouseCode, &wh.Address, &wh.MinimumTemperature, &wh.MinimumCapacity, &wh.Telephone, &wh.LocalityId)
 		if err != nil {
 			continue
 		}
@@ -65,7 +65,7 @@ func (r *WarehouseMySQL) FindAll(ctx context.Context) ([]warehouse.Warehouse, er
 func (r *WarehouseMySQL) FindById(ctx context.Context, id int) (*warehouse.Warehouse, error) {
 	var w warehouse.Warehouse
 	err := r.db.QueryRowContext(ctx, queryWarehouseFindById, id).Scan(
-		&w.Id, &w.WarehouseCode, &w.Address, &w.MinimumTemperature, &w.MinimumCapacity, &w.Telephone,
+		&w.Id, &w.WarehouseCode, &w.Address, &w.MinimumTemperature, &w.MinimumCapacity, &w.Telephone, &w.LocalityId,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

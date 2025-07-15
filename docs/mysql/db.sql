@@ -246,3 +246,7 @@ FOREIGN KEY(purchase_order_id) REFERENCES purchase_orders(id);
 --warehouse_code
 ALTER TABLE warehouse
 ADD CONSTRAINT warehouse_code_UNIQUE UNIQUE (warehouse_code);
+
+--cid carriers
+ALTER TABLE carriers
+ADD CONSTRAINT cid_UNIQUE UNIQUE (cid);

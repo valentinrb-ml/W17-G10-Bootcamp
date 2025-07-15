@@ -62,6 +62,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoWarehouse := repository.NewWarehouseRepository(mysql)
 	repoProduct := repository.NewProductRepository(dbProduct)
 	repoEmployee := repository.NewEmployeeRepository(mysql)
+	repoCarry := repository.NewCarryRepository(mysql)
 
 	// - service
 	svcSeller := service.NewSellerService(repoSeller)
@@ -70,6 +71,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	svcProduct := service.NewProductService(repoProduct)
 	svcWarehouse := service.NewWarehouseService(repoWarehouse)
 	svcEmployee := service.NewEmployeeDefault(repoEmployee, repoWarehouse)
+	svcCarry := service.NewCarryService(repoCarry)
 
 	// - handler
 	hdBuyer := handler.NewBuyerHandler(svcBuyer)
@@ -78,9 +80,10 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdWarehouse := handler.NewWarehouseHandler(svcWarehouse)
 	hdProduct := handler.NewProductHandler(svcProduct)
 	hdEmployee := handler.NewEmployeeHandler(svcEmployee)
+	hdCarry := handler.NewCarryHandler(svcCarry)
 
 	// router
-	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee)
+	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee, hdCarry)
 
 	fmt.Printf("Server running at http://localhost%s\n", s.serverAddress)
 
