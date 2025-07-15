@@ -7,6 +7,7 @@ type WarehouseDoc struct {
 	WarehouseCode      string  `json:"warehouse_code"`
 	MinimumCapacity    int     `json:"minimum_capacity"`
 	MinimumTemperature float64 `json:"minimum_temperature"`
+	LocalityId         int     `json:"locality_id"`
 }
 
 type WarehouseRequest struct {
