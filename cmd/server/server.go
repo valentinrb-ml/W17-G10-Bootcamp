@@ -62,7 +62,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoGeography := repository.NewGeographyRepository(mysql)
 
 	// - service
-	svcSeller := service.NewSellerService(repoSeller)
+	svcSeller := service.NewSellerService(repoSeller, repoGeography)
 	svcBuyer := service.NewBuyerService(repoBuyer)
 	svcSection := service.NewSectionServer(repoSection)
 	svcProduct := service.NewProductService(repoProduct)

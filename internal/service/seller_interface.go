@@ -16,9 +16,13 @@ type SellerService interface {
 }
 
 type sellerService struct {
-	rp repository.SellerRepository
+	sellerRepo repository.SellerRepository
+	geoRepo    repository.GeographyRepository
 }
 
-func NewSellerService(rp repository.SellerRepository) SellerService {
-	return &sellerService{rp: rp}
+func NewSellerService(sellerRepo repository.SellerRepository, geoRepo repository.GeographyRepository) SellerService {
+	return &sellerService{
+		sellerRepo: sellerRepo,
+		geoRepo:    geoRepo,
+	}
 }

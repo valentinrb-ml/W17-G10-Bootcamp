@@ -80,7 +80,7 @@ func (r *geographyRepository) CreateLocality(ctx context.Context, exec Executor,
 	_, err := exec.ExecContext(ctx, queryLocalityCreate, l.Id, l.Name, l.ProvinceId)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
-			return nil, apperrors.NewAppError(apperrors.CodeConflict, "postal code already exists").
+			return nil, apperrors.NewAppError(apperrors.CodeConflict, "The locality you are creating already exists.").
 				WithDetail("postal_code", l.Id).
 				WithDetail("locality_name", l.Name)
 		}
@@ -95,7 +95,7 @@ func (r *geographyRepository) FindLocalityById(ctx context.Context, exec Executo
 	err := exec.QueryRowContext(ctx, queryLocalityFindById, id).Scan(&locality.Id, &locality.Name, &locality.ProvinceId)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "locality not found")
+			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "The locality you are looking for does not exist.")
 		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "failed to find locality").WithDetail("error", err.Error())
 	}

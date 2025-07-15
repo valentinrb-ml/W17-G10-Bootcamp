@@ -19,6 +19,7 @@ type GeographyRepository interface {
 	BeginTx(ctx context.Context) (*sql.Tx, error)
 	CommitTx(tx *sql.Tx) error
 	RollbackTx(tx *sql.Tx) error
+	GetDB() *sql.DB
 }
 
 type geographyRepository struct {
@@ -46,4 +47,8 @@ func (r *geographyRepository) CommitTx(tx *sql.Tx) error {
 
 func (r *geographyRepository) RollbackTx(tx *sql.Tx) error {
 	return tx.Rollback()
+}
+
+func (r *geographyRepository) GetDB() *sql.DB {
+	return r.mysql
 }

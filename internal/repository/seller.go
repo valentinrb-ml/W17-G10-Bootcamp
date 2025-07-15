@@ -14,8 +14,8 @@ const (
 	querySellerCreate   = `INSERT INTO sellers (cid, company_name, address, telephone, locality_id) VALUES (?, ?, ?, ?, ?)`
 	querySellerUpdate   = `UPDATE sellers SET cid = ?, company_name = ?, address = ?, telephone = ?, locality_id = ? WHERE id = ?`
 	querySellerDelete   = `DELETE FROM sellers WHERE id = ?`
-	querySellerFindAll  = `SELECT id, cid, company_name, address, telephone FROM sellers`
-	querySellerFindById = `SELECT id, cid, company_name, address, telephone FROM sellers WHERE id = ?`
+	querySellerFindAll  = `SELECT id, cid, company_name, address, telephone, locality_id FROM sellers`
+	querySellerFindById = `SELECT id, cid, company_name, address, telephone, locality_id FROM sellers WHERE id = ?`
 )
 
 func (r *sellerRepository) Create(ctx context.Context, s models.Seller) (*models.Seller, error) {
@@ -86,7 +86,7 @@ func (r *sellerRepository) FindAll(ctx context.Context) ([]models.Seller, error)
 	var sellers []models.Seller
 	for rows.Next() {
 		var s models.Seller
-		err := rows.Scan(&s.Id, &s.Cid, &s.CompanyName, &s.Address, &s.Telephone)
+		err := rows.Scan(&s.Id, &s.Cid, &s.CompanyName, &s.Address, &s.Telephone, &s.LocalityId)
 		if err != nil {
 			return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while finding all sellers: %s", err.Error()))
 		}
@@ -103,7 +103,7 @@ func (r *sellerRepository) FindAll(ctx context.Context) ([]models.Seller, error)
 func (r *sellerRepository) FindById(ctx context.Context, id int) (*models.Seller, error) {
 	var s models.Seller
 	row := r.mysql.QueryRowContext(ctx, querySellerFindById, id)
-	err := row.Scan(&s.Id, &s.Cid, &s.CompanyName, &s.Address, &s.Telephone)
+	err := row.Scan(&s.Id, &s.Cid, &s.CompanyName, &s.Address, &s.Telephone, &s.LocalityId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "The seller you are looking for does not exist.")
