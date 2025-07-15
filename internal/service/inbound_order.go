@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/inbound_order"
 )
@@ -24,6 +25,9 @@ func NewInboundOrderService(r repository.InboundOrderRepository, er repository.E
 }
 
 func (s *InboundOrderDefault) Create(ctx context.Context, o *models.InboundOrder) (*models.InboundOrder, error) {
+	if err := validators.ValidateInboundOrder(o); err != nil {
+		return nil, err
+	}
 	exists, err := s.repo.ExistsByOrderNumber(ctx, o.OrderNumber)
 	if err != nil {
 		return nil, apperrors.Wrap(err, "failed checking for order_number uniqueness")

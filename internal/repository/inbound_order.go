@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/go-sql-driver/mysql"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/inbound_order"
 )
@@ -37,11 +39,19 @@ type InboundOrderMySQLRepository struct {
 func NewInboundOrderRepository(db *sql.DB) *InboundOrderMySQLRepository {
 	return &InboundOrderMySQLRepository{db: db}
 }
-
 func (r *InboundOrderMySQLRepository) Create(ctx context.Context, o *models.InboundOrder) (*models.InboundOrder, error) {
 	res, err := r.db.ExecContext(ctx, queryInboundOrderInsert, o.OrderDate, o.OrderNumber, o.EmployeeID, o.ProductBatchID, o.WarehouseID)
 	if err != nil {
-		return nil, apperrors.NewAppError(apperrors.CodeInternal, "inbound order insert failed")
+		// Manejo específico para errores de MySQL
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			switch mysqlErr.Number {
+			case 1062:
+				return nil, apperrors.NewAppError(apperrors.CodeConflict, "order_number already exists")
+			case 1452:
+				return nil, apperrors.NewAppError(apperrors.CodeUnprocessableEntity, "invalid foreign key: check employee_id, product_batch_id, warehouse_id")
+			}
+		}
+		return nil, apperrors.Wrap(err, "inbound order insert failed")
 	}
 	id, err := res.LastInsertId()
 	if err != nil {
