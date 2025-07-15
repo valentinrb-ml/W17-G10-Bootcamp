@@ -9,11 +9,6 @@ import (
 )
 
 func (sv *sellerService) Create(ctx context.Context, reqs models.RequestSeller) (*models.ResponseSeller, error) {
-	_, err := sv.geoRepo.FindLocalityById(ctx, sv.geoRepo.GetDB(), *reqs.LocalityId)
-	if err != nil {
-		return nil, err
-	}
-
 	ms := mappers.RequestSellerToSeller(reqs)
 
 	s, err := sv.sellerRepo.Create(ctx, ms)
@@ -30,13 +25,6 @@ func (sv *sellerService) Update(ctx context.Context, id int, reqs models.Request
 	s, err := sv.sellerRepo.FindById(ctx, id)
 	if err != nil {
 		return nil, err
-	}
-
-	if reqs.LocalityId != nil {
-		_, err := sv.geoRepo.FindLocalityById(ctx, sv.geoRepo.GetDB(), *reqs.LocalityId)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	mappers.ApplySellerPatch(s, &reqs)
