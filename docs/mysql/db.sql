@@ -16,7 +16,7 @@ CREATE TABLE provinces (
 );
 -- Tabla: localities
 CREATE TABLE localities (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT UNIQUE PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     province_id INT NOT NULL
 );
