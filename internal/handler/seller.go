@@ -121,7 +121,8 @@ func (h *SellerHandler) FindById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s, err := h.sv.FindById(ctx, id)
-	if handleApiError(w, err) {
+	if err != nil {
+		response.Error(w, err)
 		return
 	}
 
