@@ -135,8 +135,10 @@ func handleApiError(w http.ResponseWriter, err error) bool {
 	}
 	if errorResp, ok := err.(*api.ServiceError); ok {
 		// response.Error(w, errorResp.ResponseCode, errorResp.Message)
+		// response.Error(w, errorResp.ResponseCode, errorResp.Message)
 		response.Error(w, errorResp)
 	} else {
+		// response.Error(w, http.StatusInternalServerError, err.Error())
 		// response.Error(w, http.StatusInternalServerError, err.Error())
 		response.Error(w, err)
 	}
