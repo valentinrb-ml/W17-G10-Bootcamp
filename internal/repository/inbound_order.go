@@ -54,7 +54,7 @@ func (r *InboundOrderMySQLRepository) Create(ctx context.Context, o *models.Inbo
 			case 1062: // Unique constraint violation
 				return nil, apperrors.NewAppError(apperrors.CodeConflict, "order_number already exists")
 			case 1452: // FK constraint violation
-				return nil, apperrors.NewAppError(apperrors.CodeUnprocessableEntity, "invalid foreign key: check employee_id, product_batch_id, warehouse_id")
+				return nil, apperrors.NewAppError(apperrors.CodeNotFound, "related resource not found (check employee_id, product_batch_id, warehouse_id)")
 			}
 		}
 		return nil, apperrors.Wrap(err, "inbound order insert failed")
