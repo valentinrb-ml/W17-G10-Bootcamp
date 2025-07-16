@@ -1,9 +1,10 @@
 package validators
 
 import (
+	"time"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/productrecord"
-	"time"
 )
 
 func ValidateProductRecordCreateRequest(req productrecord.ProductRecordRequest) error {

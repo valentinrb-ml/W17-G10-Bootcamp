@@ -1,13 +1,14 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/productrecord"
-	"net/http"
 )
 
 type ProductRecordHandler struct {
@@ -39,9 +40,7 @@ func (h *ProductRecordHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.JSON(w, http.StatusCreated, map[string]interface{}{
-		"data": result,
-	})
+	response.JSON(w, http.StatusCreated, result)
 }
 
 func (h *ProductRecordHandler) GetRecordsReport(w http.ResponseWriter, r *http.Request) {
