@@ -4,21 +4,11 @@ import (
 	"context"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
 
-type SectionDefault struct {
-	rp repository.SectionRepository
-}
-
-func NewSectionServer(rp repository.SectionRepository) *SectionDefault {
-	return &SectionDefault{
-		rp: rp,
-	}
-}
-
-func (s *SectionDefault) FindAllSections(ctx context.Context) ([]section.Section, error) {
+// FindAllSections fetches and returns all sections from the repository.
+func (s *SectionDefault) FindAllSections(ctx context.Context) ([]models.Section, error) {
 	sections, err := s.rp.FindAllSections(ctx)
 	if err != nil {
 		return nil, err
@@ -26,7 +16,8 @@ func (s *SectionDefault) FindAllSections(ctx context.Context) ([]section.Section
 	return sections, nil
 }
 
-func (s *SectionDefault) FindById(ctx context.Context, id int) (*section.Section, error) {
+// FindById retrieves a section by its ID using the repository.
+func (s *SectionDefault) FindById(ctx context.Context, id int) (*models.Section, error) {
 	sec, err := s.rp.FindById(ctx, id)
 	if err != nil {
 		return nil, err
@@ -34,6 +25,7 @@ func (s *SectionDefault) FindById(ctx context.Context, id int) (*section.Section
 	return sec, nil
 }
 
+// DeleteSection removes a section by ID using the repository.
 func (s *SectionDefault) DeleteSection(ctx context.Context, id int) error {
 	err := s.rp.DeleteSection(ctx, id)
 	if err != nil {
@@ -43,7 +35,8 @@ func (s *SectionDefault) DeleteSection(ctx context.Context, id int) error {
 }
 
 
-func (s *SectionDefault) CreateSection(ctx context.Context, sec section.Section) (*section.Section, error) {
+// CreateSection creates a new section using the repository.
+func (s *SectionDefault) CreateSection(ctx context.Context, sec models.Section) (*models.Section, error) {
 	newSection, err := s.rp.CreateSection(ctx, sec)
 	if err != nil {
 		return nil, err
@@ -52,12 +45,14 @@ func (s *SectionDefault) CreateSection(ctx context.Context, sec section.Section)
 
 }
 
-func (s *SectionDefault) UpdateSection(ctx context.Context, id int, sec section.PatchSection) (*section.Section, error) {
+// UpdateSection partially updates an existing section by applying a patch and persisting changes.
+// Uses a mapper to apply only the changed fields.
+func (s *SectionDefault) UpdateSection(ctx context.Context, id int, sec models.PatchSection) (*models.Section, error) {
 	existing, err := s.rp.FindById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-  
+
 	mappers.ApplySectionPatch(sec, existing)
 
 	secUpd, err := s.rp.UpdateSection(ctx, id, existing)

@@ -93,7 +93,8 @@ CREATE TABLE sections (
     minimum_capacity INT,
     minimum_temperature DECIMAL(19,2),
     product_type_id INT NOT NULL,
-    warehouse_id INT NOT NULL
+    warehouse_id INT NOT NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 -- Tabla: order_status
 CREATE TABLE order_status (
@@ -113,14 +114,14 @@ CREATE TABLE purchase_orders (
 -- Tabla: product_batches
 CREATE TABLE product_batches (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    batch_number VARCHAR(255) NOT NULL,
-    current_quantity INT,
-    current_temperature DECIMAL(19,2),
-    due_date DATETIME(6),
-    initial_quantity INT,
-    manufacturing_date DATETIME(6),
-    manufacturing_hour DATETIME(6),
-    minimum_temperature DECIMAL(19,2),
+    batch_number INT NOT NULL UNIQUE,
+    current_quantity INT NOT NULL,
+    current_temperature DECIMAL(19,2) NOT NULL,
+    due_date DATETIME(6) NOT NULL,
+    initial_quantity INT NOT NULL,
+    manufacturing_date DATETIME(6) NOT NULL,
+    manufacturing_hour INT NOT NULL,
+    minimum_temperature DECIMAL(19,2) NOT NULL,
     product_id INT NOT NULL,
     section_id INT NOT NULL
 );

@@ -47,16 +47,17 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	}
 
 	// - repository
-	repoSection := repository.NewSectionMap(mysql)
+
+	repoSection := repository.NewSectionRepository(mysql)
 	repoSeller := repository.NewSellerRepository(mysql)
 	repoBuyer := repository.NewBuyerRepository(mysql)
 	repoWarehouse := repository.NewWarehouseRepository(mysql)
 	repoProduct := repository.NewProductRepository(dbProduct)
 	repoEmployee := repository.NewEmployeeRepository(mysql)
+	repoProductBatches := repository.NewProductBatchesRepository(mysql)
 	repoCarry := repository.NewCarryRepository(mysql)
 	repoGeography := repository.NewGeographyRepository(mysql)
 	repoInboundOrder := repository.NewInboundOrderRepository(mysql)
-
 	repoPurchaseOrder := repository.NewPurchaseOrderRepository(mysql)
 
 	// - service
@@ -66,10 +67,10 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	svcProduct := service.NewProductService(repoProduct)
 	svcWarehouse := service.NewWarehouseService(repoWarehouse)
 	svcEmployee := service.NewEmployeeDefault(repoEmployee, repoWarehouse)
+	svcProductBatches := service.NewProductBatchesService(repoProductBatches)
 	svcCarry := service.NewCarryService(repoCarry, repoGeography)
 	svcGeography := service.NewGeographyService(repoGeography)
 	svcInboundOrder := service.NewInboundOrderService(repoInboundOrder, repoEmployee, repoWarehouse)
-
 	svcPurchaseOrder := service.NewPurchaseOrderService(repoPurchaseOrder)
 
 	// - handler
@@ -80,13 +81,13 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdWarehouse := handler.NewWarehouseHandler(svcWarehouse)
 	hdProduct := handler.NewProductHandler(svcProduct)
 	hdEmployee := handler.NewEmployeeHandler(svcEmployee)
+	hdProductBatches := handler.NewProductBatchesHandler(svcProductBatches)
 	hdGeography := handler.NewGeographyHandler(svcGeography)
 	hdInboundOrder := handler.NewInboundOrderHandler(svcInboundOrder)
-
 	hdPurchaseOrder := handler.NewPurchaseOrderHandler(svcPurchaseOrder)
 
 	// router
-	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee, hdGeography, hdInboundOrder, hdCarry, hdPurchaseOrder)
+	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee, hdProductBatches, hdPurchaseOrder, hdGeography, hdInboundOrder, hdCarry)
 
 	fmt.Printf("Server running at http://localhost%s\n", s.serverAddress)
 

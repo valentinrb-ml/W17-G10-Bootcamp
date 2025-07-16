@@ -14,6 +14,7 @@ func NewAPIRouter(
 	hdWarehouse *handler.WarehouseHandler,
 	hdProduct *handler.ProductHandler,
 	hdEmployee *handler.EmployeeHandler,
+	hdProductBatches *handler.ProductBatchesHandler,
 	hdPurchaseOrder *handler.PurchaseOrderHandler,
 	hdGeography *handler.GeographyHandler,
 	hdInboundOrder *handler.InboundOrderHandler,
@@ -27,11 +28,12 @@ func NewAPIRouter(
 
 	root.Route("/api/v1", func(api chi.Router) {
 		MountProductRoutes(api, hdProduct)
-		MountSectionRoutes(api, hdSection)
+		MountSectionRoutes(api, hdSection, hdProductBatches)
 		MountBuyerRoutes(api, hdBuyer)
 		MountWarehouseRoutes(api, hdWarehouse)
 		MountSellerRoutes(api, hdSeller)
 		MountEmployeeRoutes(api, hdEmployee)
+		MountProductBatchesRoutes(api, hdProductBatches)
 		MountPurchaseOrderRoutes(api, hdPurchaseOrder)
 		MountCarryRoutes(api, hdCarry)
 		MountGeographyRoutes(api, hdGeography, hdCarry)
