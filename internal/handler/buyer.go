@@ -5,8 +5,6 @@ import (
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
@@ -30,13 +28,13 @@ func (h *BuyerHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validators.ValidateRequestBuyer(br); err != nil {
-		response.Error(w, convertServiceErrorToAppError(err))
+		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
 		return
 	}
 
 	b, err := h.sv.Create(ctx, br)
 	if err != nil {
-		response.Error(w, convertServiceErrorToAppError(err))
+		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
 		return
 	}
 
@@ -59,17 +57,17 @@ func (h *BuyerHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validators.ValidateUpdateBuyer(br); err != nil {
-		response.Error(w, convertServiceErrorToAppError(err))
+		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
 		return
 	}
 	if err := validators.ValidateBuyerPatchNotEmpty(br); err != nil {
-		response.Error(w, convertServiceErrorToAppError(err))
+		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
 		return
 	}
 
 	updated, err := h.sv.Update(ctx, id, br)
 	if err != nil {
-		response.Error(w, convertServiceErrorToAppError(err))
+		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
 		return
 	}
 
@@ -80,11 +78,11 @@ func (h *BuyerHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id, err := httputil.ParseIDParam(r, "id")
-	if handleError(w, err) {
+	if httputil.HandleError(w, err) {
 		return
 	}
 
-	if err := h.sv.Delete(ctx, id); handleError(w, err) {
+	if err := h.sv.Delete(ctx, id); httputil.HandleError(w, err) {
 		return
 	}
 
@@ -95,7 +93,7 @@ func (h *BuyerHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	result, err := h.sv.FindAll(ctx)
-	if handleError(w, err) {
+	if httputil.HandleError(w, err) {
 		return
 	}
 
@@ -113,7 +111,7 @@ func (h *BuyerHandler) FindById(w http.ResponseWriter, r *http.Request) {
 
 	b, err := h.sv.FindById(ctx, id)
 	if err != nil {
-		response.Error(w, convertServiceErrorToAppError(err))
+		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
 		return
 	}
 
@@ -121,6 +119,7 @@ func (h *BuyerHandler) FindById(w http.ResponseWriter, r *http.Request) {
 }
 
 // --- Utilidades ---
+/**
 
 func handleError(w http.ResponseWriter, err error) bool {
 	if err != nil {
@@ -163,3 +162,5 @@ func mapServiceErrorCode(code int) string {
 		return apperrors.CodeBadRequest
 	}
 }
+
+**/

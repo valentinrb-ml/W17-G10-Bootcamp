@@ -14,6 +14,7 @@ func NewAPIRouter(
 	hdWarehouse *handler.WarehouseHandler,
 	hdProduct *handler.ProductHandler,
 	hdEmployee *handler.EmployeeHandler,
+	hdPurchaseOrder *handler.PurchaseOrderHandler,
 	hdGeography *handler.GeographyHandler,
 	hdInboundOrder *handler.InboundOrderHandler,
   hdCarry *handler.CarryHandler,
@@ -31,6 +32,7 @@ func NewAPIRouter(
 		MountWarehouseRoutes(api, hdWarehouse)
 		MountSellerRoutes(api, hdSeller)
 		MountEmployeeRoutes(api, hdEmployee)
+		MountPurchaseOrderRoutes(api, hdPurchaseOrder)
 		MountCarryRoutes(api, hdCarry)
 		MountCarryReportRoutes(api, hdCarry)
 		MountGeographyRoutes(api, hdGeography)
