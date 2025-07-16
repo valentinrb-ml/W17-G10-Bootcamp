@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/loader"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/router"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
@@ -34,12 +33,6 @@ type ServerChi struct {
 
 // Run is a method that runs the server
 func (s *ServerChi) Run(mysql *sql.DB) (err error) {
-	ldBuyer := loader.NewBuyerJSONFile("docs/db/buyers.json")
-	dbBuyer, err := ldBuyer.Load()
-	if err != nil {
-		return err
-	}
-
 	// - repository
 	repoSection := repository.NewSectionMap(mysql)
 	repoSeller := repository.NewSellerRepository(mysql)
@@ -83,7 +76,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdPurchaseOrder := handler.NewPurchaseOrderHandler(svcPurchaseOrder)
 
 	// router
-	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee, hdGeography, hdInboundOrder, hdCarry, hdPurchaseOrder)
+	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee, hdPurchaseOrder, hdGeography, hdInboundOrder, hdCarry)
 
 	fmt.Printf("Server running at http://localhost%s\n", s.serverAddress)
 
