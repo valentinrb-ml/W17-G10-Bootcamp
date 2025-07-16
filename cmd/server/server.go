@@ -34,7 +34,6 @@ type ServerChi struct {
 // Run is a method that runs the server
 func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	// - repository
-
 	repoSection := repository.NewSectionRepository(mysql)
 	repoSeller := repository.NewSellerRepository(mysql)
 	repoBuyer := repository.NewBuyerRepository(mysql)
@@ -49,6 +48,10 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoGeography := repository.NewGeographyRepository(mysql)
 	repoInboundOrder := repository.NewInboundOrderRepository(mysql)
 	repoPurchaseOrder := repository.NewPurchaseOrderRepository(mysql)
+	repoProductRecord, err := repository.NewProductRecordRepository(mysql)
+	if err != nil {
+		return err
+	}
 
 	// - service
 	svcSeller := service.NewSellerService(repoSeller, repoGeography)
@@ -62,6 +65,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	svcGeography := service.NewGeographyService(repoGeography)
 	svcInboundOrder := service.NewInboundOrderService(repoInboundOrder, repoEmployee, repoWarehouse)
 	svcPurchaseOrder := service.NewPurchaseOrderService(repoPurchaseOrder)
+	svcProductRecord := service.NewProductRecordService(repoProductRecord)
 
 	// - handler
 	hdBuyer := handler.NewBuyerHandler(svcBuyer)
@@ -75,9 +79,10 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdGeography := handler.NewGeographyHandler(svcGeography)
 	hdInboundOrder := handler.NewInboundOrderHandler(svcInboundOrder)
 	hdPurchaseOrder := handler.NewPurchaseOrderHandler(svcPurchaseOrder)
+	hdProductRecord := handler.NewProductRecordHandler(svcProductRecord)
 
 	// router
-	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee, hdProductBatches, hdPurchaseOrder, hdGeography, hdInboundOrder, hdCarry)
+	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee, hdProductBatches, hdPurchaseOrder, hdGeography, hdInboundOrder, hdCarry, hdProductRecord)
 
 	fmt.Printf("Server running at http://localhost%s\n", s.serverAddress)
 
