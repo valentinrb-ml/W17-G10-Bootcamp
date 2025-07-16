@@ -5,9 +5,10 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
 )
 
-func MountGeographyRoutes(api chi.Router, hd *handler.GeographyHandler) {
+func MountGeographyRoutes(api chi.Router, hd *handler.GeographyHandler, hdCarry *handler.CarryHandler) {
 	api.Route("/localities", func(r chi.Router) {
 		r.Post("/", hd.Create)
 		r.Get("/reportSellers", hd.CountSellersByLocality)
+		r.Get("/reportCarries", hdCarry.ReportCarries)
 	})
 }

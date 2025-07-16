@@ -32,8 +32,7 @@ func NewAPIRouter(
 		MountSellerRoutes(api, hdSeller)
 		MountEmployeeRoutes(api, hdEmployee)
 		MountCarryRoutes(api, hdCarry)
-		MountCarryReportRoutes(api, hdCarry)
-		MountGeographyRoutes(api, hdGeography)
+		MountGeographyRoutes(api, hdGeography, hdCarry)
 		MountInboundOrderRoutes(api, hdInboundOrder)
 	})
 
