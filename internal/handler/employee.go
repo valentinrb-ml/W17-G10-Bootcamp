@@ -15,28 +15,24 @@ import (
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
 )
 
+// Handler para las rutas relacionadas a Employee
 type EmployeeHandler struct {
 	service service.EmployeeService
 }
 
+// Constructor del handler
 func NewEmployeeHandler(s service.EmployeeService) *EmployeeHandler {
 	return &EmployeeHandler{service: s}
 }
 
-type EmployeeRequest struct {
-	CardNumberID string `json:"card_number_id"`
-	FirstName    string `json:"first_name"`
-	LastName     string `json:"last_name"`
-	WarehouseID  *int   `json:"warehouse_id"`
-}
-
+// POST /employees - crea un nuevo empleado
 func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var req EmployeeRequest
+	var req models.EmployeeRequest
 	if err := request.JSON(r, &req); err != nil {
-		// response.Error(w, http.StatusBadRequest, "Invalid request body: "+err.Error())
 		response.Error(w, err)
 		return
 	}
+	// Construye el objeto empleado a partir de la request
 	emp := &models.Employee{
 		CardNumberID: req.CardNumberID,
 		FirstName:    req.FirstName,
@@ -47,30 +43,31 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	} else {
 		emp.WarehouseID = 0
 	}
+	// Llama al service para crear
 	created, err := h.service.Create(r.Context(), emp)
 	if err != nil {
 		var se *api.ServiceError
 		if errors.As(err, &se) {
-			// response.Error(w, se.ResponseCode, se.Message)
 			response.Error(w, err)
 		} else {
-			// response.Error(w, http.StatusInternalServerError, "Internal error")
 			response.Error(w, err)
 		}
 		return
 	}
+	// Convierte el modelo a doc para presentarlo al cliente
 	employeeDoc := mappers.MapEmployeeToEmployeeDoc(created)
 	response.JSON(w, http.StatusCreated, employeeDoc)
 }
 
+// GET /employees - devuelve todos los empleados
 func (h *EmployeeHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	employees, err := h.service.FindAll(r.Context())
 	if err != nil {
-		// response.Error(w, http.StatusInternalServerError, "cannot get employees")
 		response.Error(w, err)
 		return
 	}
 	if len(employees) == 0 {
+		// Responde lista vacía si no hay empleados
 		response.JSON(w, http.StatusOK, []interface{}{})
 		return
 	}
@@ -81,11 +78,11 @@ func (h *EmployeeHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, employeeDocs)
 }
 
+// GET /employees/{id} - devuelve un empleado por id
 func (h *EmployeeHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		// response.Error(w, http.StatusBadRequest, "id must be a number")
 		response.Error(w, err)
 		return
 	}
@@ -93,10 +90,8 @@ func (h *EmployeeHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var se *api.ServiceError
 		if errors.As(err, &se) {
-			// response.Error(w, se.ResponseCode, se.Message)
 			response.Error(w, err)
 		} else {
-			// response.Error(w, http.StatusInternalServerError, "Internal error")
 			response.Error(w, err)
 		}
 		return
@@ -105,11 +100,11 @@ func (h *EmployeeHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, employeeDoc)
 }
 
+// PATCH /employees/{id} - actualiza parcialmente un empleado
 func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		// response.Error(w, http.StatusBadRequest, "Invalid id")
 		response.Error(w, err)
 		return
 	}
@@ -117,7 +112,6 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request) {
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&patch); err != nil {
-		// response.Error(w, http.StatusBadRequest, "Invalid JSON or unknown field: "+err.Error())
 		response.Error(w, err)
 		return
 	}
@@ -125,10 +119,8 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var se *api.ServiceError
 		if errors.As(err, &se) {
-			// response.Error(w, se.ResponseCode, se.Message)
 			response.Error(w, err)
 		} else {
-			// response.Error(w, http.StatusInternalServerError, "Internal error")
 			response.Error(w, err)
 		}
 		return
@@ -137,21 +129,19 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, employeeDoc)
 }
 
+// DELETE /employees/{id} - elimina un empleado por id
 func (h *EmployeeHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		// response.Error(w, http.StatusBadRequest, "Invalid id")
 		response.Error(w, err)
 		return
 	}
 	if err := h.service.Delete(r.Context(), id); err != nil {
 		var se *api.ServiceError
 		if errors.As(err, &se) {
-			// response.Error(w, se.ResponseCode, se.Message)
 			response.Error(w, err)
 		} else {
-			// response.Error(w, http.StatusInternalServerError, "Internal error")
 			response.Error(w, err)
 		}
 		return
