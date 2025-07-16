@@ -5,7 +5,6 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/request"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 	"net/http"
@@ -29,7 +28,7 @@ func (h *SectionDefault) FindAllSections(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	sectionDoc := make([]section.ResponseSection, 0, len(sections))
+	sectionDoc := make([]models.ResponseSection, 0, len(sections))
 	for _, s := range sections {
 		secDoc := mappers.SectionToResponseSection(s)
 		sectionDoc = append(sectionDoc, secDoc)
@@ -79,10 +78,8 @@ func (h *SectionDefault) DeleteSection(w http.ResponseWriter, r *http.Request) {
 func (h *SectionDefault) CreateSection(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var sectionReq section.PostSection
-	err := request.JSON(r, &sectionReq)
-
-	if err != nil {
+	var sectionReq models.PostSection
+	if err := httputil.DecodeJSON(r, &sectionReq); err != nil {
 		response.Error(w, err)
 		return
 	}
@@ -110,7 +107,7 @@ func (h *SectionDefault) UpdateSection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var sec section.PatchSection
+	var sec models.PatchSection
 	if err := httputil.DecodeJSON(r, &sec); err != nil {
 		response.Error(w, err)
 		return

@@ -17,17 +17,17 @@ const (
 	querySectionCreate = `INSERT INTO sections (section_number, current_capacity, current_temperature, maximum_capacity, minimum_capacity, minimum_temperature, product_type_id, warehouse_id) VALUES (?,?,?,?,?,?,?,?)`
 )
 
-func (r *sectionRepository) FindAllSections(ctx context.Context) ([]section.Section, error) {
+func (r *sectionRepository) FindAllSections(ctx context.Context) ([]models.Section, error) {
 	rows, err := r.mysql.QueryContext(ctx, querySectionGetAll)
 	if err != nil {
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the sections.")
 	}
 	defer rows.Close()
 
-	var sections []section.Section
+	var sections []models.Section
 
 	for rows.Next() {
-		var s section.Section
+		var s models.Section
 		if err := rows.Scan(&s.Id, &s.SectionNumber, &s.CurrentCapacity, &s.CurrentTemperature, &s.MaximumCapacity, &s.MinimumCapacity, &s.MinimumTemperature, &s.ProductTypeId, &s.WarehouseId); err != nil {
 			return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the section.")
 		}
@@ -40,8 +40,8 @@ func (r *sectionRepository) FindAllSections(ctx context.Context) ([]section.Sect
 	return sections, nil
 }
 
-func (r sectionRepository) FindById(ctx context.Context, id int) (*section.Section, error) {
-	var s section.Section
+func (r sectionRepository) FindById(ctx context.Context, id int) (*models.Section, error) {
+	var s models.Section
 	err := r.mysql.QueryRowContext(ctx, querySectionGetOne, id).Scan(&s.Id, &s.SectionNumber, &s.CurrentCapacity, &s.CurrentTemperature, &s.MaximumCapacity, &s.MinimumCapacity, &s.MinimumTemperature, &s.ProductTypeId, &s.WarehouseId)
 
 	if err != nil {
@@ -73,7 +73,7 @@ func (r sectionRepository) DeleteSection(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *sectionRepository) CreateSection(ctx context.Context, sec section.Section) (*section.Section, error) {
+func (r *sectionRepository) CreateSection(ctx context.Context, sec models.Section) (*models.Section, error) {
 	result, err := r.mysql.ExecContext(ctx, querySectionCreate,
 		sec.SectionNumber, sec.CurrentCapacity, sec.CurrentTemperature, sec.MaximumCapacity, sec.MinimumCapacity, sec.MinimumTemperature, sec.ProductTypeId, sec.WarehouseId)
 
@@ -85,7 +85,7 @@ func (r *sectionRepository) CreateSection(ctx context.Context, sec section.Secti
 		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1452 {
 			return nil, apperrors.NewAppError(apperrors.CodeBadRequest, "Warehouse id or product type id does not exist.")
 		}
-		return nil, apperrors.NewAppError(apperrors.CodeInternal, "Warehouse id or product type id does not exist.")
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while creating the section.")
 	}
 
 	id, err := result.LastInsertId()
@@ -98,7 +98,7 @@ func (r *sectionRepository) CreateSection(ctx context.Context, sec section.Secti
 	return &sec, nil
 }
 
-func (r *sectionRepository) UpdateSection(ctx context.Context, id int, sec *section.Section) (*section.Section, error) {
+func (r *sectionRepository) UpdateSection(ctx context.Context, id int, sec *models.Section) (*models.Section, error) {
 	result, err := r.mysql.ExecContext(ctx, querySectionUpdate,
 		sec.SectionNumber, sec.CurrentCapacity, sec.CurrentTemperature,
 		sec.MaximumCapacity, sec.MinimumCapacity, sec.MinimumTemperature,

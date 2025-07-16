@@ -8,11 +8,11 @@ import (
 
 // SectionRepository is an interface that represents a section repository
 type SectionRepository interface {
-	FindAllSections(ctx context.Context) ([]section.Section, error)
-	FindById(ctx context.Context, id int) (*section.Section, error)
+	FindAllSections(ctx context.Context) ([]models.Section, error)
+	FindById(ctx context.Context, id int) (*models.Section, error)
 	DeleteSection(ctx context.Context, id int) error
-	CreateSection(ctx context.Context, sec section.Section) (*section.Section, error)
-	UpdateSection(ctx context.Context, id int, sec *section.Section) (*section.Section, error)
+	CreateSection(ctx context.Context, sec models.Section) (*models.Section, error)
+	UpdateSection(ctx context.Context, id int, sec *models.Section) (*models.Section, error)
 }
 
 type sectionRepository struct {

@@ -5,7 +5,7 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
 
-func ValidateSectionRequest(secReq section.PostSection) error {
+func ValidateSectionRequest(secReq models.PostSection) error {
 	if secReq.SectionNumber == 0 || secReq.WarehouseId == 0 ||
 		secReq.MaximumCapacity == 0 || secReq.MinimumCapacity == 0 ||
 		secReq.CurrentCapacity == 0 || secReq.MinimumTemperature == nil ||
@@ -25,7 +25,7 @@ func ValidateSectionRequest(secReq section.PostSection) error {
 	return nil
 }
 
-func ValidateSectionPatch(secReq section.PatchSection) error {
+func ValidateSectionPatch(secReq models.PatchSection) error {
 	if secReq.SectionNumber == nil && secReq.WarehouseId == nil &&
 		secReq.MaximumCapacity == nil && secReq.MinimumCapacity == nil &&
 		secReq.CurrentCapacity == nil && secReq.MinimumTemperature == nil &&

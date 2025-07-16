@@ -1,4 +1,4 @@
-package section
+package models
 
 type PostSection struct {
 	SectionNumber      int      `json:"section_number"`
