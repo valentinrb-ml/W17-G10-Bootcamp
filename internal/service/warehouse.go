@@ -6,6 +6,7 @@ import (
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
 
@@ -61,6 +62,15 @@ func (s *WarehouseDefault) Update(ctx context.Context, id int, patch warehouse.W
 	if patch.MinimumCapacity != nil {
 		if err := validators.ValidateMinimumCapacity(*patch.MinimumCapacity); err != nil {
 			return nil, err
+		}
+	}
+
+	if patch.WarehouseCode != nil {
+		ok, _ := s.rp.Exist(*patch.WarehouseCode)
+		if ok {
+			err := api.ServiceErrors[api.ErrConflict]
+			err.Message = "warehouse_code already exists"
+			return nil, &err
 		}
 	}
 
