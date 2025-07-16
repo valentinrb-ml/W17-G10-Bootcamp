@@ -15,6 +15,9 @@ func NewAPIRouter(
 	hdProduct *handler.ProductHandler,
 	hdEmployee *handler.EmployeeHandler,
 	hdPurchaseOrder *handler.PurchaseOrderHandler,
+	hdGeography *handler.GeographyHandler,
+	hdInboundOrder *handler.InboundOrderHandler,
+  hdCarry *handler.CarryHandler,
 ) *chi.Mux {
 	root := chi.NewRouter()
 	root.Use(middleware.Logger, middleware.Recoverer)
@@ -30,6 +33,10 @@ func NewAPIRouter(
 		MountSellerRoutes(api, hdSeller)
 		MountEmployeeRoutes(api, hdEmployee)
 		MountPurchaseOrderRoutes(api, hdPurchaseOrder)
+		MountCarryRoutes(api, hdCarry)
+		MountCarryReportRoutes(api, hdCarry)
+		MountGeographyRoutes(api, hdGeography)
+		MountInboundOrderRoutes(api, hdInboundOrder)
 	})
 
 	return root

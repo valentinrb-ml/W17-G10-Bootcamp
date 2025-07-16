@@ -6,23 +6,12 @@ import (
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
 
-func (s *WarehouseDefault) Create(ctx context.Context, w warehouse.Warehouse) (*warehouse.Warehouse, *api.ServiceError) {
-	ok, err := s.rp.Exist(ctx, w.WarehouseCode)
-	if err != nil {
-		serviceErr := api.ServiceErrors[api.ErrInternalServer]
-		serviceErr.Message = err.Message
-		return nil, &serviceErr
-	}
-	if ok {
-		err := api.ServiceErrors[api.ErrConflict]
-		err.Message = "warehouse_code already exists"
-		return nil, &err
-	}
-
+// Create creates a new warehouse by delegating to the repository layer
+// Returns the created warehouse or an error if the operation fails
+func (s *WarehouseDefault) Create(ctx context.Context, w warehouse.Warehouse) (*warehouse.Warehouse, error) {
 	wh, err := s.rp.Create(ctx, w)
 	if err != nil {
 		return nil, err
@@ -30,7 +19,9 @@ func (s *WarehouseDefault) Create(ctx context.Context, w warehouse.Warehouse) (*
 	return wh, nil
 }
 
-func (s *WarehouseDefault) FindAll(ctx context.Context) ([]warehouse.Warehouse, *api.ServiceError) {
+// FindAll retrieves all warehouses from the repository and sorts them by ID
+// Returns a slice of warehouses sorted by ID in ascending order or an error if the operation fails
+func (s *WarehouseDefault) FindAll(ctx context.Context) ([]warehouse.Warehouse, error) {
 	whs, err := s.rp.FindAll(ctx)
 	if err != nil {
 		return nil, err
@@ -47,7 +38,9 @@ func (s *WarehouseDefault) FindAll(ctx context.Context) ([]warehouse.Warehouse, 
 	return whs, err
 }
 
-func (s *WarehouseDefault) FindById(ctx context.Context, id int) (*warehouse.Warehouse, *api.ServiceError) {
+// FindById retrieves a specific warehouse by its ID from the repository
+// Returns the warehouse if found or an error if not found or operation fails
+func (s *WarehouseDefault) FindById(ctx context.Context, id int) (*warehouse.Warehouse, error) {
 	w, err := s.rp.FindById(ctx, id)
 	if err != nil {
 		return nil, err
@@ -55,7 +48,11 @@ func (s *WarehouseDefault) FindById(ctx context.Context, id int) (*warehouse.War
 	return w, nil
 }
 
-func (s *WarehouseDefault) Update(ctx context.Context, id int, patch warehouse.WarehousePatchDTO) (*warehouse.Warehouse, *api.ServiceError) {
+// Update modifies an existing warehouse with the provided patch data
+// First retrieves the existing warehouse, validates minimum capacity if provided,
+// applies the patch, and then updates the warehouse in the repository
+// Returns the updated warehouse or an error if validation fails or operation fails
+func (s *WarehouseDefault) Update(ctx context.Context, id int, patch warehouse.WarehousePatchDTO) (*warehouse.Warehouse, error) {
 	existing, err := s.rp.FindById(ctx, id)
 	if err != nil {
 		return nil, err
@@ -64,18 +61,6 @@ func (s *WarehouseDefault) Update(ctx context.Context, id int, patch warehouse.W
 	if patch.MinimumCapacity != nil {
 		if err := validators.ValidateMinimumCapacity(*patch.MinimumCapacity); err != nil {
 			return nil, err
-		}
-	}
-
-	if patch.WarehouseCode != nil {
-		ok, err := s.rp.Exist(ctx, *patch.WarehouseCode)
-		if err != nil {
-			return nil, err
-		}
-		if ok {
-			err := api.ServiceErrors[api.ErrConflict]
-			err.Message = "warehouse_code already exists"
-			return nil, &err
 		}
 	}
 
@@ -88,7 +73,10 @@ func (s *WarehouseDefault) Update(ctx context.Context, id int, patch warehouse.W
 	return updated, nil
 }
 
-func (s *WarehouseDefault) Delete(ctx context.Context, id int) *api.ServiceError {
+// Delete removes a warehouse from the repository by its ID
+// First verifies the warehouse exists, then deletes it from the repository
+// Returns an error if the warehouse doesn't exist or operation fails
+func (s *WarehouseDefault) Delete(ctx context.Context, id int) error {
 	_, err := s.rp.FindById(ctx, id)
 	if err != nil {
 		return err

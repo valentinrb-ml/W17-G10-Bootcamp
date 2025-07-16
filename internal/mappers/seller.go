@@ -20,6 +20,7 @@ func ToResponseSeller(s *models.Seller) models.ResponseSeller {
 		CompanyName: s.CompanyName,
 		Address:     s.Address,
 		Telephone:   s.Telephone,
+		LocalityId:  s.LocalityId,
 	}
 }
 
