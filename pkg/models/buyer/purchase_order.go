@@ -36,3 +36,8 @@ type BuyerWithPurchaseCount struct {
 	LastName            string `json:"last_name"`
 	PurchaseOrdersCount int    `json:"purchase_orders_count"`
 }
+
+// En tu archivo models/purchase_order.go
+type PurchaseOrderRequestWrapper struct {
+	Data RequestPurchaseOrder `json:"data"`
+}

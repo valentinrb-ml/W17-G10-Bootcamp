@@ -18,30 +18,29 @@ type PurchaseOrderHandler struct {
 func NewPurchaseOrderHandler(s service.PurchaseOrderService) *PurchaseOrderHandler {
 	return &PurchaseOrderHandler{service: s}
 }
-
 func (h *PurchaseOrderHandler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var req models.RequestPurchaseOrder
-	if err := httputil.DecodeJSON(r, &req); err != nil {
+	var wrapper models.PurchaseOrderRequestWrapper
+	if err := httputil.DecodeJSON(r, &wrapper); err != nil {
 		response.Error(w, err)
 		return
 	}
 
-	// Validación de campos
+	req := wrapper.Data // Extraemos los datos del wrapper
+
 	if err := validators.ValidatePurchaseOrderPost(req); err != nil {
-		//response.Error(w, err)
 		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
 		return
 	}
 
 	createdPO, err := h.service.Create(ctx, req)
 	if err != nil {
-		//response.Error(w, convertServiceError(err))
 		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
 		return
 	}
 
+	// Envuelve la respuesta también si es necesario
 	response.JSON(w, http.StatusCreated, createdPO)
 }
 
