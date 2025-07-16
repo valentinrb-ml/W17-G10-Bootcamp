@@ -16,6 +16,8 @@ const (
 	queryGetProductsReport     = `SELECT s.id, s.section_number, SUM(p.current_quantity) FROM product_batches p INNER JOIN sections s on p.section_id = s.id  GROUP BY p.section_id`
 )
 
+// CreateProductBatches inserts a new product batch into the database and returns the created batch.
+// Returns error if a duplicate batch number or invalid foreign keys are provided.
 func (r *productBatchesRepository) CreateProductBatches(ctx context.Context, proBa models.ProductBatches) (*models.ProductBatches, error) {
 	result, err := r.mysql.ExecContext(ctx, queryCreateProductBatch, proBa.BatchNumber, proBa.CurrentQuantity, proBa.CurrentTemperature, proBa.DueDate, proBa.InitialQuantity, proBa.ManufacturingDate, proBa.ManufacturingHour, proBa.MinimumTemperature, proBa.ProductId, proBa.SectionId)
 
@@ -41,6 +43,8 @@ func (r *productBatchesRepository) CreateProductBatches(ctx context.Context, pro
 	return &proBa, nil
 }
 
+// GetReportProductById returns product report data by section id, including section info and sum of current quantities.
+// Returns error if the section is not found.
 func (r *productBatchesRepository) GetReportProductById(ctx context.Context, id int) (*models.ReportProduct, error) {
 	var pr models.ReportProduct
 	err := r.mysql.QueryRowContext(ctx, queryGetReportProductsById, id).Scan(&pr.SectionId, &pr.SectionNumber, &pr.ProductsCount)
@@ -53,6 +57,8 @@ func (r *productBatchesRepository) GetReportProductById(ctx context.Context, id 
 	return &pr, nil
 }
 
+// GetReportProduct returns a report for all sections, each with section info and sum of current quantities.
+// Returns error if there was a problem during the query.
 func (r *productBatchesRepository) GetReportProduct(ctx context.Context) ([]models.ReportProduct, error) {
 	rows, err := r.mysql.QueryContext(ctx, queryGetProductsReport)
 	if err != nil {

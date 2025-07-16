@@ -12,16 +12,21 @@ import (
 	"strconv"
 )
 
+// ProductBatchesHandler handles HTTP requests for product batches endpoints.
 type ProductBatchesHandler struct {
 	sv service.ProductBatchesService
 }
 
+// NewProductBatchesHandler creates a new ProductBatchesHandler with provided service.
 func NewProductBatchesHandler(sv service.ProductBatchesService) *ProductBatchesHandler {
 	return &ProductBatchesHandler{
 		sv,
 	}
 }
 
+// CreateProductBatches handles POST requests to create a new product batch.
+// - Decodes the JSON body, validates input, and calls service to persist.
+// - Responds with proper error or the created product batch.
 func (h *ProductBatchesHandler) CreateProductBatches(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -42,6 +47,9 @@ func (h *ProductBatchesHandler) CreateProductBatches(w http.ResponseWriter, r *h
 	response.JSON(w, http.StatusCreated, mappers.ProductBatchesToResponse(*newProBa))
 }
 
+// GetReportProduct handles GET requests for product batch reports.
+// - If 'id' query param is present, returns report for specific section; else returns all.
+// - Returns 400 if 'id' is not a valid integer.
 func (h *ProductBatchesHandler) GetReportProduct(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.URL.Query().Get("id")
