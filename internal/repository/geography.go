@@ -139,3 +139,19 @@ func (r *geographyRepository) CountSellersGroupedByLocality(ctx context.Context)
 
 	return results, nil
 }
+
+func (r *geographyRepository) BeginTx(ctx context.Context) (*sql.Tx, error) {
+	return r.mysql.BeginTx(ctx, nil)
+}
+
+func (r *geographyRepository) CommitTx(tx *sql.Tx) error {
+	return tx.Commit()
+}
+
+func (r *geographyRepository) RollbackTx(tx *sql.Tx) error {
+	return tx.Rollback()
+}
+
+func (r *geographyRepository) GetDB() *sql.DB {
+	return r.mysql
+}
