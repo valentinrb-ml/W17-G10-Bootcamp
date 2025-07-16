@@ -10,14 +10,18 @@ import (
 	"net/http"
 )
 
+// SectionDefault handles HTTP requests related to warehouse sections.
 type SectionDefault struct {
 	sv service.SectionService
 }
 
+// NewSectionHandler creates a new SectionDefault handler with the given service.
 func NewSectionHandler(sv service.SectionService) *SectionDefault {
 	return &SectionDefault{sv: sv}
 }
 
+// FindAllSections handles GET /sections to return all sections.
+// - Maps domain sections to response models.
 func (h *SectionDefault) FindAllSections(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -37,6 +41,7 @@ func (h *SectionDefault) FindAllSections(w http.ResponseWriter, r *http.Request)
 
 }
 
+// FindById handles GET /sections/{id} to return a section by its ID.
 func (h *SectionDefault) FindById(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
@@ -56,6 +61,8 @@ func (h *SectionDefault) FindById(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// DeleteSection handles DELETE /sections/{id} to remove a section.
+// Returns 204 No Content on success.
 func (h *SectionDefault) DeleteSection(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -75,6 +82,8 @@ func (h *SectionDefault) DeleteSection(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusNoContent, nil)
 }
 
+// CreateSection handles POST /sections to add a new section.
+// Validates input, maps request to domain, and returns 201 Created with section.
 func (h *SectionDefault) CreateSection(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -99,6 +108,8 @@ func (h *SectionDefault) CreateSection(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusCreated, mappers.SectionToResponseSection(*newSection))
 }
 
+// UpdateSection handles PATCH /sections/{id} to update only specified fields.
+// Decodes JSON patch, validates and returns updated section.
 func (h *SectionDefault) UpdateSection(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id, err := httputil.ParseIDParam(r, "id")

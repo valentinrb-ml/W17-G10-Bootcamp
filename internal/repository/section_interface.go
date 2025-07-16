@@ -15,6 +15,7 @@ type SectionRepository interface {
 	UpdateSection(ctx context.Context, id int, sec *models.Section) (*models.Section, error)
 }
 
+// sectionRepository implements SectionRepository using MySQL as the data source.
 type sectionRepository struct {
 	mysql *sql.DB
 }

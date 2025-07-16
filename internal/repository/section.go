@@ -17,6 +17,8 @@ const (
 	querySectionCreate = `INSERT INTO sections (section_number, current_capacity, current_temperature, maximum_capacity, minimum_capacity, minimum_temperature, product_type_id, warehouse_id) VALUES (?,?,?,?,?,?,?,?)`
 )
 
+// FindAllSections retrieves all Section records from the database.
+// Returns a slice of Section or an error if the query fails.
 func (r *sectionRepository) FindAllSections(ctx context.Context) ([]models.Section, error) {
 	rows, err := r.mysql.QueryContext(ctx, querySectionGetAll)
 	if err != nil {
@@ -40,6 +42,8 @@ func (r *sectionRepository) FindAllSections(ctx context.Context) ([]models.Secti
 	return sections, nil
 }
 
+// FindById retrieves a Section by its id.
+// Returns a pointer to Section or error if not found.
 func (r sectionRepository) FindById(ctx context.Context, id int) (*models.Section, error) {
 	var s models.Section
 	err := r.mysql.QueryRowContext(ctx, querySectionGetOne, id).Scan(&s.Id, &s.SectionNumber, &s.CurrentCapacity, &s.CurrentTemperature, &s.MaximumCapacity, &s.MinimumCapacity, &s.MinimumTemperature, &s.ProductTypeId, &s.WarehouseId)
@@ -54,6 +58,8 @@ func (r sectionRepository) FindById(ctx context.Context, id int) (*models.Sectio
 	return &s, nil
 }
 
+// DeleteSection deletes a Section by its id.
+// Returns error if the section does not exist or if there are foreign key constraints.
 func (r sectionRepository) DeleteSection(ctx context.Context, id int) error {
 	result, err := r.mysql.ExecContext(ctx, querySectionDelete, id)
 	if err != nil {
@@ -73,6 +79,8 @@ func (r sectionRepository) DeleteSection(ctx context.Context, id int) error {
 	return nil
 }
 
+// CreateSection inserts a new Section into the database, setting its Id.
+// Returns pointer to the created Section or error if validation fails.
 func (r *sectionRepository) CreateSection(ctx context.Context, sec models.Section) (*models.Section, error) {
 	result, err := r.mysql.ExecContext(ctx, querySectionCreate,
 		sec.SectionNumber, sec.CurrentCapacity, sec.CurrentTemperature, sec.MaximumCapacity, sec.MinimumCapacity, sec.MinimumTemperature, sec.ProductTypeId, sec.WarehouseId)
@@ -98,6 +106,8 @@ func (r *sectionRepository) CreateSection(ctx context.Context, sec models.Sectio
 	return &sec, nil
 }
 
+// UpdateSection updates an existing Section by id with new data in sec.
+// Returns pointer to updated Section or error if the section does not exist or constraints fail.
 func (r *sectionRepository) UpdateSection(ctx context.Context, id int, sec *models.Section) (*models.Section, error) {
 	result, err := r.mysql.ExecContext(ctx, querySectionUpdate,
 		sec.SectionNumber, sec.CurrentCapacity, sec.CurrentTemperature,
