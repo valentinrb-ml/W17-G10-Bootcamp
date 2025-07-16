@@ -241,3 +241,12 @@ FOREIGN KEY(product_record_id) REFERENCES product_records(id);
 ALTER TABLE order_details
 ADD CONSTRAINT fk_order_details_purchase_order
 FOREIGN KEY(purchase_order_id) REFERENCES purchase_orders(id);
+
+-- Índices Únicos
+--warehouse_code
+ALTER TABLE warehouse
+ADD CONSTRAINT warehouse_code_UNIQUE UNIQUE (warehouse_code);
+
+--cid carriers
+ALTER TABLE carriers
+ADD CONSTRAINT cid_UNIQUE UNIQUE (cid);
