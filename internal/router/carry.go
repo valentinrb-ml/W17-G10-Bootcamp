@@ -10,9 +10,3 @@ func MountCarryRoutes(api chi.Router, hd *handler.CarryHandler) {
 		r.Post("/", hd.Create)
 	})
 }
-
-func MountCarryReportRoutes(api chi.Router, hd *handler.CarryHandler) {
-	api.Route("/localities", func(r chi.Router) {
-		r.Get("/reportCarries", hd.ReportCarries)
-	})
-}
