@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -35,16 +34,6 @@ type ServerChi struct {
 
 // Run is a method that runs the server
 func (s *ServerChi) Run(mysql *sql.DB) (err error) {
-	ctx := context.Background()
-
-	ldProduct, err := loader.NewJSONFileProductLoader("docs/db/products.json")
-	if err != nil {
-		return err
-	}
-	dbProduct, err := ldProduct.Load(ctx)
-	if err != nil {
-		return err
-	}
 	ldBuyer := loader.NewBuyerJSONFile("docs/db/buyers.json")
 	dbBuyer, err := ldBuyer.Load()
 	if err != nil {
@@ -52,12 +41,14 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	}
 
 	// - repository
-
 	repoSection := repository.NewSectionMap(mysql)
 	repoSeller := repository.NewSellerRepository(mysql)
 	repoBuyer := repository.NewBuyerRepository(dbBuyer)
 	repoWarehouse := repository.NewWarehouseRepository(mysql)
-	repoProduct := repository.NewProductRepository(dbProduct)
+	repoProduct, err := repository.NewProductRepository(mysql)
+	if err != nil {
+		return err
+	}
 	repoEmployee := repository.NewEmployeeRepository(mysql)
 
 	// - service

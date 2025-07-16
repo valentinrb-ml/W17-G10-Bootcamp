@@ -8,7 +8,14 @@ import (
 )
 
 func ParseIntParam(r *http.Request, name string) (int, error) {
+	// Search first in URL params
 	valueStr := chi.URLParam(r, name)
+
+	// If it is not in URL, search in query params
+	if valueStr == "" {
+		valueStr = r.URL.Query().Get(name)
+	}
+
 	if valueStr == "" {
 		return 0, apperrors.NewAppError(apperrors.CodeBadRequest, name+" parameter is required")
 	}
