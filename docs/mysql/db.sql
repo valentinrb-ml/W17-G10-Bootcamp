@@ -6,18 +6,18 @@ USE db_warehouse;
 -- Tabla: countries
 CREATE TABLE countries (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    country_name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL
 );
 -- Tabla: provinces
 CREATE TABLE provinces (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    province_name VARCHAR(255) NOT NULL,
-    id_country_fk INT NOT NULL
+    name VARCHAR(255) NOT NULL,
+    country_id INT NOT NULL
 );
 -- Tabla: localities
 CREATE TABLE localities (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    locality_name VARCHAR(255) NOT NULL,
+    id VARCHAR(255) UNIQUE PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
     province_id INT NOT NULL
 );
 -- Tabla: sellers
@@ -25,9 +25,9 @@ CREATE TABLE sellers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cid INT NOT NULL UNIQUE,
     company_name VARCHAR(255) NOT NULL,
-    address VARCHAR(255),
-    telephone VARCHAR(255),
-    locality_id INT NOT NULL
+    address VARCHAR(255) NOT NULL,
+    telephone VARCHAR(255) NOT NULL,
+    locality_id VARCHAR(255) NOT NULL UNIQUE
 );
 -- Tabla: carriers
 CREATE TABLE carriers (
@@ -36,7 +36,7 @@ CREATE TABLE carriers (
     company_name VARCHAR(255) NOT NULL,
     address VARCHAR(255),
     telephone VARCHAR(255),
-    locality_id INT NOT NULL
+    locality_id VARCHAR(255) NOT NULL
 );
 -- Tabla: buyers
 CREATE TABLE buyers (
@@ -53,7 +53,7 @@ CREATE TABLE warehouse (
     warehouse_code VARCHAR(255) NOT NULL,
     minimum_capacity INT NOT NULL,
     minimum_temperature DECIMAL(19,2) NOT NULL,
-    locality_id INT NOT NULL
+    locality_id VARCHAR(255) NOT NULL
 );
 -- Tabla: employees
 CREATE TABLE employees (
@@ -108,9 +108,8 @@ CREATE TABLE purchase_orders (
     order_date DATETIME(6) NOT NULL,
     tracking_code VARCHAR(255),
     buyer_id INT NOT NULL,
-    carrier_id INT NOT NULL,
-    order_status_id INT NOT NULL,
-    warehouse_id INT NOT NULL
+    product_record_id INT NOT NULL
+
 );
 -- Tabla: product_batches
 CREATE TABLE product_batches (
@@ -157,7 +156,7 @@ CREATE TABLE order_details (
 -- Provincias -> countries
 ALTER TABLE provinces
 ADD CONSTRAINT fk_provinces_country
-FOREIGN KEY(id_country_fk) REFERENCES countries(id);
+FOREIGN KEY(country_id) REFERENCES countries(id);
 -- Localities -> provinces
 ALTER TABLE localities
 ADD CONSTRAINT fk_localities_province
@@ -194,22 +193,17 @@ FOREIGN KEY(product_type_id) REFERENCES products_types(id);
 ALTER TABLE sections
 ADD CONSTRAINT fk_sections_warehouse
 FOREIGN KEY(warehouse_id) REFERENCES warehouse(id);
+
 -- Purchase_orders -> buyers
 ALTER TABLE purchase_orders
 ADD CONSTRAINT fk_purchase_orders_buyer
 FOREIGN KEY(buyer_id) REFERENCES buyers(id);
--- Purchase_orders -> carriers
+-- Purchase_orders -> product_record_id
 ALTER TABLE purchase_orders
-ADD CONSTRAINT fk_purchase_orders_carrier
-FOREIGN KEY(carrier_id) REFERENCES carriers(id);
--- Purchase_orders -> order_status
-ALTER TABLE purchase_orders
-ADD CONSTRAINT fk_purchase_orders_status
-FOREIGN KEY(order_status_id) REFERENCES order_status(id);
--- Purchase_orders -> warehouse
-ALTER TABLE purchase_orders
-ADD CONSTRAINT fk_purchase_orders_warehouse
-FOREIGN KEY(warehouse_id) REFERENCES warehouse(id);
+ADD CONSTRAINT fk_purchase_orders_product_record
+FOREIGN KEY(product_record_id) REFERENCES product_records(id);
+
+
 -- Product_batches -> products
 ALTER TABLE product_batches
 ADD CONSTRAINT fk_product_batches_product
@@ -242,3 +236,12 @@ FOREIGN KEY(product_record_id) REFERENCES product_records(id);
 ALTER TABLE order_details
 ADD CONSTRAINT fk_order_details_purchase_order
 FOREIGN KEY(purchase_order_id) REFERENCES purchase_orders(id);
+
+-- Índices Únicos
+--warehouse_code
+ALTER TABLE warehouse
+ADD CONSTRAINT warehouse_code_UNIQUE UNIQUE (warehouse_code);
+
+--cid carriers
+ALTER TABLE carriers
+ADD CONSTRAINT cid_UNIQUE UNIQUE (cid);

@@ -34,6 +34,7 @@ func (s *SectionDefault) DeleteSection(ctx context.Context, id int) error {
 	return nil
 }
 
+
 // CreateSection creates a new section using the repository.
 func (s *SectionDefault) CreateSection(ctx context.Context, sec models.Section) (*models.Section, error) {
 	newSection, err := s.rp.CreateSection(ctx, sec)

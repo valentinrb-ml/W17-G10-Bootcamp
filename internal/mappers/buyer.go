@@ -1,38 +1,53 @@
 package mappers
 
-import models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
+import (
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
+)
 
-func RequestBuyerToBuyer(rb models.RequestBuyer) models.Buyer {
-	b := models.Buyer{
-		Id: 0,
+// Convierte un request en un buyer DB
+func RequestBuyerToBuyer(req models.RequestBuyer) models.Buyer {
+	return models.Buyer{
+		CardNumberId: coalesceString(req.CardNumberId),
+		FirstName:    coalesceString(req.FirstName),
+		LastName:     coalesceString(req.LastName),
 	}
-
-	if rb.CardNumberId != nil {
-		b.CardNumberId = *rb.CardNumberId
-	}
-	if rb.FirstName != nil {
-		b.FirstName = *rb.FirstName
-	}
-	if rb.LastName != nil {
-		b.LastName = *rb.LastName
-	}
-
-	return b
 }
 
-func RequestBuyerToBuyerUpadate(rb models.RequestBuyer, existing models.Buyer) models.Buyer {
-
-	updated := existing
-
-	if rb.CardNumberId != nil {
-		updated.CardNumberId = *rb.CardNumberId
+func ApplyBuyerPatch(b *models.Buyer, req *models.RequestBuyer) {
+	if req.CardNumberId != nil {
+		b.CardNumberId = *req.CardNumberId
 	}
-	if rb.FirstName != nil {
-		updated.FirstName = *rb.FirstName
+	if req.FirstName != nil {
+		b.FirstName = *req.FirstName
 	}
-	if rb.LastName != nil {
-		updated.LastName = *rb.LastName
+	if req.LastName != nil {
+		b.LastName = *req.LastName
 	}
+}
 
-	return updated
+// Convierte de DB a respuesta para la API
+func ToResponseBuyer(b *models.Buyer) models.ResponseBuyer {
+	return models.ResponseBuyer{
+		Id:           b.Id,
+		CardNumberId: b.CardNumberId,
+		FirstName:    b.FirstName,
+		LastName:     b.LastName,
+	}
+}
+
+// Convierte una lista de buyers a response para API
+func ToResponseBuyerList(buyers []models.Buyer) []models.ResponseBuyer {
+	res := make([]models.ResponseBuyer, 0, len(buyers))
+	for _, b := range buyers {
+		res = append(res, ToResponseBuyer(&b))
+	}
+	return res
+}
+
+// para campos opcionales en request
+func coalesceString(str *string) string {
+	if str == nil {
+		return ""
+	}
+	return *str
 }

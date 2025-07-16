@@ -1,57 +1,40 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
-	"strconv"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/request"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
-
-func NewBuyerHandler(sv service.BuyerService) *BuyerHandler {
-	return &BuyerHandler{
-		sv: sv,
-	}
-}
 
 type BuyerHandler struct {
 	sv service.BuyerService
 }
 
+func NewBuyerHandler(sv service.BuyerService) *BuyerHandler {
+	return &BuyerHandler{sv: sv}
+}
+
 func (h *BuyerHandler) Create(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	var br models.RequestBuyer
-	err := request.JSON(r, &br)
+	if err := httputil.DecodeJSON(r, &br); err != nil {
+		response.Error(w, err)
+		return
+	}
+
+	if err := validators.ValidateRequestBuyer(br); err != nil {
+		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
+		return
+	}
+
+	b, err := h.sv.Create(ctx, br)
 	if err != nil {
-		switch {
-		case errors.Is(err, request.ErrRequestContentTypeNotJSON):
-			// response.Error(w, http.StatusUnsupportedMediaType, err.Error())
-			response.Error(w, err)
-		case errors.Is(err, request.ErrRequestJSONInvalid):
-			// response.Error(w, http.StatusBadRequest, err.Error())
-			response.Error(w, err)
-		default:
-			// response.Error(w, http.StatusInternalServerError, err.Error())
-			response.Error(w, err)
-		}
-		return
-	}
-
-	er := validators.ValidateRequestBuyer(br)
-	if er != nil {
-		// response.Error(w, er.ResponseCode, er.Message)
-		response.Error(w, er)
-		return
-	}
-
-	b, er := h.sv.Create(br)
-	if er != nil {
-		// response.Error(w, er.ResponseCode, er.Message)
-		response.Error(w, er)
+		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
 		return
 	}
 
@@ -59,95 +42,125 @@ func (h *BuyerHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BuyerHandler) Update(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
+	ctx := r.Context()
+
+	id, err := httputil.ParseIDParam(r, "id")
 	if err != nil {
-		// response.Error(w, http.StatusBadRequest, "Invalid ID parameter")
 		response.Error(w, err)
 		return
 	}
 
 	var br models.RequestBuyer
-	err = request.JSON(r, &br)
+	if err := httputil.DecodeJSON(r, &br); err != nil {
+		response.Error(w, err)
+		return
+	}
+
+	if err := validators.ValidateUpdateBuyer(br); err != nil {
+		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
+		return
+	}
+	if err := validators.ValidateBuyerPatchNotEmpty(br); err != nil {
+		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
+		return
+	}
+
+	updated, err := h.sv.Update(ctx, id, br)
 	if err != nil {
-		switch {
-		case errors.Is(err, request.ErrRequestContentTypeNotJSON):
-			// response.Error(w, http.StatusUnsupportedMediaType, err.Error())
-			response.Error(w, err)
-		case errors.Is(err, request.ErrRequestJSONInvalid):
-			// response.Error(w, http.StatusBadRequest, err.Error())
-			response.Error(w, err)
-		default:
-			// response.Error(w, http.StatusInternalServerError, err.Error())
-			response.Error(w, err)
-		}
-		return
-	}
-
-	if er := validators.ValidateUpdateBuyer(br); er != nil {
-		// response.Error(w, er.ResponseCode, er.Message)
-		response.Error(w, er)
-		return
-	}
-
-	_, er := h.sv.FindById(id)
-	if er != nil {
-		// response.Error(w, er.ResponseCode, er.Message)
-		response.Error(w, er)
-		return
-	}
-
-	updated, er := h.sv.Update(id, br)
-	if er != nil {
-		// response.Error(w, er.ResponseCode, er.Message)
-		response.Error(w, er)
+		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
 		return
 	}
 
 	response.JSON(w, http.StatusOK, updated)
-
 }
 
 func (h *BuyerHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		// response.Error(w, http.StatusBadRequest, "Invalid ID parameter")
-		response.Error(w, err)
+	ctx := r.Context()
+
+	id, err := httputil.ParseIDParam(r, "id")
+	if httputil.HandleError(w, err) {
 		return
 	}
 
-	er := h.sv.Delete(id)
-	if er != nil {
-		// response.Error(w, er.ResponseCode, er.Message)
-		response.Error(w, er)
+	if err := h.sv.Delete(ctx, id); httputil.HandleError(w, err) {
 		return
 	}
 
 	response.JSON(w, http.StatusNoContent, nil)
-
 }
 
 func (h *BuyerHandler) FindAll(w http.ResponseWriter, r *http.Request) {
-	response.JSON(w, http.StatusOK, h.sv.FindAll())
+	ctx := r.Context()
 
+	result, err := h.sv.FindAll(ctx)
+	if httputil.HandleError(w, err) {
+		return
+	}
+
+	response.JSON(w, http.StatusOK, result)
 }
 
 func (h *BuyerHandler) FindById(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
+	ctx := r.Context()
+
+	id, err := httputil.ParseIDParam(r, "id")
 	if err != nil {
-		// response.Error(w, http.StatusBadRequest, "Invalid ID parameter")
 		response.Error(w, err)
 		return
 	}
 
-	b, er := h.sv.FindById(id)
-	if er != nil {
-		// response.Error(w, er.ResponseCode, er.Message)
-		response.Error(w, er)
+	b, err := h.sv.FindById(ctx, id)
+	if err != nil {
+		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
 		return
 	}
 
 	response.JSON(w, http.StatusOK, b)
 }
+
+// --- Utilidades ---
+/**
+
+func handleError(w http.ResponseWriter, err error) bool {
+	if err != nil {
+		response.Error(w, convertServiceErrorToAppError(err))
+		return true
+	}
+	return false
+}
+
+func convertServiceErrorToAppError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	switch e := err.(type) {
+	case *apperrors.AppError:
+		return e
+	case *api.ServiceError:
+		return apperrors.NewAppError(mapServiceErrorCode(e.Code), e.Message)
+	default:
+		return apperrors.Wrap(err, "internal server error")
+	}
+}
+
+func mapServiceErrorCode(code int) string {
+	switch code {
+	case http.StatusBadRequest:
+		return apperrors.CodeBadRequest
+	case http.StatusUnauthorized:
+		return apperrors.CodeUnauthorized
+	case http.StatusForbidden:
+		return apperrors.CodeForbidden
+	case http.StatusNotFound:
+		return apperrors.CodeNotFound
+	case http.StatusConflict:
+		return apperrors.CodeConflict
+	case http.StatusUnprocessableEntity:
+		return apperrors.CodeValidationError
+	default:
+		return apperrors.CodeBadRequest
+	}
+}
+
+**/

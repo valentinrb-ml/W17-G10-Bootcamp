@@ -45,42 +45,51 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	if err != nil {
 		return err
 	}
-	ldBuyer := loader.NewBuyerJSONFile("docs/db/buyers.json")
-	dbBuyer, err := ldBuyer.Load()
-	if err != nil {
-		return err
-	}
 
 	// - repository
 
 	repoSection := repository.NewSectionRepository(mysql)
 	repoSeller := repository.NewSellerRepository(mysql)
-	repoBuyer := repository.NewBuyerRepository(dbBuyer)
+	repoBuyer := repository.NewBuyerRepository(mysql)
 	repoWarehouse := repository.NewWarehouseRepository(mysql)
 	repoProduct := repository.NewProductRepository(dbProduct)
 	repoEmployee := repository.NewEmployeeRepository(mysql)
 	repoProductBatches := repository.NewProductBatchesRepository(mysql)
+	repoCarry := repository.NewCarryRepository(mysql)
+	repoGeography := repository.NewGeographyRepository(mysql)
+	repoInboundOrder := repository.NewInboundOrderRepository(mysql)
+	repoPurchaseOrder := repository.NewPurchaseOrderRepository(mysql)
+
 
 	// - service
-	svcSeller := service.NewSellerService(repoSeller)
+	svcSeller := service.NewSellerService(repoSeller, repoGeography)
 	svcBuyer := service.NewBuyerService(repoBuyer)
 	svcSection := service.NewSectionServer(repoSection)
 	svcProduct := service.NewProductService(repoProduct)
-	svcWarehouse := service.NewWarehouseDefault(repoWarehouse)
+	svcWarehouse := service.NewWarehouseService(repoWarehouse)
 	svcEmployee := service.NewEmployeeDefault(repoEmployee, repoWarehouse)
 	svcProductBatches := service.NewProductBatchesService(repoProductBatches)
+	svcCarry := service.NewCarryService(repoCarry)
+	svcGeography := service.NewGeographyService(repoGeography)
+	svcInboundOrder := service.NewInboundOrderService(repoInboundOrder, repoEmployee, repoWarehouse)
+	svcPurchaseOrder := service.NewPurchaseOrderService(repoPurchaseOrder)
+
 
 	// - handler
 	hdBuyer := handler.NewBuyerHandler(svcBuyer)
 	hdSection := handler.NewSectionHandler(svcSection)
 	hdSeller := handler.NewSellerHandler(svcSeller)
-	hdWarehouse := handler.NewWarehouseDefault(svcWarehouse)
+	hdCarry := handler.NewCarryHandler(svcCarry)
+	hdWarehouse := handler.NewWarehouseHandler(svcWarehouse)
 	hdProduct := handler.NewProductHandler(svcProduct)
 	hdEmployee := handler.NewEmployeeHandler(svcEmployee)
 	hdProductBatches := handler.NewProductBatchesHandler(svcProductBatches)
+	hdGeography := handler.NewGeographyHandler(svcGeography)
+	hdInboundOrder := handler.NewInboundOrderHandler(svcInboundOrder)
+	hdPurchaseOrder := handler.NewPurchaseOrderHandler(svcPurchaseOrder)
 
 	// router
-	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee, hdProductBatches)
+	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee, hdGeography, hdInboundOrder, hdCarry, hdPurchaseOrder)
 
 	fmt.Printf("Server running at http://localhost%s\n", s.serverAddress)
 

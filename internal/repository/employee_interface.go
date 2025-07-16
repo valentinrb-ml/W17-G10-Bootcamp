@@ -6,6 +6,7 @@ import (
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
 )
 
+// declaración de interface del repositorio de employees
 type EmployeeRepository interface {
 	Create(ctx context.Context, e *models.Employee) (*models.Employee, error)
 	FindByCardNumberID(ctx context.Context, cardNumberID string) (*models.Employee, error)
@@ -13,5 +14,4 @@ type EmployeeRepository interface {
 	FindByID(ctx context.Context, id int) (*models.Employee, error)
 	Update(ctx context.Context, id int, e *models.Employee) error
 	Delete(ctx context.Context, id int) error
-	ExistsByCardNumberID(ctx context.Context, cardNumberID string) (bool, error)
 }

@@ -11,7 +11,7 @@ import (
 func (sv *sellerService) Create(ctx context.Context, reqs models.RequestSeller) (*models.ResponseSeller, error) {
 	ms := mappers.RequestSellerToSeller(reqs)
 
-	s, err := sv.rp.Create(ctx, ms)
+	s, err := sv.sellerRepo.Create(ctx, ms)
 	if err != nil {
 		return nil, err
 	}
@@ -22,14 +22,14 @@ func (sv *sellerService) Create(ctx context.Context, reqs models.RequestSeller) 
 }
 
 func (sv *sellerService) Update(ctx context.Context, id int, reqs models.RequestSeller) (*models.ResponseSeller, error) {
-	s, err := sv.rp.FindById(ctx, id)
+	s, err := sv.sellerRepo.FindById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
 	mappers.ApplySellerPatch(s, &reqs)
 
-	err = sv.rp.Update(ctx, id, *s)
+	err = sv.sellerRepo.Update(ctx, id, *s)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (sv *sellerService) Update(ctx context.Context, id int, reqs models.Request
 }
 
 func (sv *sellerService) Delete(ctx context.Context, id int) error {
-	err := sv.rp.Delete(ctx, id)
+	err := sv.sellerRepo.Delete(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (sv *sellerService) Delete(ctx context.Context, id int) error {
 }
 
 func (sv *sellerService) FindAll(ctx context.Context) ([]models.ResponseSeller, error) {
-	s, err := sv.rp.FindAll(ctx)
+	s, err := sv.sellerRepo.FindAll(ctx)
 	if err != nil {
 		return []models.ResponseSeller{}, err
 	}
@@ -64,7 +64,7 @@ func (sv *sellerService) FindAll(ctx context.Context) ([]models.ResponseSeller, 
 }
 
 func (sv *sellerService) FindById(ctx context.Context, id int) (*models.ResponseSeller, error) {
-	s, err := sv.rp.FindById(ctx, id)
+	s, err := sv.sellerRepo.FindById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
