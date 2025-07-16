@@ -47,7 +47,6 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	}
 
 	// - repository
-
 	repoSection := repository.NewSectionMap(mysql)
 	repoSeller := repository.NewSellerRepository(mysql)
 	repoBuyer := repository.NewBuyerRepository(mysql)
@@ -55,27 +54,30 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoProduct := repository.NewProductRepository(dbProduct)
 	repoEmployee := repository.NewEmployeeRepository(mysql)
 	repoGeography := repository.NewGeographyRepository(mysql)
+	repoInboundOrder := repository.NewInboundOrderRepository(mysql)
 
 	// - service
 	svcSeller := service.NewSellerService(repoSeller, repoGeography)
 	svcBuyer := service.NewBuyerService(repoBuyer)
 	svcSection := service.NewSectionServer(repoSection)
 	svcProduct := service.NewProductService(repoProduct)
-	svcWarehouse := service.NewWarehouseDefault(repoWarehouse)
+	svcWarehouse := service.NewWarehouseService(repoWarehouse)
 	svcEmployee := service.NewEmployeeDefault(repoEmployee, repoWarehouse)
 	svcGeography := service.NewGeographyService(repoGeography)
+	svcInboundOrder := service.NewInboundOrderService(repoInboundOrder, repoEmployee, repoWarehouse)
 
 	// - handler
 	hdBuyer := handler.NewBuyerHandler(svcBuyer)
 	hdSection := handler.NewSectionHandler(svcSection)
 	hdSeller := handler.NewSellerHandler(svcSeller)
-	hdWarehouse := handler.NewWarehouseDefault(svcWarehouse)
+	hdWarehouse := handler.NewWarehouseHandler(svcWarehouse)
 	hdProduct := handler.NewProductHandler(svcProduct)
 	hdEmployee := handler.NewEmployeeHandler(svcEmployee)
 	hdGeography := handler.NewGeographyHandler(svcGeography)
+	hdInboundOrder := handler.NewInboundOrderHandler(svcInboundOrder)
 
 	// router
-	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee, hdGeography)
+	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee, hdGeography, hdInboundOrder)
 
 	fmt.Printf("Server running at http://localhost%s\n", s.serverAddress)
 
