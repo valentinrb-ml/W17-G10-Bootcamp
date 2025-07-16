@@ -55,6 +55,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoProduct := repository.NewProductRepository(dbProduct)
 	repoEmployee := repository.NewEmployeeRepository(mysql)
 	repoCarry := repository.NewCarryRepository(mysql)
+	repoInboundOrder := repository.NewInboundOrderRepository(mysql)
 
 	// - service
 	svcSeller := service.NewSellerService(repoSeller)
@@ -64,18 +65,20 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	svcWarehouse := service.NewWarehouseService(repoWarehouse)
 	svcEmployee := service.NewEmployeeDefault(repoEmployee, repoWarehouse)
 	svcCarry := service.NewCarryService(repoCarry)
+	svcInboundOrder := service.NewInboundOrderService(repoInboundOrder, repoEmployee, repoWarehouse)
 
 	// - handler
 	hdBuyer := handler.NewBuyerHandler(svcBuyer)
 	hdSection := handler.NewSectionHandler(svcSection)
 	hdSeller := handler.NewSellerHandler(svcSeller)
+	hdCarry := handler.NewCarryHandler(svcCarry)
 	hdWarehouse := handler.NewWarehouseHandler(svcWarehouse)
 	hdProduct := handler.NewProductHandler(svcProduct)
 	hdEmployee := handler.NewEmployeeHandler(svcEmployee)
-	hdCarry := handler.NewCarryHandler(svcCarry)
+	hdInboundOrder := handler.NewInboundOrderHandler(svcInboundOrder)
 
 	// router
-	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee, hdCarry)
+	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee, hdInboundOrder, hdCarry)
 
 	fmt.Printf("Server running at http://localhost%s\n", s.serverAddress)
 

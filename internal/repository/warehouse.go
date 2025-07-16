@@ -10,6 +10,7 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
 
+
 // SQL queries for warehouse operations
 const (
 	queryWarehouseCreate   = `INSERT INTO warehouse (warehouse_code, address, minimum_temperature, minimum_capacity, telephone, locality_id) VALUES (?, ?, ?, ?, ?, ?)`
@@ -64,6 +65,7 @@ func (r *WarehouseMySQL) FindAll(ctx context.Context) ([]warehouse.Warehouse, er
 	}
 	return whs, nil
 }
+
 
 // FindById retrieves a specific warehouse by its ID from the database
 // Returns the warehouse if found or an error if not found or operation fails
