@@ -29,27 +29,50 @@ func ParseIntQueryParam(r *http.Request, name string) (*int, error) {
 	return &value, nil
 }
 
-// ParseIntParam (ya existente, por si acaso)
-func ParseIntParam(r *http.Request, name string) (int, error) {
+// getParamValue gets the value of a parameter (URL param or query param)
+func getParamValue(r *http.Request, name string) string {
 	// Search first in URL params
-	valueStr := chi.URLParam(r, name)
+	value := chi.URLParam(r, name)
 
 	// If it is not in URL, search in query params
-	if valueStr == "" {
-		valueStr = r.URL.Query().Get(name)
+	if value == "" {
+		value = r.URL.Query().Get(name)
 	}
+
+	return value
+}
+
+// validateIntValue converts and validates that a string is a valid integer
+func validateIntValue(valueStr, paramName string) (int, error) {
+	value, err := strconv.Atoi(valueStr)
+	if err != nil {
+		return 0, apperrors.NewAppError(apperrors.CodeBadRequest, paramName+" must be a valid integer")
+	}
+	return value, nil
+}
+
+// ParseIntParam parses an integer parameter REQUIRED
+func ParseIntParam(r *http.Request, name string) (int, error) {
+	valueStr := getParamValue(r, name)
 
 	if valueStr == "" {
 		return 0, apperrors.NewAppError(apperrors.CodeBadRequest, name+" parameter is required")
 	}
 
-	value, err := strconv.Atoi(valueStr)
-	if err != nil {
-		return 0, apperrors.NewAppError(apperrors.CodeBadRequest, name+" must be a valid integer")
+	return validateIntValue(valueStr, name)
+}
+
+// ParseOptionalIntParam parse an integer parameter OPTIONAL
+func ParseOptionalIntParam(r *http.Request, name string) (int, error) {
+	valueStr := getParamValue(r, name)
+
+	if valueStr == "" {
+		return 0, nil // Returns 0 if not present
 	}
 
-	return value, nil
+	return validateIntValue(valueStr, name)
 }
+
 func HandleError(w http.ResponseWriter, err error) bool {
 	if err != nil {
 		response.Error(w, ConvertServiceErrorToAppError(err))
