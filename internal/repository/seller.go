@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
@@ -28,7 +29,14 @@ func (r *sellerRepository) Create(ctx context.Context, s models.Seller) (*models
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			switch mysqlErr.Number {
 			case 1062:
-				return nil, apperrors.NewAppError(apperrors.CodeConflict, "Could not create seller due to a data conflict. Please verify your input and try again.")
+				switch {
+				case strings.Contains(mysqlErr.Message, "cid"):
+					return nil, apperrors.NewAppError(apperrors.CodeConflict, "Could not create seller due to a data conflict: cid is already used. Please verify your input and try again.")
+				case strings.Contains(mysqlErr.Message, "locality_id"):
+					return nil, apperrors.NewAppError(apperrors.CodeConflict, "Could not create seller due to a data conflict: locality is already used. Please verify your input and try again.")
+				default:
+					return nil, apperrors.NewAppError(apperrors.CodeConflict, "Could not create seller due to a data conflict. Please verify your input and try again.")
+				}
 			case 1452:
 				return nil, apperrors.NewAppError(apperrors.CodeNotFound, "Unable to create seller: The specified locality does not exist. Please check the locality information and try again.")
 			}
@@ -54,7 +62,14 @@ func (r *sellerRepository) Update(ctx context.Context, id int, s models.Seller) 
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			switch mysqlErr.Number {
 			case 1062:
-				return apperrors.NewAppError(apperrors.CodeConflict, "Could not update seller due to a data conflict. Please verify your input and try again.")
+				switch {
+				case strings.Contains(mysqlErr.Message, "cid"):
+					return apperrors.NewAppError(apperrors.CodeConflict, "Could not update seller due to a data conflict: cid is already used. Please verify your input and try again.")
+				case strings.Contains(mysqlErr.Message, "locality_id"):
+					return apperrors.NewAppError(apperrors.CodeConflict, "Could not update seller due to a data conflict: locality_id is already used. Please verify your input and try again.")
+				default:
+					return apperrors.NewAppError(apperrors.CodeConflict, "Could not update seller due to a data conflict. Please verify your input and try again.")
+				}
 			case 1452:
 				return apperrors.NewAppError(apperrors.CodeNotFound, "Unable to update seller: The specified locality does not exist. Please check the locality information and try again.")
 			}

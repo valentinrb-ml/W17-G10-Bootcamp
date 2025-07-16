@@ -25,9 +25,9 @@ CREATE TABLE sellers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cid INT NOT NULL UNIQUE,
     company_name VARCHAR(255) NOT NULL,
-    address VARCHAR(255),
-    telephone VARCHAR(255),
-    locality_id VARCHAR(255) NOT NULL
+    address VARCHAR(255) NOT NULL,
+    telephone VARCHAR(255) NOT NULL,
+    locality_id VARCHAR(255) NOT NULL UNIQUE
 );
 -- Tabla: carriers
 CREATE TABLE carriers (
