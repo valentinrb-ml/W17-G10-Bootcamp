@@ -9,8 +9,7 @@ import (
 )
 
 type SectionDefault struct {
-	rp          repository.SectionRepository
-	rpWareHouse repository.WarehouseRepository
+	rp repository.SectionRepository
 }
 
 func NewSectionServer(rp repository.SectionRepository) *SectionDefault {
@@ -42,6 +41,7 @@ func (s *SectionDefault) DeleteSection(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
 
 func (s *SectionDefault) CreateSection(ctx context.Context, sec section.Section) (*section.Section, error) {
 	newSection, err := s.rp.CreateSection(ctx, sec)

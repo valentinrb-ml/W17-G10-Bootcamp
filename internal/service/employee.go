@@ -6,15 +6,17 @@ import (
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
 )
 
+// Servicio principal de empleados, implementa operaciones de negocio
 type EmployeeDefault struct {
 	repo          repository.EmployeeRepository
 	warehouseRepo repository.WarehouseRepository
 }
 
+// Constructor del servicio de empleados
 func NewEmployeeDefault(r repository.EmployeeRepository, wrepo repository.WarehouseRepository) *EmployeeDefault {
 	return &EmployeeDefault{
 		repo:          r,
@@ -22,87 +24,84 @@ func NewEmployeeDefault(r repository.EmployeeRepository, wrepo repository.Wareho
 	}
 }
 
+// Crea un nuevo empleado validando unicidad, existencia de warehouse y reglas de negocio
 func (s *EmployeeDefault) Create(ctx context.Context, e *models.Employee) (*models.Employee, error) {
+	// Valida los campos obligatorios
 	if err := validators.ValidateEmployee(e); err != nil {
-		return nil, err
+		return nil, apperrors.NewAppError(apperrors.CodeValidationError, err.Error())
 	}
-
+	// Valida que el warehouse exista
 	warehouse, whErr := s.warehouseRepo.FindById(ctx, e.WarehouseID)
 	if whErr != nil {
-		var se *api.ServiceError
-		if errors.As(whErr, &se) && se.Code == api.ErrNotFound {
-			se := api.ServiceErrors[api.ErrBadRequest]
-			se.Message = "warehouse_id does not exist"
-			return nil, &se
+		var appErr *apperrors.AppError
+		if errors.As(whErr, &appErr) && appErr.Code == apperrors.CodeNotFound {
+			return nil, apperrors.NewAppError(apperrors.CodeBadRequest, "warehouse_id does not exist")
 		}
-		return nil, whErr
+		return nil, apperrors.Wrap(whErr, "failed getting warehouse by id")
 	}
 	if warehouse == nil {
-		se := api.ServiceErrors[api.ErrBadRequest]
-		se.Message = "warehouse_id does not exist"
-		return nil, &se
+		return nil, apperrors.NewAppError(apperrors.CodeBadRequest, "warehouse_id does not exist")
 	}
-
+	// Valida unicidad de card_number_id
 	emp, err := s.repo.FindByCardNumberID(ctx, e.CardNumberID)
 	if err != nil {
-		return nil, err
+		return nil, apperrors.Wrap(err, "failed checking card_number_id uniqueness")
 	}
 	if emp != nil {
-		se := api.ServiceErrors[api.ErrBadRequest]
-		se.Message = "card_number_id already exists"
-		return nil, &se
+		return nil, apperrors.NewAppError(apperrors.CodeConflict, "card_number_id already exists")
 	}
+	// Crea el empleado
 	return s.repo.Create(ctx, e)
 }
 
+// Devuelve todos los empleados
 func (s *EmployeeDefault) FindAll(ctx context.Context) ([]*models.Employee, error) {
-	return s.repo.FindAll(ctx)
+	emps, err := s.repo.FindAll(ctx)
+	if err != nil {
+		return nil, apperrors.Wrap(err, "failed fetching all employees")
+	}
+	return emps, nil
 }
 
+// Busca un empleado por id, validando id y existencia
 func (s *EmployeeDefault) FindByID(ctx context.Context, id int) (*models.Employee, error) {
 	if err := validators.ValidateEmployeeID(id); err != nil {
-		return nil, err
+		return nil, apperrors.NewAppError(apperrors.CodeValidationError, err.Error())
 	}
 	emp, err := s.repo.FindByID(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, apperrors.Wrap(err, "failed fetching employee by id")
 	}
 	if emp == nil {
-		se := api.ServiceErrors[api.ErrNotFound]
-		se.Message = "employee not found"
-		return nil, &se
+		return nil, apperrors.NewAppError(apperrors.CodeNotFound, "employee not found")
 	}
 	return emp, nil
 }
 
+// Actualiza parcialmente un empleado, validando campos y relaciones
 func (s *EmployeeDefault) Update(ctx context.Context, id int, patch *models.EmployeePatch) (*models.Employee, error) {
-	found, err := s.repo.FindByID(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	if found == nil {
-		se := api.ServiceErrors[api.ErrNotFound]
-		se.Message = "employee not found"
-		return nil, &se
+	if err := validators.ValidateEmployeePatch(patch); err != nil {
+		return nil, apperrors.NewAppError(apperrors.CodeValidationError, err.Error())
 	}
 	if id <= 0 {
-		se := api.ServiceErrors[api.ErrUnprocessableEntity]
-		se.Message = "invalid employee id"
-		return nil, &se
-	}
-	if err := validators.ValidateEmployeePatch(patch); err != nil {
-		return nil, err
+		return nil, apperrors.NewAppError(apperrors.CodeValidationError, "invalid employee id")
 	}
 
+	found, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, apperrors.Wrap(err, "failed fetching employee by id")
+	}
+	if found == nil {
+		return nil, apperrors.NewAppError(apperrors.CodeNotFound, "employee not found")
+	}
+	// Valida unicidad y actualiza campos modificados del patch
 	if patch.CardNumberID != nil {
 		emp, err := s.repo.FindByCardNumberID(ctx, *patch.CardNumberID)
 		if err != nil {
-			return nil, err
+			return nil, apperrors.Wrap(err, "failed checking card_number_id")
 		}
 		if emp != nil && emp.ID != id {
-			se := api.ServiceErrors[api.ErrBadRequest]
-			se.Message = "card_number_id already exists"
-			return nil, &se
+			return nil, apperrors.NewAppError(apperrors.CodeConflict, "card_number_id already exists")
 		}
 		found.CardNumberID = *patch.CardNumberID
 	}
@@ -112,53 +111,46 @@ func (s *EmployeeDefault) Update(ctx context.Context, id int, patch *models.Empl
 	if patch.LastName != nil {
 		found.LastName = *patch.LastName
 	}
+	// Si cambia warehouse, valida que exista antes de asignar
 	if patch.WarehouseID != nil && *patch.WarehouseID != 0 {
 		warehouse, whErr := s.warehouseRepo.FindById(ctx, *patch.WarehouseID)
 		if whErr != nil {
-			var se *api.ServiceError
-			if errors.As(whErr, &se) && se.Code == api.ErrNotFound {
-				se2 := api.ServiceErrors[api.ErrBadRequest]
-				se2.Message = "warehouse_id does not exist"
-				return nil, &se2
+			var appErr *apperrors.AppError
+			if errors.As(whErr, &appErr) && appErr.Code == apperrors.CodeNotFound {
+				return nil, apperrors.NewAppError(apperrors.CodeBadRequest, "warehouse_id does not exist")
 			}
-			return nil, whErr
+			return nil, apperrors.Wrap(whErr, "failed getting warehouse by id")
 		}
 		if warehouse == nil {
-			se := api.ServiceErrors[api.ErrBadRequest]
-			se.Message = "warehouse_id does not exist"
-			return nil, &se
+			return nil, apperrors.NewAppError(apperrors.CodeBadRequest, "warehouse_id does not exist")
 		}
 		found.WarehouseID = *patch.WarehouseID
 	}
-
+	// Ejecuta actualización y retorna el registro actualizado
 	if err := s.repo.Update(ctx, id, found); err != nil {
-		return nil, err
+		return nil, apperrors.Wrap(err, "failed updating employee")
 	}
 	updated, err := s.repo.FindByID(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, apperrors.Wrap(err, "failed fetching employee after update")
 	}
 	return updated, nil
 }
 
+// Elimina un empleado por id, validando su existencia
 func (s *EmployeeDefault) Delete(ctx context.Context, id int) error {
 	if err := validators.ValidateEmployeeID(id); err != nil {
-		return err
+		return apperrors.NewAppError(apperrors.CodeValidationError, err.Error())
 	}
 	found, err := s.repo.FindByID(ctx, id)
 	if err != nil {
-		return err
+		return apperrors.Wrap(err, "failed fetching employee by id")
 	}
 	if found == nil {
-		se := api.ServiceErrors[api.ErrNotFound]
-		se.Message = "employee not found"
-		return &se
+		return apperrors.NewAppError(apperrors.CodeNotFound, "employee not found")
 	}
 	if err := s.repo.Delete(ctx, id); err != nil {
-		se := api.ServiceErrors[api.ErrInternalServer]
-		se.Message = "failed to delete employee"
-		se.InternalError = err
-		return &se
+		return apperrors.Wrap(err, "failed deleting employee")
 	}
 	return nil
 }
