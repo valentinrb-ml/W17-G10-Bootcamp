@@ -1,4 +1,4 @@
-package product_batches
+package models
 
 import "time"
 
@@ -41,4 +41,10 @@ type PostProductBatches struct {
 	MinimumTemperature *float64  `json:"minimum_temperature"`
 	ProductId          int       `json:"product_id"`
 	SectionId          int       `json:"section_id"`
+}
+
+type ReportProduct struct {
+	SectionId     int `json:"section_id"`
+	SectionNumber int `json:"section_number"`
+	ProductsCount int `json:"products_count"`
 }
