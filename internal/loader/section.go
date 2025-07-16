@@ -8,7 +8,7 @@ import (
 )
 
 type SectionLoader interface {
-	Load() (v map[int]section.Section, err error)
+	Load() (v map[int]models.Section, err error)
 }
 
 type SectionJSONFile struct {
@@ -20,23 +20,23 @@ func NewSectionJSONFile(path string) *SectionJSONFile {
 }
 
 // Load loads the section data from the json file.
-func (l *SectionJSONFile) Load() (map[int]section.Section, error) {
+func (l *SectionJSONFile) Load() (map[int]models.Section, error) {
 	file, err := os.Open(l.path)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	var sectionDoc []section.Section
+	var sectionDoc []models.Section
 	err = json.NewDecoder(file).Decode(&sectionDoc)
 	if err != nil {
 		return nil, fmt.Errorf("error loading section.json: %v", err)
 	}
 
-	sectionMap := make(map[int]section.Section, len(sectionDoc))
+	sectionMap := make(map[int]models.Section, len(sectionDoc))
 
 	for _, s := range sectionDoc {
-		sec := section.Section{
+		sec := models.Section{
 			Id:                 s.Id,
 			SectionNumber:      s.SectionNumber,
 			CurrentTemperature: s.CurrentTemperature,

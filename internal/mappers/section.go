@@ -4,8 +4,8 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
 
-func RequestSectionToSection(req section.PostSection) section.Section {
-	return section.Section{
+func RequestSectionToSection(req models.PostSection) models.Section {
+	return models.Section{
 		SectionNumber:      req.SectionNumber,
 		CurrentTemperature: *req.CurrentTemperature,
 		MinimumTemperature: *req.MinimumTemperature,
@@ -17,8 +17,8 @@ func RequestSectionToSection(req section.PostSection) section.Section {
 	}
 }
 
-func SectionToResponseSection(s section.Section) section.ResponseSection {
-	return section.ResponseSection{
+func SectionToResponseSection(s models.Section) models.ResponseSection {
+	return models.ResponseSection{
 		Id:                 s.Id,
 		SectionNumber:      s.SectionNumber,
 		CurrentTemperature: s.CurrentTemperature,
@@ -31,7 +31,7 @@ func SectionToResponseSection(s section.Section) section.ResponseSection {
 	}
 }
 
-func ApplySectionPatch(sec section.PatchSection, existing *section.Section) {
+func ApplySectionPatch(sec models.PatchSection, existing *models.Section) {
 	if sec.ProductTypeId != nil {
 		existing.ProductTypeId = *sec.ProductTypeId
 
