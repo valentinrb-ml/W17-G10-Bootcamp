@@ -14,8 +14,12 @@ type CarryService interface {
 
 type CarryDefault struct {
 	rp repository.CarryRepository
+	rpGeo repository.GeographyRepository
 }
 
-func NewCarryService(rp repository.CarryRepository) *CarryDefault {
-	return &CarryDefault{rp: rp}
+func NewCarryService(rp repository.CarryRepository, rpGeo repository.GeographyRepository) *CarryDefault {
+	return &CarryDefault{
+		rp:    rp,
+		rpGeo: rpGeo,
+	}
 }

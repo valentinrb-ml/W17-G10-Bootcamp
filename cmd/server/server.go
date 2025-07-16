@@ -69,7 +69,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	svcWarehouse := service.NewWarehouseService(repoWarehouse)
 	svcEmployee := service.NewEmployeeDefault(repoEmployee, repoWarehouse)
 	svcProductBatches := service.NewProductBatchesService(repoProductBatches)
-	svcCarry := service.NewCarryService(repoCarry)
+	svcCarry := service.NewCarryService(repoCarry, repoGeography)
 	svcGeography := service.NewGeographyService(repoGeography)
 	svcInboundOrder := service.NewInboundOrderService(repoInboundOrder, repoEmployee, repoWarehouse)
 	svcPurchaseOrder := service.NewPurchaseOrderService(repoPurchaseOrder)
