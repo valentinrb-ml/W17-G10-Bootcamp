@@ -1,4 +1,3 @@
-// internal/validators/product_record_validator.go
 package validators
 
 import (

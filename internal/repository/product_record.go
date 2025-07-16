@@ -15,6 +15,27 @@ import (
 
 const (
 	productRecordQueryTimeout = 5 * time.Second
+	insertProductRecord       = `
+		INSERT INTO product_records (last_update_date, purchase_price, sale_price, product_id) 
+		VALUES (?, ?, ?, ?)`
+	selectAllProductsReport = `
+		SELECT 
+			p.id as product_id,
+			p.description,
+			COALESCE(COUNT(pr.id), 0) as records_count
+		FROM products p
+		LEFT JOIN product_records pr ON p.id = pr.product_id
+		GROUP BY p.id, p.description
+		ORDER BY p.id`
+	selectProductReportByID = `
+		SELECT 
+			p.id as product_id,
+			p.description,
+			COALESCE(COUNT(pr.id), 0) as records_count
+		FROM products p
+		LEFT JOIN product_records pr ON p.id = pr.product_id
+		WHERE p.id = ?
+		GROUP BY p.id, p.description`
 )
 
 type productRecordMySQLRepository struct {
@@ -27,35 +48,17 @@ type productRecordMySQLRepository struct {
 func NewProductRecordRepository(db *sql.DB) (ProductRecordRepository, error) {
 	xdb := sqlx.NewDb(db, "mysql")
 
-	insert, err := xdb.Preparex(`
-		INSERT INTO product_records (last_update_date, purchase_price, sale_price, product_id) 
-		VALUES (?, ?, ?, ?)`)
+	insert, err := xdb.Preparex(insertProductRecord)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare insert statement: %w", err)
 	}
 
-	reportAll, err := xdb.Preparex(`
-		SELECT 
-			p.id as product_id,
-			p.description,
-			COALESCE(COUNT(pr.id), 0) as records_count
-		FROM products p
-		LEFT JOIN product_records pr ON p.id = pr.product_id
-		GROUP BY p.id, p.description
-		ORDER BY p.id`)
+	reportAll, err := xdb.Preparex(selectAllProductsReport)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare report all statement: %w", err)
 	}
 
-	reportByProduct, err := xdb.Preparex(`
-		SELECT 
-			p.id as product_id,
-			p.description,
-			COALESCE(COUNT(pr.id), 0) as records_count
-		FROM products p
-		LEFT JOIN product_records pr ON p.id = pr.product_id
-		WHERE p.id = ?
-		GROUP BY p.id, p.description`)
+	reportByProduct, err := xdb.Preparex(selectProductReportByID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare report by product statement: %w", err)
 	}
