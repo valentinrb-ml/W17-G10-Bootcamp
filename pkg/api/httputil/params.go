@@ -60,27 +60,26 @@ func ConvertServiceErrorToAppError(err error) error {
 	case *apperrors.AppError:
 		return e
 	case *api.ServiceError:
-		return apperrors.NewAppError(MapServiceErrorCode(e.Code), e.Message)
+		// Mapear el código de ServiceError a AppError
+		var code string
+		switch e.ResponseCode {
+		case http.StatusBadRequest:
+			code = apperrors.CodeBadRequest
+		case http.StatusUnauthorized:
+			code = apperrors.CodeUnauthorized
+		case http.StatusForbidden:
+			code = apperrors.CodeForbidden
+		case http.StatusNotFound:
+			code = apperrors.CodeNotFound
+		case http.StatusConflict:
+			code = apperrors.CodeConflict
+		case http.StatusUnprocessableEntity:
+			code = apperrors.CodeValidationError
+		default:
+			code = apperrors.CodeInternal
+		}
+		return apperrors.NewAppError(code, e.Message)
 	default:
 		return apperrors.Wrap(err, "internal server error")
-	}
-}
-
-func MapServiceErrorCode(code int) string {
-	switch code {
-	case http.StatusBadRequest:
-		return apperrors.CodeBadRequest
-	case http.StatusUnauthorized:
-		return apperrors.CodeUnauthorized
-	case http.StatusForbidden:
-		return apperrors.CodeForbidden
-	case http.StatusNotFound:
-		return apperrors.CodeNotFound
-	case http.StatusConflict:
-		return apperrors.CodeConflict
-	case http.StatusUnprocessableEntity:
-		return apperrors.CodeValidationError
-	default:
-		return apperrors.CodeBadRequest
 	}
 }
