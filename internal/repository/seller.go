@@ -1,104 +1,139 @@
 package repository
 
 import (
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
+	"context"
+	"database/sql"
+	"fmt"
+	"strings"
+
+	"github.com/go-sql-driver/mysql"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
 
-type SellerRepository interface {
-	Create(s models.Seller) models.Seller
-	Update(id int, s models.Seller)
-	Delete(id int)
-	FindAll() []models.Seller
-	FindById(id int) (*models.Seller, *api.ServiceError)
+const (
+	querySellerCreate   = `INSERT INTO sellers (cid, company_name, address, telephone, locality_id) VALUES (?, ?, ?, ?, ?)`
+	querySellerUpdate   = `UPDATE sellers SET cid = ?, company_name = ?, address = ?, telephone = ?, locality_id = ? WHERE id = ?`
+	querySellerDelete   = `DELETE FROM sellers WHERE id = ?`
+	querySellerFindAll  = `SELECT id, cid, company_name, address, telephone, locality_id FROM sellers`
+	querySellerFindById = `SELECT id, cid, company_name, address, telephone, locality_id FROM sellers WHERE id = ?`
+)
 
-	CidAlreadyExists(cid int) bool
-	CidAlreadyExistsExcludeId(cid int, excludeId int) bool
-	ExistsById(id int) bool
-}
-
-type sellerRepository struct {
-	db map[int]models.Seller
-}
-
-func NewSellerRepository(db map[int]models.Seller) SellerRepository {
-	defaultDb := make(map[int]models.Seller)
-	if db != nil {
-		defaultDb = db
-	}
-	return &sellerRepository{db: defaultDb}
-}
-
-func (r *sellerRepository) Create(s models.Seller) models.Seller {
-	lastId := r.getLastId()
-	s.Id = lastId + 1
-
-	r.db[s.Id] = s
-
-	return s
-}
-
-func (r *sellerRepository) Update(id int, s models.Seller) {
-	r.db[id] = s
-}
-
-func (r *sellerRepository) Delete(id int) {
-	delete(r.db, id)
-}
-
-func (r *sellerRepository) FindAll() []models.Seller {
-	sellers := make([]models.Seller, 0, len(r.db))
-	for _, s := range r.db {
-		sellers = append(sellers, s)
-	}
-	return sellers
-}
-
-func (r *sellerRepository) FindById(id int) (*models.Seller, *api.ServiceError) {
-	s, exists := r.db[id]
-	if !exists {
-		err := api.ServiceErrors[api.ErrNotFound]
-		return nil, &api.ServiceError{
-			Code:         err.Code,
-			ResponseCode: err.ResponseCode,
-			Message:      "The seller you are looking for does not exist.",
+func (r *sellerRepository) Create(ctx context.Context, s models.Seller) (*models.Seller, error) {
+	res, err := r.mysql.ExecContext(
+		ctx,
+		querySellerCreate,
+		s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId,
+	)
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			switch mysqlErr.Number {
+			case 1062:
+				switch {
+				case strings.Contains(mysqlErr.Message, "cid"):
+					return nil, apperrors.NewAppError(apperrors.CodeConflict, "Could not create seller due to a data conflict: cid is already used. Please verify your input and try again.")
+				case strings.Contains(mysqlErr.Message, "locality_id"):
+					return nil, apperrors.NewAppError(apperrors.CodeConflict, "Could not create seller due to a data conflict: locality is already used. Please verify your input and try again.")
+				default:
+					return nil, apperrors.NewAppError(apperrors.CodeConflict, "Could not create seller due to a data conflict. Please verify your input and try again.")
+				}
+			case 1452:
+				return nil, apperrors.NewAppError(apperrors.CodeNotFound, "Unable to create seller: The specified locality does not exist. Please check the locality information and try again.")
+			}
 		}
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while creating a seller: %s", err.Error()))
 	}
 
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while creating a seller: %s", err.Error()))
+	}
+	s.Id = int(id)
 	return &s, nil
 }
 
-func (r *sellerRepository) CidAlreadyExists(cid int) bool {
-	for _, s := range r.db {
-		if s.Cid == cid {
-			return true
+func (r *sellerRepository) Update(ctx context.Context, id int, s models.Seller) error {
+	_, err := r.mysql.ExecContext(
+		ctx,
+		querySellerUpdate,
+		s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId, s.Id,
+	)
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			switch mysqlErr.Number {
+			case 1062:
+				switch {
+				case strings.Contains(mysqlErr.Message, "cid"):
+					return apperrors.NewAppError(apperrors.CodeConflict, "Could not update seller due to a data conflict: cid is already used. Please verify your input and try again.")
+				case strings.Contains(mysqlErr.Message, "locality_id"):
+					return apperrors.NewAppError(apperrors.CodeConflict, "Could not update seller due to a data conflict: locality_id is already used. Please verify your input and try again.")
+				default:
+					return apperrors.NewAppError(apperrors.CodeConflict, "Could not update seller due to a data conflict. Please verify your input and try again.")
+				}
+			case 1452:
+				return apperrors.NewAppError(apperrors.CodeNotFound, "Unable to update seller: The specified locality does not exist. Please check the locality information and try again.")
+			}
 		}
+		return apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while updating a seller: %s", err.Error()))
 	}
 
-	return false
+	return nil
 }
 
-func (r *sellerRepository) CidAlreadyExistsExcludeId(cid int, excludeId int) bool {
-	for _, s := range r.db {
-		if s.Cid == cid && s.Id != excludeId {
-			return true
+func (r *sellerRepository) Delete(ctx context.Context, id int) error {
+	result, err := r.mysql.ExecContext(ctx, querySellerDelete, id)
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1451 {
+			return apperrors.NewAppError(apperrors.CodeConflict, "Cannot delete seller: there are products associated with this seller.")
 		}
+		return apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while deleting the seller: %s", err.Error()))
 	}
-	return false
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while deleting the seller: %s", err.Error()))
+	}
+	if rowsAffected == 0 {
+		return apperrors.NewAppError(apperrors.CodeNotFound, "The seller you are trying to delete does not exist")
+	}
+
+	return nil
 }
 
-func (r *sellerRepository) ExistsById(id int) bool {
-	_, exists := r.db[id]
+func (r *sellerRepository) FindAll(ctx context.Context) ([]models.Seller, error) {
+	rows, err := r.mysql.QueryContext(ctx, querySellerFindAll)
+	if err != nil {
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while finding all sellers: %s", err.Error()))
+	}
+	defer rows.Close()
 
-	return exists
-}
-
-func (r *sellerRepository) getLastId() int {
-	maxId := 0
-	for id := range r.db {
-		if id > maxId {
-			maxId = id
+	var sellers []models.Seller
+	for rows.Next() {
+		var s models.Seller
+		err := rows.Scan(&s.Id, &s.Cid, &s.CompanyName, &s.Address, &s.Telephone, &s.LocalityId)
+		if err != nil {
+			return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while finding all sellers: %s", err.Error()))
 		}
+		sellers = append(sellers, s)
 	}
-	return maxId
+
+	if err := rows.Err(); err != nil {
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while finding all sellers: %s", err.Error()))
+	}
+
+	return sellers, nil
+}
+
+func (r *sellerRepository) FindById(ctx context.Context, id int) (*models.Seller, error) {
+	var s models.Seller
+	row := r.mysql.QueryRowContext(ctx, querySellerFindById, id)
+	err := row.Scan(&s.Id, &s.Cid, &s.CompanyName, &s.Address, &s.Telephone, &s.LocalityId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "The seller you are looking for does not exist.")
+		}
+		return nil, apperrors.NewAppError(apperrors.CodeNotFound, "An internal server error occurred while retrieving the seller.")
+	}
+
+	return &s, nil
 }

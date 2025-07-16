@@ -2,20 +2,13 @@ package service
 
 import (
 	"context"
+	"errors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
 )
-
-
-type ProductService interface {
-	GetAll(ctx context.Context) ([]product.ProductResponse, error)
-	Create(ctx context.Context, prod product.Product) (product.ProductResponse, error)
-	GetByID(ctx context.Context, id int) (product.ProductResponse, error)
-	Delete(ctx context.Context, id int) error
-	Patch(ctx context.Context, id int, req product.ProductPatchRequest) (product.ProductResponse, error)
-}
 
 type productService struct{ repo repository.ProductRepository }
 
@@ -26,14 +19,18 @@ func NewProductService(r repository.ProductRepository) ProductService {
 func (s *productService) GetAll(ctx context.Context) ([]product.ProductResponse, error) {
 	domainList, err := s.repo.GetAll(ctx)
 	if err != nil {
-		return nil, err
+		return nil, apperrors.Wrap(err, "failed to get all products")
 	}
 	return mappers.FromDomainList(domainList), nil
 }
 
 func (s *productService) Create(ctx context.Context, prod product.Product) (product.ProductResponse, error) {
 	if err := validators.ValidateProductBusinessRules(prod); err != nil {
-		return product.ProductResponse{}, err
+		var appErr *apperrors.AppError
+		if errors.As(err, &appErr) {
+			return product.ProductResponse{}, err // Ya es AppError
+		}
+		return product.ProductResponse{}, apperrors.NewAppError(apperrors.CodeBadRequest, err.Error())
 	}
 
 	savedProduct, err := s.repo.Save(ctx, prod)

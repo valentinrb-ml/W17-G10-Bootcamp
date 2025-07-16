@@ -5,7 +5,7 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
 )
 
-
+// Monta las rutas relacionadas con la entidad Employee en el router API principal.
 func MountEmployeeRoutes(api chi.Router, hd *handler.EmployeeHandler) {
 	api.Route("/employees", func(r chi.Router) {
 		r.Get("/", hd.GetAll)

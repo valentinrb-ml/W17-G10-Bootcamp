@@ -1,105 +1,75 @@
 package service
 
 import (
+	"context"
 	"slices"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
 
-type SellerService interface {
-	Create(reqs models.RequestSeller) (*models.ResponseSeller, *api.ServiceError)
-	Update(id int, reqs models.RequestSeller) (*models.ResponseSeller, *api.ServiceError)
-	Delete(id int) *api.ServiceError
-	FindAll() []models.ResponseSeller
-	FindById(id int) (*models.ResponseSeller, *api.ServiceError)
-}
-
-type sellerService struct {
-	rp repository.SellerRepository
-}
-
-func NewSellerService(rp repository.SellerRepository) SellerService {
-	return &sellerService{rp: rp}
-}
-
-func (sv *sellerService) Create(reqs models.RequestSeller) (*models.ResponseSeller, *api.ServiceError) {
-	if sv.rp.CidAlreadyExists(*reqs.Cid) {
-		err := api.ServiceErrors[api.ErrConflict]
-		return nil, &api.ServiceError{
-			Code:         err.Code,
-			ResponseCode: err.ResponseCode,
-			Message:      "The CID is in use, use a valid one",
-		}
-	}
-
+func (sv *sellerService) Create(ctx context.Context, reqs models.RequestSeller) (*models.ResponseSeller, error) {
 	ms := mappers.RequestSellerToSeller(reqs)
 
-	s := sv.rp.Create(ms)
-	resps := models.ResponseSeller(s)
+	s, err := sv.sellerRepo.Create(ctx, ms)
+	if err != nil {
+		return nil, err
+	}
+
+	resps := mappers.ToResponseSeller(s)
 
 	return &resps, nil
 }
 
-func (sv *sellerService) Update(id int, reqs models.RequestSeller) (*models.ResponseSeller, *api.ServiceError) {
-	if sv.rp.CidAlreadyExistsExcludeId(*reqs.Cid, id) {
-		err := api.ServiceErrors[api.ErrConflict]
-		return nil, &api.ServiceError{
-			Code:         err.Code,
-			ResponseCode: err.ResponseCode,
-			Message:      "The CID is in use, use a valid one",
-		}
-	}
-	s, err := sv.rp.FindById(id)
+func (sv *sellerService) Update(ctx context.Context, id int, reqs models.RequestSeller) (*models.ResponseSeller, error) {
+	s, err := sv.sellerRepo.FindById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
 	mappers.ApplySellerPatch(s, &reqs)
 
-	sv.rp.Update(id, *s)
-	resps := models.ResponseSeller(*s)
+	err = sv.sellerRepo.Update(ctx, id, *s)
+	if err != nil {
+		return nil, err
+	}
+
+	resps := mappers.ToResponseSeller(s)
 
 	return &resps, nil
 }
 
-func (sv *sellerService) Delete(id int) *api.ServiceError {
-	if !sv.rp.ExistsById(id) {
-		err := api.ServiceErrors[api.ErrNotFound]
-		return &api.ServiceError{
-			Code:         err.Code,
-			ResponseCode: err.ResponseCode,
-			Message:      "The seller you are trying to delete does not exist",
-		}
+func (sv *sellerService) Delete(ctx context.Context, id int) error {
+	err := sv.sellerRepo.Delete(ctx, id)
+	if err != nil {
+		return err
 	}
-
-	sv.rp.Delete(id)
 
 	return nil
 }
 
-func (sv *sellerService) FindAll() []models.ResponseSeller {
-	var rs []models.ResponseSeller
-	for _, s := range sv.rp.FindAll() {
-		rs = append(rs, models.ResponseSeller(s))
+func (sv *sellerService) FindAll(ctx context.Context) ([]models.ResponseSeller, error) {
+	s, err := sv.sellerRepo.FindAll(ctx)
+	if err != nil {
+		return []models.ResponseSeller{}, err
 	}
+
+	rs := mappers.ToResponseSellerList(s)
 
 	slices.SortFunc(rs, func(a, b models.ResponseSeller) int {
 		return a.Id - b.Id
 	})
 
-	return rs
+	return rs, nil
 }
 
-func (sv *sellerService) FindById(id int) (*models.ResponseSeller, *api.ServiceError) {
-	s, err := sv.rp.FindById(id)
+func (sv *sellerService) FindById(ctx context.Context, id int) (*models.ResponseSeller, error) {
+	s, err := sv.sellerRepo.FindById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	resps := models.ResponseSeller(*s)
+	resps := mappers.ToResponseSeller(s)
 
 	return &resps, nil
 }

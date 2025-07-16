@@ -5,12 +5,18 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
 )
 
-func MountProductRoutes(api chi.Router, hd *handler.ProductHandler) {
+func MountProductRoutes(api chi.Router, productHandler *handler.ProductHandler, productRecordHandler *handler.ProductRecordHandler) {
 	api.Route("/products", func(r chi.Router) {
-		r.Get("/", hd.GetAll)
-		r.Get("/{id}", hd.GetByID)
-		r.Post("/", hd.Create)
-		r.Patch("/{id}", hd.Patch)
-		r.Delete("/{id}", hd.Delete)
+		r.Get("/", productHandler.GetAll)
+		r.Post("/", productHandler.Create)
+
+		// Product records reporting path
+		r.Get("/reportRecords", productRecordHandler.GetRecordsReport) // GET /api/v1/products/reportRecords?id=1
+
+		r.Route("/{id}", func(r chi.Router) {
+			r.Get("/", productHandler.GetByID)
+			r.Patch("/", productHandler.Patch)
+			r.Delete("/", productHandler.Delete)
+		})
 	})
 }

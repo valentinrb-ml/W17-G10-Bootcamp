@@ -4,21 +4,21 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
 
-func RequestSectionToSection(req section.RequestSection) section.Section {
-	return section.Section{
-		SectionNumber:      *req.SectionNumber,
+func RequestSectionToSection(req models.PostSection) models.Section {
+	return models.Section{
+		SectionNumber:      req.SectionNumber,
 		CurrentTemperature: *req.CurrentTemperature,
 		MinimumTemperature: *req.MinimumTemperature,
-		CurrentCapacity:    *req.CurrentCapacity,
-		MinimumCapacity:    *req.MinimumCapacity,
-		MaximumCapacity:    *req.MaximumCapacity,
-		WarehouseId:        *req.WarehouseId,
-		ProductId:          req.ProductId,
+		CurrentCapacity:    req.CurrentCapacity,
+		MinimumCapacity:    req.MinimumCapacity,
+		MaximumCapacity:    req.MaximumCapacity,
+		WarehouseId:        req.WarehouseId,
+		ProductTypeId:      req.ProductTypeId,
 	}
 }
 
-func SectionToResponseSection(s section.Section) section.ResponseSection {
-	return section.ResponseSection{
+func SectionToResponseSection(s models.Section) models.ResponseSection {
+	return models.ResponseSection{
 		Id:                 s.Id,
 		SectionNumber:      s.SectionNumber,
 		CurrentTemperature: s.CurrentTemperature,
@@ -27,13 +27,13 @@ func SectionToResponseSection(s section.Section) section.ResponseSection {
 		MinimumCapacity:    s.MinimumCapacity,
 		MaximumCapacity:    s.MaximumCapacity,
 		WarehouseId:        s.WarehouseId,
-		ProductId:          s.ProductId,
+		ProductTypeId:      s.ProductTypeId,
 	}
 }
 
-func ApplySectionPatch(sec section.RequestSection, existing *section.Section) {
-	if sec.ProductId != 0 {
-		existing.ProductId = sec.ProductId
+func ApplySectionPatch(sec models.PatchSection, existing *models.Section) {
+	if sec.ProductTypeId != nil {
+		existing.ProductTypeId = *sec.ProductTypeId
 
 	}
 	if sec.SectionNumber != nil {

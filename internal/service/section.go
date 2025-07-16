@@ -1,106 +1,64 @@
 package service
 
 import (
-	"fmt"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
-	"net/http"
+	"context"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
 
-type SectionService interface {
-	FindAllSections() ([]section.Section, *api.ServiceError)
-	FindById(id int) (section.Section, *api.ServiceError)
-	DeleteSection(id int) *api.ServiceError
-	CreateSection(sec section.Section) (section.Section, *api.ServiceError)
-	UpdateSection(id int, sec section.RequestSection) (section.Section, *api.ServiceError)
-}
-
-type SectionDefault struct {
-	rp          repository.SectionRepository
-	rpWareHouse repository.WarehouseRepository
-}
-
-func NewSectionServer(rp repository.SectionRepository, rpWareHouse repository.WarehouseRepository) *SectionDefault {
-	return &SectionDefault{
-		rp:          rp,
-		rpWareHouse: rpWareHouse,
-	}
-}
-
-func (s *SectionDefault) FindAllSections() ([]section.Section, *api.ServiceError) {
-	sections, err := s.rp.FindAllSections()
+// FindAllSections fetches and returns all sections from the repository.
+func (s *SectionDefault) FindAllSections(ctx context.Context) ([]models.Section, error) {
+	sections, err := s.rp.FindAllSections(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return sections, nil
 }
 
-func (s *SectionDefault) FindById(id int) (section.Section, *api.ServiceError) {
-	sec, err := s.rp.FindById(id)
+// FindById retrieves a section by its ID using the repository.
+func (s *SectionDefault) FindById(ctx context.Context, id int) (*models.Section, error) {
+	sec, err := s.rp.FindById(ctx, id)
 	if err != nil {
-		return section.Section{}, err
+		return nil, err
 	}
 	return sec, nil
 }
 
-func (s *SectionDefault) DeleteSection(id int) *api.ServiceError {
-	err := s.rp.DeleteSection(id)
+// DeleteSection removes a section by ID using the repository.
+func (s *SectionDefault) DeleteSection(ctx context.Context, id int) error {
+	err := s.rp.DeleteSection(ctx, id)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *SectionDefault) CreateSection(sec section.Section) (section.Section, *api.ServiceError) {
-	if _, err1 := s.rpWareHouse.FindById(sec.WarehouseId); err1 != nil {
-		fmt.Println("no hay tin")
-		return section.Section{}, &api.ServiceError{
-			Code:         err1.Code,
-			ResponseCode: http.StatusBadRequest,
-			Message:      "The warehouse does not exist",
-		}
-	}
-	newSection, err := s.rp.CreateSection(sec)
+
+// CreateSection creates a new section using the repository.
+func (s *SectionDefault) CreateSection(ctx context.Context, sec models.Section) (*models.Section, error) {
+	newSection, err := s.rp.CreateSection(ctx, sec)
 	if err != nil {
-		return section.Section{}, err
+		return nil, err
 	}
 	return newSection, nil
 
 }
-func (s *SectionDefault) UpdateSection(id int, sec section.RequestSection) (section.Section, *api.ServiceError) {
-	existing, err := s.rp.FindById(id)
+
+// UpdateSection partially updates an existing section by applying a patch and persisting changes.
+// Uses a mapper to apply only the changed fields.
+func (s *SectionDefault) UpdateSection(ctx context.Context, id int, sec models.PatchSection) (*models.Section, error) {
+	existing, err := s.rp.FindById(ctx, id)
 	if err != nil {
-		return section.Section{}, err
-	}
-	if sec.SectionNumber != nil {
-		if s.rp.ExistsSectionByNumber(*sec.SectionNumber) && *sec.SectionNumber != existing.SectionNumber {
-			err := api.ServiceErrors[api.ErrConflict]
-			return section.Section{}, &api.ServiceError{
-				Code:         err.Code,
-				ResponseCode: err.ResponseCode,
-				Message:      "The section number already exists",
-			}
-		}
-	}
-	if sec.WarehouseId != nil {
-		if _, err1 := s.rpWareHouse.FindById(*sec.WarehouseId); err1 != nil {
-			return section.Section{}, &api.ServiceError{
-				Code:         err1.Code,
-				ResponseCode: err1.ResponseCode,
-				Message:      "The warehouse does not exist",
-			}
-		}
+		return nil, err
 	}
 
-	mappers.ApplySectionPatch(sec, &existing)
+	mappers.ApplySectionPatch(sec, existing)
 
-	secUpd, err := s.rp.UpdateSection(id, existing)
+	secUpd, err := s.rp.UpdateSection(ctx, id, existing)
 
 	if err != nil {
-		return section.Section{}, err
+		return nil, err
 	}
 
 	return secUpd, nil

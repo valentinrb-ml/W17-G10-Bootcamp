@@ -1,147 +1,123 @@
 package repository
 
 import (
-	"encoding/json"
+	"context"
+	"database/sql"
 	"errors"
-	"os"
-	"sync"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
 )
 
-var (
-	ErrCardNumberIDExists = errors.New("card_number_id already exists")
-	ErrNotFound           = errors.New("not found")
+const (
+	// Query para insertar un empleado
+	queryEmployeeInsert = `INSERT INTO employees (id_card_number, first_name, last_name, wareHouse_id) VALUES (?, ?, ?, ?)`
+	// Query para traer empleado por card_number_id (para comprobar duplicados)
+	queryEmployeeSelectByCardNumberID = `SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees WHERE id_card_number=?`
+	// Query para traer todos los empleados
+	queryEmployeeSelectAll = `SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees`
+	// Query para traer empleado por id
+	queryEmployeeSelectByID = `SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees WHERE id=?`
+	// Query para actualizar empleado
+	queryEmployeeUpdate = `UPDATE employees SET id_card_number=?, first_name=?, last_name=?, wareHouse_id=? WHERE id=?`
+	// Query para borrar empleado
+	queryEmployeeDelete = `DELETE FROM employees WHERE id=?`
 )
 
-type EmployeeRepository interface {
-	Create(e *models.Employee) (*models.Employee, error)
-	SaveToFile(filename string) error
-	FindByCardNumberID(cardNumberID string) (*models.Employee, error)
-	FindAll() ([]*models.Employee, error)
-	FindByID(id int) (*models.Employee, error)
-	Update(id int, patch *models.EmployeePatch) (*models.Employee, error)
-	Delete(id int) error
+// Implementación MySQL del repositorio de empleados
+type EmployeeMySQLRepository struct {
+	db *sql.DB
 }
 
-type EmployeeMap struct {
-	mu     sync.Mutex
-	nextID int
-	data   map[int]*models.Employee
+func NewEmployeeRepository(db *sql.DB) *EmployeeMySQLRepository {
+	return &EmployeeMySQLRepository{db: db}
 }
 
-func NewEmployeeMap(db map[int]*models.Employee) *EmployeeMap {
-	defaultDb := make(map[int]*models.Employee)
-	if db != nil {
-		defaultDb = db
+// Crea un nuevo empleado
+func (r *EmployeeMySQLRepository) Create(ctx context.Context, e *models.Employee) (*models.Employee, error) {
+	result, err := r.db.ExecContext(ctx, queryEmployeeInsert, e.CardNumberID, e.FirstName, e.LastName, e.WarehouseID)
+	if err != nil {
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "database insert failed")
 	}
-
-	maxID := 0
-	for id := range defaultDb {
-		if id > maxID {
-			maxID = id
-		}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "could not get inserted ID")
 	}
-
-	return &EmployeeMap{
-		nextID: maxID + 1,
-		data:   defaultDb,
-	}
-}
-
-func (r *EmployeeMap) Create(e *models.Employee) (*models.Employee, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	for _, emp := range r.data {
-		if emp.CardNumberID == e.CardNumberID {
-			return nil, ErrCardNumberIDExists
-		}
-	}
-	e.ID = r.nextID
-	r.nextID++
-	r.data[e.ID] = e
+	e.ID = int(id)
 	return e, nil
 }
 
-func (r *EmployeeMap) SaveToFile(filename string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	var employees []models.EmployeeDoc
-	for _, emp := range r.data {
-		employees = append(employees, mappers.MapEmployeeToEmployeeDoc(emp))
+// Busca un empleado por card_number_id (para unicidad)
+func (r *EmployeeMySQLRepository) FindByCardNumberID(ctx context.Context, cardNumberID string) (*models.Employee, error) {
+	row := r.db.QueryRowContext(ctx, queryEmployeeSelectByCardNumberID, cardNumberID)
+	e := &models.Employee{}
+	err := row.Scan(&e.ID, &e.CardNumberID, &e.FirstName, &e.LastName, &e.WarehouseID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
 	}
-	file, err := os.Create(filename)
 	if err != nil {
-		return errors.New("could not create the file")
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "database scan failed")
 	}
-	defer file.Close()
-	return json.NewEncoder(file).Encode(employees)
+	return e, nil
 }
 
-func (r *EmployeeMap) FindByCardNumberID(cardNumberID string) (*models.Employee, error) {
-	for _, emp := range r.data {
-		if emp.CardNumberID == cardNumberID {
-			return emp, nil
+// Devuelve todos los empleados
+func (r *EmployeeMySQLRepository) FindAll(ctx context.Context) ([]*models.Employee, error) {
+	rows, err := r.db.QueryContext(ctx, queryEmployeeSelectAll)
+	if err != nil {
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "database query failed")
+	}
+	defer rows.Close()
+
+	var employees []*models.Employee
+	for rows.Next() {
+		e := &models.Employee{}
+		if err := rows.Scan(&e.ID, &e.CardNumberID, &e.FirstName, &e.LastName, &e.WarehouseID); err != nil {
+			return nil, apperrors.NewAppError(apperrors.CodeInternal, "database scan failed")
 		}
+		employees = append(employees, e)
 	}
-	return nil, nil
-}
-
-func (r *EmployeeMap) FindAll() ([]*models.Employee, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	employees := make([]*models.Employee, 0, len(r.data))
-	for _, emp := range r.data {
-		employees = append(employees, emp)
+	if err := rows.Err(); err != nil {
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "row iteration error")
 	}
 	return employees, nil
 }
 
-func (r *EmployeeMap) FindByID(id int) (*models.Employee, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	emp, ok := r.data[id]
-	if !ok {
-		return nil, nil
+// Busca un empleado por id
+func (r *EmployeeMySQLRepository) FindByID(ctx context.Context, id int) (*models.Employee, error) {
+	row := r.db.QueryRowContext(ctx, queryEmployeeSelectByID, id)
+	e := &models.Employee{}
+	err := row.Scan(&e.ID, &e.CardNumberID, &e.FirstName, &e.LastName, &e.WarehouseID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil // PARA QUE EL SERVICE PUEDA DEVOLVER 409 O 404
 	}
-	return emp, nil
+	if err != nil {
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "database scan failed")
+	}
+	return e, nil
 }
 
-func (r *EmployeeMap) Update(id int, patch *models.EmployeePatch) (*models.Employee, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	emp, ok := r.data[id]
-	if !ok {
-		return nil, ErrNotFound
+// Actualiza un empleado existente
+func (r *EmployeeMySQLRepository) Update(ctx context.Context, id int, e *models.Employee) error {
+	_, err := r.db.ExecContext(ctx, queryEmployeeUpdate, e.CardNumberID, e.FirstName, e.LastName, e.WarehouseID, id)
+	if err != nil {
+		return apperrors.NewAppError(apperrors.CodeInternal, "database update failed")
 	}
-	if patch.CardNumberID != nil && *patch.CardNumberID != emp.CardNumberID {
-		for _, v := range r.data {
-			if v.CardNumberID == *patch.CardNumberID {
-				return nil, ErrCardNumberIDExists
-			}
-		}
-		emp.CardNumberID = *patch.CardNumberID
-	}
-	if patch.FirstName != nil {
-		emp.FirstName = *patch.FirstName
-	}
-	if patch.LastName != nil {
-		emp.LastName = *patch.LastName
-	}
-	if patch.WarehouseID != nil && *patch.WarehouseID != 0 {
-		emp.WarehouseID = *patch.WarehouseID
-	}
-	r.data[emp.ID] = emp
-	return emp, nil
+	return nil
 }
 
-func (r *EmployeeMap) Delete(id int) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	if _, exists := r.data[id]; !exists {
-		return ErrNotFound
+// Borra un empleado por id
+func (r *EmployeeMySQLRepository) Delete(ctx context.Context, id int) error {
+	result, err := r.db.ExecContext(ctx, queryEmployeeDelete, id)
+	if err != nil {
+		return apperrors.NewAppError(apperrors.CodeInternal, "database delete failed")
 	}
-	delete(r.data, id)
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return apperrors.NewAppError(apperrors.CodeInternal, "rows affected failed")
+	}
+	if rows == 0 {
+		return apperrors.NewAppError(apperrors.CodeNotFound, "employee not found")
+	}
 	return nil
 }

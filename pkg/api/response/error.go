@@ -2,38 +2,61 @@ package response
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"net/http"
 )
 
-type errorResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
+type ErrorResponse struct {
+	Error ErrorDetail `json:"error"`
+}
+type ErrorDetail struct {
+	Code    string                 `json:"code"`
+	Message string                 `json:"message"`
+	Details map[string]interface{} `json:"details,omitempty"`
 }
 
-func Error(w http.ResponseWriter, statusCode int, message string) {
-	defaultStatusCode := http.StatusInternalServerError
-	if statusCode > 299 && statusCode < 600 {
-		defaultStatusCode = statusCode
-	}
-
-	body := errorResponse{
-		Status:  http.StatusText(defaultStatusCode),
-		Message: message,
-	}
-	bytes, err := json.Marshal(body)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+// Error - Single point handling of HTTP errors
+func Error(w http.ResponseWriter, err error) {
+	if err == nil {
+		writeErrorResponse(w, http.StatusInternalServerError, ErrorDetail{
+			Code:    apperrors.CodeInternal,
+			Message: "Unexpected nil error",
+		})
 		return
 	}
 
-	// write response
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(defaultStatusCode)
-	w.Write(bytes)
+	var appErr *apperrors.AppError
+	if errors.As(err, &appErr) {
+		detail := ErrorDetail{
+			Code:    appErr.Code,
+			Message: appErr.Message,
+		}
+
+		// Only include details if they are not empty
+		if len(appErr.Details) > 0 {
+			detail.Details = appErr.Details
+		}
+
+		writeErrorResponse(w, appErr.HTTPStatus, detail)
+		return
+	}
+
+	// Untyped error - fallback
+	writeErrorResponse(w, http.StatusInternalServerError, ErrorDetail{
+		Code:    apperrors.CodeInternal,
+		Message: "internal server error",
+	})
 }
 
-func Errorf(w http.ResponseWriter, statusCode int, format string, args ...interface{}) {
-	message := fmt.Sprintf(format, args...)
-	Error(w, statusCode, message)
+func writeErrorResponse(w http.ResponseWriter, statusCode int, detail ErrorDetail) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+
+	response := ErrorResponse{Error: detail}
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		// Fallback if encoding fails
+		http.Error(w, `{"error":{"code":"ENCODING_ERROR, "message":"failed to encode response"}}`, http.StatusInternalServerError)
+	}
 }

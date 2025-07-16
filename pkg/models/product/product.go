@@ -1,11 +1,13 @@
 package product
 
+import "database/sql"
+
 type Dimensions struct{ Width, Height, Length float64 }
 
 type Expiration struct {
-	Rate                    int
+	Rate                    float64
 	RecommendedFreezingTemp float64
-	FreezingRate            int
+	FreezingRate            float64
 }
 
 // Product Main model used in the Domain
@@ -21,7 +23,7 @@ type Product struct {
 }
 
 // DTOs
-// productBase contains the fields shared by Request and Response
+// ProductData contains the fields shared by Request and Response
 type ProductData struct {
 	ProductCode                    string  `json:"product_code"`
 	Description                    string  `json:"description"`
@@ -29,9 +31,9 @@ type ProductData struct {
 	Height                         float64 `json:"height"`
 	Length                         float64 `json:"length"`
 	NetWeight                      float64 `json:"net_weight"`
-	ExpirationRate                 int     `json:"expiration_rate"`
+	ExpirationRate                 float64 `json:"expiration_rate"`
 	RecommendedFreezingTemperature float64 `json:"recommended_freezing_temperature"`
-	FreezingRate                   int     `json:"freezing_rate"`
+	FreezingRate                   float64 `json:"freezing_rate"`
 	ProductTypeID                  int     `json:"product_type_id"`
 	SellerID                       *int    `json:"seller_id,omitempty"`
 }
@@ -52,9 +54,25 @@ type ProductPatchRequest struct {
 	Height                         *float64 `json:"height,omitempty"`
 	Length                         *float64 `json:"length,omitempty"`
 	NetWeight                      *float64 `json:"net_weight,omitempty"`
-	ExpirationRate                 *int     `json:"expiration_rate,omitempty"`
+	ExpirationRate                 *float64 `json:"expiration_rate,omitempty"`
 	RecommendedFreezingTemperature *float64 `json:"recommended_freezing_temperature,omitempty"`
-	FreezingRate                   *int     `json:"freezing_rate,omitempty"`
+	FreezingRate                   *float64 `json:"freezing_rate,omitempty"`
 	ProductTypeID                  *int     `json:"product_type_id,omitempty"`
 	SellerID                       *int     `json:"seller_id,omitempty"`
+}
+
+// Structure that matches 1-to-1 with table `products`
+type ProductDb struct {
+	ID          int           `db:"id"`
+	Code        string        `db:"product_code"`
+	Description string        `db:"description"`
+	Width       float64       `db:"width"`
+	Height      float64       `db:"height"`
+	Length      float64       `db:"length"`
+	NetWeight   float64       `db:"net_weight"`
+	ExpRate     float64       `db:"expiration_rate"`
+	RecFreeze   float64       `db:"recommended_freezing_temperature"`
+	FreezeRate  float64       `db:"freezing_rate"`
+	TypeID      int           `db:"product_type_id"`
+	SellerID    sql.NullInt64 `db:"seller_id"`
 }
