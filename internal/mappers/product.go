@@ -1,6 +1,7 @@
 package mappers
 
 import (
+	"database/sql"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
 )
 
@@ -65,5 +66,52 @@ func ResponseToDomain(r product.ProductResponse) product.Product {
 		},
 		ProductType: r.ProductTypeID,
 		SellerID:    r.SellerID,
+	}
+}
+
+// DB -> Domain
+func DbToDomain(d product.ProductDb) product.Product {
+	var seller *int
+	if d.SellerID.Valid {
+		v := int(d.SellerID.Int64)
+		seller = &v
+	}
+
+	return product.Product{
+		ID:          d.ID,
+		Code:        d.Code,
+		Description: d.Description,
+		Dimensions:  product.Dimensions{Width: d.Width, Height: d.Height, Length: d.Length},
+		NetWeight:   d.NetWeight,
+		Expiration: product.Expiration{
+			Rate:                    d.ExpRate,
+			RecommendedFreezingTemp: d.RecFreeze,
+			FreezingRate:            d.FreezeRate,
+		},
+		ProductType: d.TypeID,
+		SellerID:    seller,
+	}
+}
+
+// Domain -> DB
+func FromDomainToDb(p product.Product) product.ProductDb {
+	var seller sql.NullInt64
+	if p.SellerID != nil {
+		seller = sql.NullInt64{Int64: int64(*p.SellerID), Valid: true}
+	}
+
+	return product.ProductDb{
+		ID:          p.ID,
+		Code:        p.Code,
+		Description: p.Description,
+		Width:       p.Dimensions.Width,
+		Height:      p.Dimensions.Height,
+		Length:      p.Dimensions.Length,
+		NetWeight:   p.NetWeight,
+		ExpRate:     p.Expiration.Rate,
+		RecFreeze:   p.Expiration.RecommendedFreezingTemp,
+		FreezeRate:  p.Expiration.FreezingRate,
+		TypeID:      p.ProductType,
+		SellerID:    seller,
 	}
 }

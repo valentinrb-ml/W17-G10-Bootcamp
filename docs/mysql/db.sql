@@ -185,6 +185,10 @@ FOREIGN KEY(product_type_id) REFERENCES products_types(id);
 ALTER TABLE products
 ADD CONSTRAINT fk_products_seller
 FOREIGN KEY(seller_id) REFERENCES sellers(id);
+-- Unique product code
+ALTER TABLE products
+    ADD CONSTRAINT uk_products_code
+        UNIQUE (product_code);
 -- Sections -> products_types
 ALTER TABLE sections
 ADD CONSTRAINT fk_sections_product_type

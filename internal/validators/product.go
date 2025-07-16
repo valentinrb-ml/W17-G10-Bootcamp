@@ -21,6 +21,9 @@ func (v *ProductValidator) addError(field, message string) {
 }
 
 func (v *ProductValidator) Error() error {
+	if v.err == nil {
+		return nil // <- nil literal, not typed-nil
+	}
 	return v.err
 }
 

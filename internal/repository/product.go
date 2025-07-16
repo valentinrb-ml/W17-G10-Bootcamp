@@ -2,154 +2,272 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
+	"strings"
+	"time"
+
+	"github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
-type ProductRepository interface {
-	GetAll(ctx context.Context) ([]product.Product, error)
-	GetByID(ctx context.Context, id int) (product.Product, error)
-	ExistsByCode(ctx context.Context, code string) (bool, error)
-	Save(ctx context.Context, p product.Product) (product.Product, error)
-	Delete(ctx context.Context, id int) error
-	Patch(ctx context.Context, id int, req product.ProductPatchRequest) (product.Product, error)
+const (
+	queryTimeout = 5 * time.Second
+	baseSelect   = `SELECT id, product_code, description, width, height, length,
+	                     net_weight, expiration_rate, recommended_freezing_temperature,
+	                     freezing_rate, product_type_id, seller_id
+	               FROM products`
+	insertProduct = `
+		INSERT INTO products (
+		  product_code, description, width, height, length,
+		  net_weight, expiration_rate, recommended_freezing_temperature,
+		  freezing_rate, product_type_id, seller_id
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	updateProduct = `
+		UPDATE products SET
+		  product_code = ?, description = ?, width = ?, height = ?,
+		  length = ?, net_weight = ?, expiration_rate = ?,
+		  recommended_freezing_temperature = ?, freezing_rate = ?,
+		  product_type_id = ?, seller_id = ?
+		WHERE id = ?`
+	deleteProduct = `DELETE FROM products WHERE id = ?`
+)
+
+type productMySQLRepository struct {
+	db         *sqlx.DB
+	stmtByID   *sqlx.Stmt
+	stmtInsert *sqlx.Stmt
+	stmtUpdate *sqlx.Stmt
+	stmtDelete *sqlx.Stmt
 }
 
-type productMemoryRepository struct {
-	db     map[int]product.Product
-	nextID int
-}
+func NewProductRepository(db *sql.DB) (ProductRepository, error) {
+	xdb := sqlx.NewDb(db, "mysql")
 
-func NewProductRepository(db map[int]product.Product) ProductRepository {
-	var highestID int
-	for id := range db {
-		if id > highestID {
-			highestID = id
-		}
+	// Only critical sentences are prepared
+	selByID, err := xdb.Preparex(baseSelect + " WHERE id = ?")
+	if err != nil {
+		return nil, err
+	}
+	insert, err := xdb.Preparex(insertProduct)
+	if err != nil {
+		return nil, err
+	}
+	update, err := xdb.Preparex(updateProduct)
+	if err != nil {
+		return nil, err
+	}
+	deleteStmt, err := xdb.Preparex(deleteProduct)
+	if err != nil {
+		return nil, err
 	}
 
-	return &productMemoryRepository{
-		db:     db,
-		nextID: highestID + 1,
-	}
+	return &productMySQLRepository{
+		db:         xdb,
+		stmtByID:   selByID,
+		stmtInsert: insert,
+		stmtUpdate: update,
+		stmtDelete: deleteStmt,
+	}, nil
 }
 
-func (r *productMemoryRepository) GetAll(_ context.Context) ([]product.Product, error) {
-	products := make([]product.Product, 0, len(r.db))
-	for _, currentProduct := range r.db {
-		products = append(products, currentProduct)
+// CRUD
+
+func (r *productMySQLRepository) GetAll(ctx context.Context) ([]product.Product, error) {
+	ctx, cancel := context.WithTimeout(ctx, queryTimeout)
+	defer cancel()
+
+	var dbRows []product.ProductDb
+	query := baseSelect + " ORDER BY id"
+
+	if err := r.db.SelectContext(ctx, &dbRows, query); err != nil {
+		fmt.Println(err)
+		return nil, apperrors.Wrap(err, "failed to get all products")
+	}
+
+	products := make([]product.Product, len(dbRows))
+	for i, dp := range dbRows {
+		products[i] = mappers.DbToDomain(dp)
 	}
 	return products, nil
 }
 
-func (r *productMemoryRepository) GetByID(_ context.Context, id int) (product.Product, error) {
-	currentProduct, found := r.db[id]
-	if !found {
-		return product.Product{}, apperrors.NewAppError(apperrors.CodeNotFound, fmt.Sprintf("product with id %d not found", id))
+func (r *productMySQLRepository) GetByID(ctx context.Context, id int) (product.Product, error) {
+	ctx, cancel := context.WithTimeout(ctx, queryTimeout)
+	defer cancel()
+
+	var dp product.ProductDb
+	if err := r.stmtByID.GetContext(ctx, &dp, id); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return product.Product{}, apperrors.NewAppError(
+				apperrors.CodeNotFound,
+				fmt.Sprintf("product with id %d not found", id),
+			)
+		}
+		return product.Product{}, apperrors.Wrap(err, "failed to get product by id")
 	}
-	return currentProduct, nil
+	return mappers.DbToDomain(dp), nil
 }
 
-func (r *productMemoryRepository) ExistsByCode(_ context.Context, code string) (bool, error) {
-	for _, currentProduct := range r.db {
-		if currentProduct.Code == code {
-			return true, nil
-		}
+func (r *productMySQLRepository) Save(ctx context.Context, p product.Product) (product.Product, error) {
+	ctx, cancel := context.WithTimeout(ctx, queryTimeout)
+	defer cancel()
+
+	if p.ID == 0 {
+		return r.create(ctx, p)
 	}
-	return false, nil
+	return r.update(ctx, p)
 }
 
-func (r *productMemoryRepository) Save(ctx context.Context, currentProduct product.Product) (product.Product, error) {
-	if currentProduct.ID == 0 { // Create
-		exists, err := r.ExistsByCode(ctx, currentProduct.Code)
-		if err != nil {
-			return product.Product{}, apperrors.Wrap(err, "failed to check product code existence")
-		}
-		if exists {
-			return product.Product{}, apperrors.NewAppError(apperrors.CodeConflict, "product code already exists")
-		}
+func (r *productMySQLRepository) Delete(ctx context.Context, id int) error {
+	ctx, cancel := context.WithTimeout(ctx, queryTimeout)
+	defer cancel()
 
-		currentProduct.ID = r.nextID
-		r.nextID += 1
-	} else { // Update
-		_, err := r.GetByID(ctx, currentProduct.ID)
-		if err != nil {
-			return product.Product{}, err
-		}
-
-		for id, existing := range r.db {
-			if existing.Code == currentProduct.Code && id != currentProduct.ID {
-				return product.Product{}, apperrors.NewAppError(apperrors.CodeConflict, "product code already exists")
-			}
-		}
-	}
-
-	r.db[currentProduct.ID] = currentProduct
-	return currentProduct, nil
-}
-
-func (r *productMemoryRepository) Delete(ctx context.Context, id int) error {
-	_, err := r.GetByID(ctx, id)
+	res, err := r.stmtDelete.ExecContext(ctx, id)
 	if err != nil {
-		return err
+		return r.handleDBError(err, "failed to delete product")
 	}
-
-	delete(r.db, id)
+	if n, _ := res.RowsAffected(); n == 0 {
+		return apperrors.NewAppError(apperrors.CodeNotFound, "product not found")
+	}
 	return nil
 }
 
-func (r *productMemoryRepository) Patch(ctx context.Context, id int, req product.ProductPatchRequest) (product.Product, error) {
-	current, err := r.GetByID(ctx, id)
-	if err != nil {
-		return product.Product{}, err
-	}
+func (r *productMySQLRepository) Patch(ctx context.Context, id int, req product.ProductPatchRequest) (product.Product, error) {
+	ctx, cancel := context.WithTimeout(ctx, queryTimeout)
+	defer cancel()
 
-	updated := current
+	var (
+		fields []string
+		args   []interface{}
+	)
+
 	if req.ProductCode != nil {
-		updated.Code = *req.ProductCode
+		fields = append(fields, "product_code = ?")
+		args = append(args, *req.ProductCode)
 	}
 	if req.Description != nil {
-		updated.Description = *req.Description
+		fields = append(fields, "description = ?")
+		args = append(args, *req.Description)
 	}
 	if req.Width != nil {
-		updated.Dimensions.Width = *req.Width
+		fields = append(fields, "width = ?")
+		args = append(args, *req.Width)
 	}
 	if req.Height != nil {
-		updated.Dimensions.Height = *req.Height
+		fields = append(fields, "height = ?")
+		args = append(args, *req.Height)
 	}
 	if req.Length != nil {
-		updated.Dimensions.Length = *req.Length
+		fields = append(fields, "length = ?")
+		args = append(args, *req.Length)
 	}
 	if req.NetWeight != nil {
-		updated.NetWeight = *req.NetWeight
+		fields = append(fields, "net_weight = ?")
+		args = append(args, *req.NetWeight)
 	}
 	if req.ExpirationRate != nil {
-		updated.Expiration.Rate = *req.ExpirationRate
+		fields = append(fields, "expiration_rate = ?")
+		args = append(args, *req.ExpirationRate)
 	}
 	if req.RecommendedFreezingTemperature != nil {
-		updated.Expiration.RecommendedFreezingTemp = *req.RecommendedFreezingTemperature
+		fields = append(fields, "recommended_freezing_temperature = ?")
+		args = append(args, *req.RecommendedFreezingTemperature)
 	}
 	if req.FreezingRate != nil {
-		updated.Expiration.FreezingRate = *req.FreezingRate
+		fields = append(fields, "freezing_rate = ?")
+		args = append(args, *req.FreezingRate)
 	}
 	if req.ProductTypeID != nil {
-		updated.ProductType = *req.ProductTypeID
+		fields = append(fields, "product_type_id = ?")
+		args = append(args, *req.ProductTypeID)
 	}
 	if req.SellerID != nil {
-		updated.SellerID = req.SellerID
+		fields = append(fields, "seller_id = ?")
+		args = append(args, *req.SellerID)
 	}
 
-	if req.ProductCode != nil && *req.ProductCode != current.Code {
-		exists, err := r.ExistsByCode(ctx, *req.ProductCode)
-		if err != nil {
-			return product.Product{}, apperrors.Wrap(err, "failed to check product code existence")
-		}
-		if exists {
-			return product.Product{}, apperrors.NewAppError(apperrors.CodeConflict, "product code already exists")
-		}
+	if len(fields) == 0 { // nothing to modify
+		return r.GetByID(ctx, id)
 	}
 
-	r.db[id] = updated
-	return updated, nil
+	query := fmt.Sprintf("UPDATE products SET %s WHERE id = ?", strings.Join(fields, ", "))
+	args = append(args, id)
+
+	res, err := r.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return product.Product{}, r.handleDBError(err, "failed to patch product")
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return product.Product{}, apperrors.NewAppError(apperrors.CodeNotFound, "product not found")
+	}
+
+	return r.GetByID(ctx, id)
+}
+
+// privates (create / update)
+func (r *productMySQLRepository) create(ctx context.Context, p product.Product) (product.Product, error) {
+	d := mappers.FromDomainToDb(p)
+
+	res, err := r.stmtInsert.ExecContext(ctx,
+		d.Code, d.Description, d.Width, d.Height, d.Length,
+		d.NetWeight, d.ExpRate, d.RecFreeze, d.FreezeRate,
+		d.TypeID, d.SellerID)
+	if err != nil {
+		return product.Product{}, r.handleDBError(err, "failed to create product")
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return product.Product{}, apperrors.Wrap(err, "failed to fetch new id")
+	}
+	p.ID = int(id)
+	return p, nil
+}
+
+func (r *productMySQLRepository) update(ctx context.Context, p product.Product) (product.Product, error) {
+	d := mappers.FromDomainToDb(p)
+
+	_, err := r.stmtUpdate.ExecContext(ctx,
+		d.Code, d.Description, d.Width, d.Height, d.Length,
+		d.NetWeight, d.ExpRate, d.RecFreeze, d.FreezeRate,
+		d.TypeID, d.SellerID, d.ID)
+	if err != nil {
+		return product.Product{}, r.handleDBError(err, "failed to update product")
+	}
+	return p, nil
+}
+
+// MySQL error translation
+func (r *productMySQLRepository) handleDBError(err error, msg string) error {
+	var mysqlErr *mysql.MySQLError
+	if errors.As(err, &mysqlErr) {
+		switch mysqlErr.Number {
+		case 1062: // ER_DUP_ENTRY - Duplicate key
+			return apperrors.NewAppError(apperrors.CodeConflict, "product code already exists")
+
+		case 1451: // ER_ROW_IS_REFERENCED_2 - Cannot delete (has product_records)
+			return apperrors.NewAppError(apperrors.CodeConflict, "cannot delete product: it has associated product records")
+
+		case 1452: // ER_NO_REFERENCED_ROW_2 - FK constraint fails
+			if strings.Contains(mysqlErr.Message, "product_type_id") {
+				return apperrors.NewAppError(apperrors.CodeBadRequest, "product_type_id does not exist")
+			}
+			if strings.Contains(mysqlErr.Message, "seller_id") {
+				return apperrors.NewAppError(apperrors.CodeBadRequest, "seller_id does not exist")
+			}
+			return apperrors.NewAppError(apperrors.CodeBadRequest, "referenced record does not exist")
+
+		case 1048: // ER_BAD_NULL_ERROR
+			return apperrors.NewAppError(apperrors.CodeBadRequest, "required field cannot be null")
+
+		case 1406: // ER_DATA_TOO_LONG
+			return apperrors.NewAppError(apperrors.CodeBadRequest, "data too long for field")
+		}
+	}
+	return apperrors.Wrap(err, msg)
 }

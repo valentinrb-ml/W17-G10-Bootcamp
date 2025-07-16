@@ -1,13 +1,11 @@
 package server
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/loader"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/router"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
@@ -35,24 +33,16 @@ type ServerChi struct {
 
 // Run is a method that runs the server
 func (s *ServerChi) Run(mysql *sql.DB) (err error) {
-	ctx := context.Background()
-
-	ldProduct, err := loader.NewJSONFileProductLoader("docs/db/products.json")
-	if err != nil {
-		return err
-	}
-	dbProduct, err := ldProduct.Load(ctx)
-	if err != nil {
-		return err
-	}
-
 	// - repository
 
 	repoSection := repository.NewSectionRepository(mysql)
 	repoSeller := repository.NewSellerRepository(mysql)
 	repoBuyer := repository.NewBuyerRepository(mysql)
 	repoWarehouse := repository.NewWarehouseRepository(mysql)
-	repoProduct := repository.NewProductRepository(dbProduct)
+	repoProduct, err := repository.NewProductRepository(mysql)
+	if err != nil {
+		return err
+	}
 	repoEmployee := repository.NewEmployeeRepository(mysql)
 	repoProductBatches := repository.NewProductBatchesRepository(mysql)
 	repoCarry := repository.NewCarryRepository(mysql)
