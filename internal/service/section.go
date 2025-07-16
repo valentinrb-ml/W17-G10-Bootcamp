@@ -9,8 +9,7 @@ import (
 )
 
 type SectionDefault struct {
-	rp          repository.SectionRepository
-	rpWareHouse repository.WarehouseRepository
+	rp repository.SectionRepository
 }
 
 func NewSectionServer(rp repository.SectionRepository) *SectionDefault {

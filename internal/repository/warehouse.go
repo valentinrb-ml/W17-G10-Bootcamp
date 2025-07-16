@@ -12,6 +12,7 @@ import (
 
 
 
+// SQL queries for warehouse operations
 const (
 	queryWarehouseCreate   = `INSERT INTO warehouse (warehouse_code, address, minimum_temperature, minimum_capacity, telephone, locality_id) VALUES (?, ?, ?, ?, ?, ?)`
 	queryWarehouseFindAll  = `SELECT id, warehouse_code, address, minimum_temperature, minimum_capacity, telephone, locality_id FROM warehouse`
@@ -20,6 +21,8 @@ const (
 	queryWarehouseDelete   = `DELETE FROM warehouse WHERE id = ?`
 )
 
+// Create inserts a new warehouse into the database
+// Returns the created warehouse with its generated ID or an error if the operation fails
 func (r *WarehouseMySQL) Create(ctx context.Context, w warehouse.Warehouse) (*warehouse.Warehouse, error) {
 	res, err := r.db.ExecContext(ctx, queryWarehouseCreate, w.WarehouseCode, w.Address, w.MinimumTemperature, w.MinimumCapacity, w.Telephone, w.LocalityId)
 	if err != nil {
@@ -39,6 +42,8 @@ func (r *WarehouseMySQL) Create(ctx context.Context, w warehouse.Warehouse) (*wa
 	return &w, nil
 }
 
+// FindAll retrieves all warehouses from the database
+// Returns a slice of warehouses or an error if the operation fails
 func (r *WarehouseMySQL) FindAll(ctx context.Context) ([]warehouse.Warehouse, error) {
 	rows, err := r.db.QueryContext(ctx, queryWarehouseFindAll)
 	if err != nil {
@@ -62,6 +67,8 @@ func (r *WarehouseMySQL) FindAll(ctx context.Context) ([]warehouse.Warehouse, er
 	return whs, nil
 }
 
+// FindById retrieves a specific warehouse by its ID from the database
+// Returns the warehouse if found or an error if not found or operation fails
 func (r *WarehouseMySQL) FindById(ctx context.Context, id int) (*warehouse.Warehouse, error) {
 	var w warehouse.Warehouse
 	err := r.db.QueryRowContext(ctx, queryWarehouseFindById, id).Scan(
@@ -77,6 +84,8 @@ func (r *WarehouseMySQL) FindById(ctx context.Context, id int) (*warehouse.Wareh
 	return &w, nil
 }
 
+// Update modifies an existing warehouse in the database
+// Returns the updated warehouse or an error if the warehouse doesn't exist or operation fails
 func (r *WarehouseMySQL) Update(ctx context.Context, id int, w warehouse.Warehouse) (*warehouse.Warehouse, error) {
 	res, err := r.db.ExecContext(ctx, queryWarehouseUpdate, w.WarehouseCode, w.Address, w.MinimumTemperature, w.MinimumCapacity, w.Telephone, w.LocalityId, id)
 	if err != nil {
@@ -99,6 +108,8 @@ func (r *WarehouseMySQL) Update(ctx context.Context, id int, w warehouse.Warehou
 	return &w, nil
 }
 
+// Delete removes a warehouse from the database by its ID
+// Returns an error if the warehouse doesn't exist or operation fails
 func (r *WarehouseMySQL) Delete(ctx context.Context, id int) error {
 	res, err := r.db.ExecContext(ctx, queryWarehouseDelete, id)
 	if err != nil {
