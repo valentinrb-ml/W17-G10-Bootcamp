@@ -10,8 +10,6 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
 
-
-
 // SQL queries for warehouse operations
 const (
 	queryWarehouseCreate   = `INSERT INTO warehouse (warehouse_code, address, minimum_temperature, minimum_capacity, telephone, locality_id) VALUES (?, ?, ?, ?, ?, ?)`
@@ -27,11 +25,11 @@ func (r *WarehouseMySQL) Create(ctx context.Context, w warehouse.Warehouse) (*wa
 	res, err := r.db.ExecContext(ctx, queryWarehouseCreate, w.WarehouseCode, w.Address, w.MinimumTemperature, w.MinimumCapacity, w.Telephone, w.LocalityId)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-        if mysqlErr.Number == 1062 {
-			return nil, apperrors.NewAppError(apperrors.CodeConflict, "warehouse_code already exists")
-        }
-    }
-		
+			if mysqlErr.Number == 1062 {
+				return nil, apperrors.NewAppError(apperrors.CodeConflict, "warehouse_code already exists")
+			}
+		}
+
 		return nil, apperrors.Wrap(err, "error creating warehouse")
 	}
 	id, err := res.LastInsertId()
@@ -78,7 +76,7 @@ func (r *WarehouseMySQL) FindById(ctx context.Context, id int) (*warehouse.Wareh
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "warehouse not found")
 		}
-		
+
 		return nil, apperrors.Wrap(err, "error getting warehouse")
 	}
 	return &w, nil
@@ -94,7 +92,7 @@ func (r *WarehouseMySQL) Update(ctx context.Context, id int, w warehouse.Warehou
 				return nil, apperrors.NewAppError(apperrors.CodeConflict, "warehouse_code already exists")
 			}
 		}
-		
+
 		return nil, apperrors.Wrap(err, "error updating warehouse")
 	}
 	rowsAffected, err := res.RowsAffected()
