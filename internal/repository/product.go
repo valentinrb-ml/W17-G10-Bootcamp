@@ -17,11 +17,24 @@ import (
 
 const (
 	queryTimeout = 5 * time.Second
-
-	baseSelect = `SELECT id, product_code, description, width, height, length,
+	baseSelect   = `SELECT id, product_code, description, width, height, length,
 	                     net_weight, expiration_rate, recommended_freezing_temperature,
 	                     freezing_rate, product_type_id, seller_id
 	               FROM products`
+	insertProduct = `
+		INSERT INTO products (
+		  product_code, description, width, height, length,
+		  net_weight, expiration_rate, recommended_freezing_temperature,
+		  freezing_rate, product_type_id, seller_id
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	updateProduct = `
+		UPDATE products SET
+		  product_code = ?, description = ?, width = ?, height = ?,
+		  length = ?, net_weight = ?, expiration_rate = ?,
+		  recommended_freezing_temperature = ?, freezing_rate = ?,
+		  product_type_id = ?, seller_id = ?
+		WHERE id = ?`
+	deleteProduct = `DELETE FROM products WHERE id = ?`
 )
 
 type productMySQLRepository struct {
@@ -40,24 +53,15 @@ func NewProductRepository(db *sql.DB) (ProductRepository, error) {
 	if err != nil {
 		return nil, err
 	}
-	insert, err := xdb.Preparex(`INSERT INTO products (
-		product_code, description, width, height, length,
-		net_weight, expiration_rate, recommended_freezing_temperature,
-		freezing_rate, product_type_id, seller_id
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+	insert, err := xdb.Preparex(insertProduct)
 	if err != nil {
 		return nil, err
 	}
-	update, err := xdb.Preparex(`UPDATE products SET
-		product_code = ?, description = ?, width = ?, height = ?,
-		length = ?, net_weight = ?, expiration_rate = ?,
-		recommended_freezing_temperature = ?, freezing_rate = ?,
-		product_type_id = ?, seller_id = ?
-		WHERE id = ?`)
+	update, err := xdb.Preparex(updateProduct)
 	if err != nil {
 		return nil, err
 	}
-	deleteStmt, err := xdb.Preparex(`DELETE FROM products WHERE id = ?`)
+	deleteStmt, err := xdb.Preparex(deleteProduct)
 	if err != nil {
 		return nil, err
 	}
