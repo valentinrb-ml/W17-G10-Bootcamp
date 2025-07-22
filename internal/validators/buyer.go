@@ -1,50 +1,39 @@
 package validators
 
 import (
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
-func ValidateRequestBuyer(br models.RequestBuyer) *api.ServiceError {
+func ValidateRequestBuyer(br models.RequestBuyer) *apperrors.AppError {
 	if br.CardNumberId == nil || *br.CardNumberId == "" ||
 		br.FirstName == nil || *br.FirstName == "" ||
 		br.LastName == nil || *br.LastName == "" {
-		err := api.ServiceErrors[api.ErrUnprocessableEntity]
-		err.Message = "All fields are required. They cannot be empty."
-		return &err
+		return apperrors.NewAppError(apperrors.CodeValidationError, "All fields are required. They cannot be empty")
 	}
 	return nil
 }
 
-func ValidateUpdateBuyer(br models.RequestBuyer) *api.ServiceError {
+func ValidateUpdateBuyer(br models.RequestBuyer) *apperrors.AppError {
 	if br.CardNumberId != nil && *br.CardNumberId == "" {
-		return createValidationError("card_number_id cannot be empty")
+		return newValidationError("id_card_number cannot be empty")
 	}
 	if br.FirstName != nil && *br.FirstName == "" {
-		return createValidationError("first_name cannot be empty")
+		return newValidationError("first_name cannot be empty")
 	}
 	if br.LastName != nil && *br.LastName == "" {
-		return createValidationError("last_name cannot be empty")
+		return newValidationError("last_name cannot be empty")
 	}
 	return nil
 }
 
-func createValidationError(message string) *api.ServiceError {
-	err := api.ServiceErrors[api.ErrUnprocessableEntity]
-	err.Message = message
-	return &err
-}
-
-func ValidateBuyerPatchNotEmpty(br models.RequestBuyer) error {
-	errDef := api.ServiceErrors[api.ErrUnprocessableEntity]
-
+func ValidateBuyerPatchNotEmpty(br models.RequestBuyer) *apperrors.AppError {
 	if br.CardNumberId == nil && br.FirstName == nil && br.LastName == nil {
-		return &api.ServiceError{
-			Code:         errDef.Code,
-			ResponseCode: errDef.ResponseCode,
-			Message:      "at least one field is required to be updated.",
-		}
+		return apperrors.NewAppError(apperrors.CodeValidationError, "At least one field is required to be updated")
 	}
-
 	return nil
+}
+
+func newValidationError(message string) *apperrors.AppError {
+	return apperrors.NewAppError(apperrors.CodeValidationError, message)
 }

@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
@@ -23,18 +25,19 @@ func (h *BuyerHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var br models.RequestBuyer
 	if err := httputil.DecodeJSON(r, &br); err != nil {
-		response.Error(w, err)
+		response.Error(w, apperrors.NewAppError(apperrors.CodeBadRequest, "Invalid request body"))
 		return
 	}
 
+	fmt.Printf("Request received: %+v\n", br)
 	if err := validators.ValidateRequestBuyer(br); err != nil {
-		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
+		response.Error(w, err)
 		return
 	}
 
 	b, err := h.sv.Create(ctx, br)
 	if err != nil {
-		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
+		response.Error(w, err)
 		return
 	}
 
@@ -46,28 +49,28 @@ func (h *BuyerHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	id, err := httputil.ParseIDParam(r, "id")
 	if err != nil {
-		response.Error(w, err)
+		response.Error(w, apperrors.NewAppError(apperrors.CodeBadRequest, "Invalid ID parameter"))
 		return
 	}
 
 	var br models.RequestBuyer
 	if err := httputil.DecodeJSON(r, &br); err != nil {
-		response.Error(w, err)
+		response.Error(w, apperrors.NewAppError(apperrors.CodeBadRequest, "Invalid request body"))
 		return
 	}
 
 	if err := validators.ValidateUpdateBuyer(br); err != nil {
-		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
+		response.Error(w, err)
 		return
 	}
 	if err := validators.ValidateBuyerPatchNotEmpty(br); err != nil {
-		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
+		response.Error(w, err)
 		return
 	}
 
 	updated, err := h.sv.Update(ctx, id, br)
 	if err != nil {
-		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
+		response.Error(w, err)
 		return
 	}
 
@@ -78,11 +81,13 @@ func (h *BuyerHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id, err := httputil.ParseIDParam(r, "id")
-	if httputil.HandleError(w, err) {
+	if err != nil {
+		response.Error(w, apperrors.NewAppError(apperrors.CodeBadRequest, "Invalid ID parameter"))
 		return
 	}
 
-	if err := h.sv.Delete(ctx, id); httputil.HandleError(w, err) {
+	if err := h.sv.Delete(ctx, id); err != nil {
+		response.Error(w, err)
 		return
 	}
 
@@ -93,7 +98,8 @@ func (h *BuyerHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	result, err := h.sv.FindAll(ctx)
-	if httputil.HandleError(w, err) {
+	if err != nil {
+		response.Error(w, err)
 		return
 	}
 
@@ -105,62 +111,15 @@ func (h *BuyerHandler) FindById(w http.ResponseWriter, r *http.Request) {
 
 	id, err := httputil.ParseIDParam(r, "id")
 	if err != nil {
-		response.Error(w, err)
+		response.Error(w, apperrors.NewAppError(apperrors.CodeBadRequest, "Invalid ID parameter"))
 		return
 	}
 
 	b, err := h.sv.FindById(ctx, id)
 	if err != nil {
-		response.Error(w, httputil.ConvertServiceErrorToAppError(err))
+		response.Error(w, err)
 		return
 	}
 
 	response.JSON(w, http.StatusOK, b)
 }
-
-// --- Utilidades ---
-/**
-
-func handleError(w http.ResponseWriter, err error) bool {
-	if err != nil {
-		response.Error(w, convertServiceErrorToAppError(err))
-		return true
-	}
-	return false
-}
-
-func convertServiceErrorToAppError(err error) error {
-	if err == nil {
-		return nil
-	}
-
-	switch e := err.(type) {
-	case *apperrors.AppError:
-		return e
-	case *api.ServiceError:
-		return apperrors.NewAppError(mapServiceErrorCode(e.Code), e.Message)
-	default:
-		return apperrors.Wrap(err, "internal server error")
-	}
-}
-
-func mapServiceErrorCode(code int) string {
-	switch code {
-	case http.StatusBadRequest:
-		return apperrors.CodeBadRequest
-	case http.StatusUnauthorized:
-		return apperrors.CodeUnauthorized
-	case http.StatusForbidden:
-		return apperrors.CodeForbidden
-	case http.StatusNotFound:
-		return apperrors.CodeNotFound
-	case http.StatusConflict:
-		return apperrors.CodeConflict
-	case http.StatusUnprocessableEntity:
-		return apperrors.CodeValidationError
-	default:
-		return apperrors.CodeBadRequest
-	}
-}
-
-**/
