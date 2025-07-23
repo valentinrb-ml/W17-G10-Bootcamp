@@ -2,14 +2,12 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/request"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
@@ -32,7 +30,6 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 		response.Error(w, err)
 		return
 	}
-	// Construye el objeto empleado a partir de la request
 	emp := &models.Employee{
 		CardNumberID: req.CardNumberID,
 		FirstName:    req.FirstName,
@@ -43,18 +40,11 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	} else {
 		emp.WarehouseID = 0
 	}
-	// Llama al service para crear
 	created, err := h.service.Create(r.Context(), emp)
 	if err != nil {
-		var se *api.ServiceError
-		if errors.As(err, &se) {
-			response.Error(w, err)
-		} else {
-			response.Error(w, err)
-		}
+		response.Error(w, err)
 		return
 	}
-	// Convierte el modelo a doc para presentarlo al cliente
 	employeeDoc := mappers.MapEmployeeToEmployeeDoc(created)
 	response.JSON(w, http.StatusCreated, employeeDoc)
 }
@@ -67,7 +57,6 @@ func (h *EmployeeHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if len(employees) == 0 {
-		// Responde lista vacía si no hay empleados
 		response.JSON(w, http.StatusOK, []interface{}{})
 		return
 	}
@@ -88,12 +77,7 @@ func (h *EmployeeHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 	emp, err := h.service.FindByID(r.Context(), id)
 	if err != nil {
-		var se *api.ServiceError
-		if errors.As(err, &se) {
-			response.Error(w, err)
-		} else {
-			response.Error(w, err)
-		}
+		response.Error(w, err)
 		return
 	}
 	employeeDoc := mappers.MapEmployeeToEmployeeDoc(emp)
@@ -117,12 +101,7 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	updated, err := h.service.Update(r.Context(), id, &patch)
 	if err != nil {
-		var se *api.ServiceError
-		if errors.As(err, &se) {
-			response.Error(w, err)
-		} else {
-			response.Error(w, err)
-		}
+		response.Error(w, err)
 		return
 	}
 	employeeDoc := mappers.MapEmployeeToEmployeeDoc(updated)
@@ -138,12 +117,7 @@ func (h *EmployeeHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.service.Delete(r.Context(), id); err != nil {
-		var se *api.ServiceError
-		if errors.As(err, &se) {
-			response.Error(w, err)
-		} else {
-			response.Error(w, err)
-		}
+		response.Error(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
