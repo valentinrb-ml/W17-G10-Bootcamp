@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
@@ -26,12 +26,15 @@ func (r *buyerRepository) Create(ctx context.Context, b models.Buyer) (*models.B
 		b.CardNumberId, b.FirstName, b.LastName,
 	)
 	if err != nil {
-		return nil, err
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
+			return nil, apperrors.NewAppError(apperrors.CodeConflict, "Could not create buyer: card number already exists.")
+		}
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while creating a buyer: %s", err.Error()))
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return nil, err
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while creating a buyer: %s", err.Error()))
 	}
 
 	b.Id = int(id)
@@ -44,45 +47,31 @@ func (r *buyerRepository) Update(ctx context.Context, id int, b models.Buyer) er
 		queryBuyerUpdate,
 		b.CardNumberId, b.FirstName, b.LastName, id,
 	)
-	return err
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
+			return apperrors.NewAppError(apperrors.CodeConflict, "Could not update buyer: card number already exists.")
+		}
+		return apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while updating a buyer: %s", err.Error()))
+	}
+	return nil
 }
 
 func (r *buyerRepository) Delete(ctx context.Context, id int) error {
 	result, err := r.mysql.ExecContext(ctx, queryBuyerDelete, id)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1451 {
-			errDef := api.ServiceErrors[api.ErrConflict]
-			return &api.ServiceError{
-				Code:         errDef.Code,
-				ResponseCode: errDef.ResponseCode,
-				Message:      "Cannot delete buyer: there are purchase orders associated with this buyer.",
-			}
+			return apperrors.NewAppError(apperrors.CodeConflict, "Cannot delete buyer: there are purchase orders associated with this buyer.")
 		}
-		errDef := api.ServiceErrors[api.ErrInternalServer]
-		return &api.ServiceError{
-			Code:         errDef.Code,
-			ResponseCode: errDef.ResponseCode,
-			Message:      fmt.Sprintf("An internal server error occurred while deleting the buyer: %s", err.Error()),
-		}
+		return apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while deleting the buyer: %s", err.Error()))
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		errDef := api.ServiceErrors[api.ErrInternalServer]
-		return &api.ServiceError{
-			Code:         errDef.Code,
-			ResponseCode: errDef.ResponseCode,
-			Message:      fmt.Sprintf("An internal server error occurred while deleting the buyer: %s", err.Error()),
-		}
+		return apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while deleting the buyer: %s", err.Error()))
 	}
 
 	if rowsAffected == 0 {
-		errDef := api.ServiceErrors[api.ErrNotFound]
-		return &api.ServiceError{
-			Code:         errDef.Code,
-			ResponseCode: errDef.ResponseCode,
-			Message:      "The buyer you are trying to delete does not exist",
-		}
+		return apperrors.NewAppError(apperrors.CodeNotFound, "The buyer you are trying to delete does not exist")
 	}
 	return nil
 }
@@ -90,7 +79,7 @@ func (r *buyerRepository) Delete(ctx context.Context, id int) error {
 func (r *buyerRepository) FindAll(ctx context.Context) ([]models.Buyer, error) {
 	rows, err := r.mysql.QueryContext(ctx, queryBuyerFindAll)
 	if err != nil {
-		return nil, err
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while finding all buyers: %s", err.Error()))
 	}
 	defer rows.Close()
 
@@ -99,13 +88,13 @@ func (r *buyerRepository) FindAll(ctx context.Context) ([]models.Buyer, error) {
 		var b models.Buyer
 		err := rows.Scan(&b.Id, &b.CardNumberId, &b.FirstName, &b.LastName)
 		if err != nil {
-			return nil, err
+			return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while finding all buyers: %s", err.Error()))
 		}
 		buyers = append(buyers, b)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("An internal server error occurred while finding all buyers: %s", err.Error()))
 	}
 
 	return buyers, nil
@@ -117,19 +106,9 @@ func (r *buyerRepository) FindById(ctx context.Context, id int) (*models.Buyer, 
 	err := row.Scan(&b.Id, &b.CardNumberId, &b.FirstName, &b.LastName)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			err := api.ServiceErrors[api.ErrNotFound]
-			return nil, &api.ServiceError{
-				Code:         err.Code,
-				ResponseCode: err.ResponseCode,
-				Message:      "The buyer you are looking for does not exist.",
-			}
+			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "The buyer you are looking for does not exist.")
 		}
-		err := api.ServiceErrors[api.ErrInternalServer]
-		return nil, &api.ServiceError{
-			Code:         err.Code,
-			ResponseCode: err.ResponseCode,
-			Message:      "An internal server error occurred while retrieving the buyer.",
-		}
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the buyer.")
 	}
 
 	return &b, nil

@@ -2,23 +2,16 @@ package service
 
 import (
 	"context"
-	"errors"
-	"net/http"
 	"slices"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
 func (sv *buyerService) Create(ctx context.Context, req models.RequestBuyer) (*models.ResponseBuyer, error) {
 	if sv.rp.CardNumberExists(ctx, *req.CardNumberId, 0) {
-		err := api.ServiceErrors[api.ErrConflict]
-		return nil, &api.ServiceError{
-			Code:         err.Code,
-			ResponseCode: err.ResponseCode,
-			Message:      "The card number ID is already in use, please use a different one",
-		}
+		return nil, apperrors.NewAppError(apperrors.CodeConflict, "The card number ID is already in use, please use a different one")
 	}
 
 	mb := mappers.RequestBuyerToBuyer(req)
@@ -35,14 +28,10 @@ func (sv *buyerService) Create(ctx context.Context, req models.RequestBuyer) (*m
 func (sv *buyerService) Update(ctx context.Context, id int, req models.RequestBuyer) (*models.ResponseBuyer, error) {
 	if req.CardNumberId != nil {
 		if sv.rp.CardNumberExists(ctx, *req.CardNumberId, id) {
-			err := api.ServiceErrors[api.ErrConflict]
-			return nil, &api.ServiceError{
-				Code:         err.Code,
-				ResponseCode: err.ResponseCode,
-				Message:      "The card number ID is already in use by another buyer",
-			}
+			return nil, apperrors.NewAppError(apperrors.CodeConflict, "The card number ID is already in use by another buyer")
 		}
 	}
+
 	b, err := sv.rp.FindById(ctx, id)
 	if err != nil {
 		return nil, err
@@ -58,11 +47,7 @@ func (sv *buyerService) Update(ctx context.Context, id int, req models.RequestBu
 }
 
 func (sv *buyerService) Delete(ctx context.Context, id int) error {
-	err := sv.rp.Delete(ctx, id)
-	if err != nil {
-		return err
-	}
-	return nil
+	return sv.rp.Delete(ctx, id)
 }
 
 func (sv *buyerService) FindAll(ctx context.Context) ([]models.ResponseBuyer, error) {
@@ -82,25 +67,9 @@ func (sv *buyerService) FindAll(ctx context.Context) ([]models.ResponseBuyer, er
 func (sv *buyerService) FindById(ctx context.Context, id int) (*models.ResponseBuyer, error) {
 	b, err := sv.rp.FindById(ctx, id)
 	if err != nil {
-		return nil, convertToServiceError(err)
+		return nil, err
 	}
 
 	resp := mappers.ToResponseBuyer(b)
 	return &resp, nil
-}
-func convertToServiceError(err error) *api.ServiceError {
-	if err == nil {
-		return nil
-	}
-
-	var svcErr *api.ServiceError
-	if errors.As(err, &svcErr) {
-		return svcErr
-	}
-
-	return &api.ServiceError{
-		Code:         500,
-		ResponseCode: http.StatusInternalServerError,
-		Message:      err.Error(),
-	}
 }

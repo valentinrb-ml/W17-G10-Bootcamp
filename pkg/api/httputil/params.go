@@ -5,9 +5,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 )
 
 var (
@@ -71,45 +69,4 @@ func ParseOptionalIntParam(r *http.Request, name string) (int, error) {
 	}
 
 	return validateIntValue(valueStr, name)
-}
-
-func HandleError(w http.ResponseWriter, err error) bool {
-	if err != nil {
-		response.Error(w, ConvertServiceErrorToAppError(err))
-		return true
-	}
-	return false
-}
-
-func ConvertServiceErrorToAppError(err error) error {
-	if err == nil {
-		return nil
-	}
-
-	switch e := err.(type) {
-	case *apperrors.AppError:
-		return e
-	case *api.ServiceError:
-		// Mapear el código de ServiceError a AppError
-		var code string
-		switch e.ResponseCode {
-		case http.StatusBadRequest:
-			code = apperrors.CodeBadRequest
-		case http.StatusUnauthorized:
-			code = apperrors.CodeUnauthorized
-		case http.StatusForbidden:
-			code = apperrors.CodeForbidden
-		case http.StatusNotFound:
-			code = apperrors.CodeNotFound
-		case http.StatusConflict:
-			code = apperrors.CodeConflict
-		case http.StatusUnprocessableEntity:
-			code = apperrors.CodeValidationError
-		default:
-			code = apperrors.CodeInternal
-		}
-		return apperrors.NewAppError(code, e.Message)
-	default:
-		return apperrors.Wrap(err, "internal server error")
-	}
 }

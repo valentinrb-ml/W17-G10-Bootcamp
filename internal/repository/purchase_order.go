@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
@@ -49,26 +49,15 @@ const (
 
 func (r *purchaseOrderRepository) Create(ctx context.Context, po models.PurchaseOrder) (*models.PurchaseOrder, error) {
 	if !r.recordExists(ctx, queryCheckBuyerExists, po.BuyerID) {
-		return nil, createRelationError("buyer", po.BuyerID)
+		return nil, apperrors.NewAppError(apperrors.CodeNotFound, fmt.Sprintf("buyer with id %d does not exist", po.BuyerID))
 	}
 
 	if !r.recordExists(ctx, queryCheckProductRecordExists, po.ProductRecordID) {
-		return nil, createRelationError("product record", po.ProductRecordID)
+		return nil, apperrors.NewAppError(apperrors.CodeNotFound, fmt.Sprintf("product record with id %d does not exist", po.ProductRecordID))
 	}
 
-	// Validar existencia de relaciones
-	if err := r.validateRelations(ctx, po); err != nil {
-		return nil, err
-	}
-
-	// Verificar si el order_number ya existe
 	if r.ExistsOrderNumber(ctx, po.OrderNumber) {
-		errDef := api.ServiceErrors[api.ErrConflict]
-		return nil, &api.ServiceError{
-			Code:         errDef.Code,
-			ResponseCode: errDef.ResponseCode,
-			Message:      "order_number already exists",
-		}
+		return nil, apperrors.NewAppError(apperrors.CodeConflict, "order_number already exists")
 	}
 
 	res, err := r.db.ExecContext(
@@ -82,14 +71,14 @@ func (r *purchaseOrderRepository) Create(ctx context.Context, po models.Purchase
 	)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-			return nil, handleMySQLError(mysqlErr)
+			return nil, apperrors.NewAppError(apperrors.CodeInternal, fmt.Sprintf("database error: %v", mysqlErr.Message))
 		}
-		return nil, fmt.Errorf("error creating purchase order: %w", err)
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "error creating purchase order")
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return nil, fmt.Errorf("error getting last insert id: %w", err)
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "error getting last insert id")
 	}
 
 	po.ID = int(id)
@@ -98,11 +87,11 @@ func (r *purchaseOrderRepository) Create(ctx context.Context, po models.Purchase
 
 func (r *purchaseOrderRepository) validateRelations(ctx context.Context, po models.PurchaseOrder) error {
 	if !r.recordExists(ctx, queryCheckBuyerExists, po.BuyerID) {
-		return createRelationError("buyer", po.BuyerID)
+		return apperrors.NewAppError(apperrors.CodeNotFound, fmt.Sprintf("buyer with id %d does not exist", po.BuyerID))
 	}
 
 	if !r.recordExists(ctx, queryCheckProductRecordExists, po.ProductRecordID) {
-		return createRelationError("product record", po.ProductRecordID)
+		return apperrors.NewAppError(apperrors.CodeNotFound, fmt.Sprintf("product record with id %d does not exist", po.ProductRecordID))
 	}
 
 	return nil
@@ -114,28 +103,10 @@ func (r *purchaseOrderRepository) recordExists(ctx context.Context, query string
 	return err == nil && exists
 }
 
-func createRelationError(entity string, id int) error {
-	errDef := api.ServiceErrors[api.ErrConflict]
-	return &api.ServiceError{
-		Code:         errDef.Code,
-		ResponseCode: errDef.ResponseCode,
-		Message:      fmt.Sprintf("%s with id %d does not exist", entity, id),
-	}
-}
-
-func handleMySQLError(err *mysql.MySQLError) error {
-	errDef := api.ServiceErrors[api.ErrInternalServer]
-	return &api.ServiceError{
-		Code:         errDef.Code,
-		ResponseCode: errDef.ResponseCode,
-		Message:      fmt.Sprintf("database error: %v", err.Message),
-	}
-}
-
 func (r *purchaseOrderRepository) GetAll(ctx context.Context) ([]models.PurchaseOrder, error) {
 	rows, err := r.db.QueryContext(ctx, queryPurchaseOrderGetAll)
 	if err != nil {
-		return nil, fmt.Errorf("error querying all purchase orders: %w", err)
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "error querying all purchase orders")
 	}
 	defer rows.Close()
 
@@ -152,19 +123,19 @@ func (r *purchaseOrderRepository) GetAll(ctx context.Context) ([]models.Purchase
 			&po.ProductRecordID,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("error scanning purchase order: %w", err)
+			return nil, apperrors.NewAppError(apperrors.CodeInternal, "error scanning purchase order")
 		}
 
 		po.OrderDate, err = time.Parse("2006-01-02 15:04:05", orderDateStr)
 		if err != nil {
-			return nil, fmt.Errorf("error parsing order date: %w", err)
+			return nil, apperrors.NewAppError(apperrors.CodeInternal, "error parsing order date")
 		}
 
 		pos = append(pos, po)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("error after iterating rows: %w", err)
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "error after iterating rows")
 	}
 
 	return pos, nil
@@ -185,19 +156,14 @@ func (r *purchaseOrderRepository) GetByID(ctx context.Context, id int) (*models.
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			errDef := api.ServiceErrors[api.ErrNotFound]
-			return nil, &api.ServiceError{
-				Code:         errDef.Code,
-				ResponseCode: errDef.ResponseCode,
-				Message:      "purchase order not found",
-			}
+			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "purchase order not found")
 		}
-		return nil, fmt.Errorf("error querying purchase order by id: %w", err)
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "error querying purchase order by id")
 	}
 
 	po.OrderDate, err = time.Parse("2006-01-02 15:04:05", orderDateStr)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing order date: %w", err)
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "error parsing order date")
 	}
 
 	return &po, nil
@@ -212,7 +178,7 @@ func (r *purchaseOrderRepository) ExistsOrderNumber(ctx context.Context, orderNu
 func (r *purchaseOrderRepository) GetCountByBuyer(ctx context.Context, buyerID int) ([]models.BuyerWithPurchaseCount, error) {
 	rows, err := r.db.QueryContext(ctx, queryPurchaseCountByBuyer, buyerID)
 	if err != nil {
-		return nil, fmt.Errorf("error querying purchase count by buyer: %w", err)
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "error querying purchase count by buyer")
 	}
 	defer rows.Close()
 
@@ -227,22 +193,17 @@ func (r *purchaseOrderRepository) GetCountByBuyer(ctx context.Context, buyerID i
 			&result.PurchaseOrdersCount,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("error scanning purchase count result: %w", err)
+			return nil, apperrors.NewAppError(apperrors.CodeInternal, "error scanning purchase count result")
 		}
 		results = append(results, result)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("error after iterating rows: %w", err)
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "error after iterating rows")
 	}
 
 	if len(results) == 0 {
-		errDef := api.ServiceErrors[api.ErrNotFound]
-		return nil, &api.ServiceError{
-			Code:         errDef.Code,
-			ResponseCode: errDef.ResponseCode,
-			Message:      "buyer not found",
-		}
+		return nil, apperrors.NewAppError(apperrors.CodeNotFound, "buyer not found")
 	}
 
 	return results, nil
@@ -251,7 +212,7 @@ func (r *purchaseOrderRepository) GetCountByBuyer(ctx context.Context, buyerID i
 func (r *purchaseOrderRepository) GetAllWithPurchaseCount(ctx context.Context) ([]models.BuyerWithPurchaseCount, error) {
 	rows, err := r.db.QueryContext(ctx, queryAllPurchaseCount)
 	if err != nil {
-		return nil, fmt.Errorf("error querying all purchase counts: %w", err)
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "error querying all purchase counts")
 	}
 	defer rows.Close()
 
@@ -266,13 +227,13 @@ func (r *purchaseOrderRepository) GetAllWithPurchaseCount(ctx context.Context) (
 			&result.PurchaseOrdersCount,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("error scanning purchase count result: %w", err)
+			return nil, apperrors.NewAppError(apperrors.CodeInternal, "error scanning purchase count result")
 		}
 		results = append(results, result)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("error after iterating rows: %w", err)
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "error after iterating rows")
 	}
 
 	return results, nil
