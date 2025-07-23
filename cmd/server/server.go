@@ -6,7 +6,9 @@ import (
 	"net/http"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
+	empHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	empRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/router"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 )
@@ -42,7 +44,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	if err != nil {
 		return err
 	}
-	repoEmployee := repository.NewEmployeeRepository(mysql)
+	repoEmployee := empRepo.NewEmployeeRepository(mysql)
 	repoProductBatches := repository.NewProductBatchesRepository(mysql)
 	repoCarry := repository.NewCarryRepository(mysql)
 	repoGeography := repository.NewGeographyRepository(mysql)
@@ -74,7 +76,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdCarry := handler.NewCarryHandler(svcCarry)
 	hdWarehouse := handler.NewWarehouseHandler(svcWarehouse)
 	hdProduct := handler.NewProductHandler(svcProduct)
-	hdEmployee := handler.NewEmployeeHandler(svcEmployee)
+	hdEmployee := empHandler.NewEmployeeHandler(svcEmployee)
 	hdProductBatches := handler.NewProductBatchesHandler(svcProductBatches)
 	hdGeography := handler.NewGeographyHandler(svcGeography)
 	hdInboundOrder := handler.NewInboundOrderHandler(svcInboundOrder)
@@ -82,7 +84,11 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdProductRecord := handler.NewProductRecordHandler(svcProductRecord)
 
 	// router
-	rt := router.NewAPIRouter(hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct, hdEmployee, hdProductBatches, hdPurchaseOrder, hdGeography, hdInboundOrder, hdCarry, hdProductRecord)
+	rt := router.NewAPIRouter(
+		hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct,
+		hdEmployee, hdProductBatches, hdPurchaseOrder,
+		hdGeography, hdInboundOrder, hdCarry, hdProductRecord,
+	)
 
 	fmt.Printf("Server running at http://localhost%s\n", s.serverAddress)
 
