@@ -15,7 +15,7 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/router"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	empService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/employee"
-	// inbService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/inbound_order"
+	inbService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/inbound_order"
 )
 
 type ConfigServerChi struct {
@@ -70,7 +70,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	svcProductBatches := service.NewProductBatchesService(repoProductBatches)
 	svcCarry := service.NewCarryService(repoCarry, repoGeography)
 	svcGeography := service.NewGeographyService(repoGeography)
-	svcInboundOrder := service.NewInboundOrderService(repoInboundOrder, repoEmployee, repoWarehouse)
+	svcInboundOrder := inbService.NewInboundOrderService(repoInboundOrder, repoEmployee, repoWarehouse)
 	svcPurchaseOrder := service.NewPurchaseOrderService(repoPurchaseOrder)
 	svcProductRecord := service.NewProductRecordService(repoProductRecord)
 
