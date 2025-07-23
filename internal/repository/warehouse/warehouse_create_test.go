@@ -8,27 +8,10 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
-
-func createTestWarehouse() warehouse.Warehouse {
-    return warehouse.Warehouse{
-        WarehouseCode:      "WH001",
-        Address:            "123 Main St",
-        MinimumTemperature: 10.5,
-        MinimumCapacity:    1000,
-        Telephone:          "555-1234",
-        LocalityId:         "LOC001",
-    }
-}
-
-func createExpectedWarehouse(id int) *warehouse.Warehouse {
-    w := createTestWarehouse()
-    w.Id = id
-    return &w
-}
 
 func TestWarehouseMySQL_Create(t *testing.T) {
 	type arrange struct {
@@ -55,10 +38,7 @@ func TestWarehouseMySQL_Create(t *testing.T) {
 			name: "success - warehouse created successfully",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, err := sqlmock.New()
-					if err != nil {
-						panic(err)
-					}
+					mock, db := createMockDB()
 					mock.ExpectExec("INSERT INTO warehouse").
 						WithArgs("WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001").
 						WillReturnResult(sqlmock.NewResult(1, 1))
@@ -78,10 +58,7 @@ func TestWarehouseMySQL_Create(t *testing.T) {
 			name: "error - warehouse_code already exists",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, err := sqlmock.New()
-					if err != nil {
-						panic(err)
-					}
+					mock, db := createMockDB()
 					//Simulo error de duplicidad de clave
 					mysqlErr := &mysql.MySQLError{
 						Number:  1062,
@@ -107,10 +84,8 @@ func TestWarehouseMySQL_Create(t *testing.T) {
 			name: "error - database generic error",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, err := sqlmock.New()
-					if err != nil {
-						panic(err)
-					}
+					mock, db := createMockDB()
+					
 					mock.ExpectExec("INSERT INTO warehouse").
 						WithArgs("WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001").
 						WillReturnError(sql.ErrConnDone)
@@ -130,10 +105,7 @@ func TestWarehouseMySQL_Create(t *testing.T) {
 			name: "error - failed to get last insert id",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, err := sqlmock.New()
-					if err != nil {
-						panic(err)
-					}
+					mock, db := createMockDB()
 
 					//Simulo error al obtener ID
 					result := sqlmock.NewErrorResult(sql.ErrNoRows)
