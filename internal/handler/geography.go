@@ -57,7 +57,8 @@ func (h *GeographyHandler) CountSellersByLocality(w http.ResponseWriter, r *http
 
 	if id == "" {
 		resp, err := h.sv.CountSellersGroupedByLocality(ctx)
-		if handleApiError(w, err) {
+		if err != nil {
+			response.Error(w, err)
 			return
 		}
 		response.JSON(w, http.StatusOK, resp)
@@ -65,7 +66,8 @@ func (h *GeographyHandler) CountSellersByLocality(w http.ResponseWriter, r *http
 	}
 
 	s, err := h.sv.CountSellersByLocality(ctx, id)
-	if handleApiError(w, err) {
+	if err != nil {
+		response.Error(w, err)
 		return
 	}
 
