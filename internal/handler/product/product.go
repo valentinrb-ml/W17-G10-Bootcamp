@@ -1,19 +1,21 @@
-package handler
+package product
 
 import (
+	productMappers "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers/product"
+	productService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product"
 	"net/http"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
 )
 
-type ProductHandler struct{ svc service.ProductService }
+type ProductHandler struct{ svc productService.ProductService }
 
-func NewProductHandler(s service.ProductService) *ProductHandler { return &ProductHandler{svc: s} }
+func NewProductHandler(s productService.ProductService) *ProductHandler {
+	return &ProductHandler{svc: s}
+}
 
 func (h *ProductHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	list, err := h.svc.GetAll(r.Context())
@@ -37,7 +39,7 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newProduct := mappers.ToDomain(req)
+	newProduct := productMappers.ToDomain(req)
 
 	result, err := h.svc.Create(r.Context(), newProduct)
 	if err != nil {

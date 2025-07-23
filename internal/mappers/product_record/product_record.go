@@ -1,4 +1,4 @@
-package mappers
+package product_record
 
 import productrecord "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_record"
 
@@ -7,12 +7,5 @@ func ProductRecordRequestToDomain(req productrecord.ProductRecordRequest) produc
 	return productrecord.ProductRecord{
 		ID:                0, // It is assigned in the DB
 		ProductRecordCore: req.Data,
-	}
-}
-
-// ProductRecordReportToResponse converts the report to response
-func ProductRecordReportToResponse(reports []productrecord.ProductRecordReport) productrecord.ProductRecordsReportResponse {
-	return productrecord.ProductRecordsReportResponse{
-		Data: reports,
 	}
 }

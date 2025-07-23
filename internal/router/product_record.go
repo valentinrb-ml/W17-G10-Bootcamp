@@ -2,10 +2,10 @@ package router
 
 import (
 	"github.com/go-chi/chi/v5"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_record"
 )
 
-func MountProductRecordRoutes(api chi.Router, hd *handler.ProductRecordHandler) {
+func MountProductRecordRoutes(api chi.Router, hd *product_record.ProductRecordHandler) {
 	api.Route("/productRecords", func(r chi.Router) {
 		r.Post("/", hd.Create)
 	})

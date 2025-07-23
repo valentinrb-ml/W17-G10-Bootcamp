@@ -30,8 +30,3 @@ type ProductRecordReport struct {
 	Description  string `json:"description" db:"description"`
 	RecordsCount int    `json:"records_count" db:"records_count"`
 }
-
-// ProductRecordsReportResponse represents the report response
-type ProductRecordsReportResponse struct {
-	Data []ProductRecordReport `json:"data"`
-}

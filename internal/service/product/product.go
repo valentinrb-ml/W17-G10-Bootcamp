@@ -1,19 +1,18 @@
-package service
+package product
 
 import (
 	"context"
 	"errors"
-
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers/product"
+	product2 "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/product"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
 )
 
-type productService struct{ repo repository.ProductRepository }
+type productService struct{ repo product2.ProductRepository }
 
-func NewProductService(r repository.ProductRepository) ProductService {
+func NewProductService(r product2.ProductRepository) ProductService {
 	return &productService{repo: r}
 }
 
@@ -22,7 +21,7 @@ func (s *productService) GetAll(ctx context.Context) ([]models.ProductResponse, 
 	if err != nil {
 		return nil, apperrors.Wrap(err, "failed to get all products")
 	}
-	return mappers.FromDomainList(domainList), nil
+	return product.FromDomainList(domainList), nil
 }
 
 func (s *productService) Create(ctx context.Context, prod models.Product) (models.ProductResponse, error) {
@@ -39,7 +38,7 @@ func (s *productService) Create(ctx context.Context, prod models.Product) (model
 		return models.ProductResponse{}, err
 	}
 
-	return mappers.FromDomain(savedProduct), nil
+	return product.FromDomain(savedProduct), nil
 }
 
 func (s *productService) GetByID(ctx context.Context, id int) (models.ProductResponse, error) {
@@ -48,7 +47,7 @@ func (s *productService) GetByID(ctx context.Context, id int) (models.ProductRes
 		return models.ProductResponse{}, err
 	}
 
-	return mappers.FromDomain(currentProduct), nil
+	return product.FromDomain(currentProduct), nil
 }
 
 func (s *productService) Delete(ctx context.Context, id int) error {
@@ -66,5 +65,5 @@ func (s *productService) Patch(ctx context.Context, id int, req models.ProductPa
 		return models.ProductResponse{}, err
 	}
 
-	return mappers.FromDomain(updatedProduct), nil
+	return product.FromDomain(updatedProduct), nil
 }

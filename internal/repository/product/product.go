@@ -1,14 +1,14 @@
-package repository
+package product
 
 import (
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers/product"
 	"strings"
 	"time"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
 
@@ -92,7 +92,7 @@ func (r *productMySQLRepository) GetAll(ctx context.Context) ([]models.Product, 
 
 	products := make([]models.Product, len(dbRows))
 	for i, dp := range dbRows {
-		products[i] = mappers.DbToDomain(dp)
+		products[i] = product.DbToDomain(dp)
 	}
 	return products, nil
 }
@@ -111,7 +111,7 @@ func (r *productMySQLRepository) GetByID(ctx context.Context, id int) (models.Pr
 		}
 		return models.Product{}, apperrors.Wrap(err, "failed to get product by id")
 	}
-	return mappers.DbToDomain(dp), nil
+	return product.DbToDomain(dp), nil
 }
 
 func (r *productMySQLRepository) Save(ctx context.Context, p models.Product) (models.Product, error) {
@@ -212,7 +212,7 @@ func (r *productMySQLRepository) Patch(ctx context.Context, id int, req models.P
 
 // privates (create / update)
 func (r *productMySQLRepository) create(ctx context.Context, p models.Product) (models.Product, error) {
-	d := mappers.FromDomainToDb(p)
+	d := product.FromDomainToDb(p)
 
 	res, err := r.stmtInsert.ExecContext(ctx,
 		d.Code, d.Description, d.Width, d.Height, d.Length,
@@ -231,7 +231,7 @@ func (r *productMySQLRepository) create(ctx context.Context, p models.Product) (
 }
 
 func (r *productMySQLRepository) update(ctx context.Context, p models.Product) (models.Product, error) {
-	d := mappers.FromDomainToDb(p)
+	d := product.FromDomainToDb(p)
 
 	_, err := r.stmtUpdate.ExecContext(ctx,
 		d.Code, d.Description, d.Width, d.Height, d.Length,

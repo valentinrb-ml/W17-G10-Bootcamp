@@ -1,4 +1,4 @@
-package service
+package product_record
 
 import (
 	"context"
@@ -8,5 +8,5 @@ import (
 
 type ProductRecordService interface {
 	Create(ctx context.Context, record models.ProductRecord) (models.ProductRecordResponse, error)
-	GetRecordsReport(ctx context.Context, productID int) (models.ProductRecordsReportResponse, error)
+	GetRecordsReport(ctx context.Context, productID int) ([]models.ProductRecordReport, error)
 }
