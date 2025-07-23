@@ -9,7 +9,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/seller"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
 

@@ -107,7 +107,7 @@ func (r *sellerRepository) FindAll(ctx context.Context) ([]models.Seller, error)
 	}
 	defer rows.Close()
 
-	var sellers []models.Seller
+	sellers := make([]models.Seller, 0)
 	for rows.Next() {
 		var s models.Seller
 		err := rows.Scan(&s.Id, &s.Cid, &s.CompanyName, &s.Address, &s.Telephone, &s.LocalityId)

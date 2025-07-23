@@ -6,9 +6,12 @@ import (
 	"net/http"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
+	sellerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/seller"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	sellerRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/seller"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/router"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
+	sellerService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/seller"
 )
 
 type ConfigServerChi struct {
@@ -35,7 +38,7 @@ type ServerChi struct {
 func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	// - repository
 	repoSection := repository.NewSectionRepository(mysql)
-	repoSeller := repository.NewSellerRepository(mysql)
+	repoSeller := sellerRepository.NewSellerRepository(mysql)
 	repoBuyer := repository.NewBuyerRepository(mysql)
 	repoWarehouse := repository.NewWarehouseRepository(mysql)
 	repoProduct, err := repository.NewProductRepository(mysql)
@@ -54,7 +57,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	}
 
 	// - service
-	svcSeller := service.NewSellerService(repoSeller, repoGeography)
+	svcSeller := sellerService.NewSellerService(repoSeller, repoGeography)
 	svcBuyer := service.NewBuyerService(repoBuyer)
 	svcSection := service.NewSectionServer(repoSection)
 	svcProduct := service.NewProductService(repoProduct)
@@ -70,7 +73,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	// - handler
 	hdBuyer := handler.NewBuyerHandler(svcBuyer)
 	hdSection := handler.NewSectionHandler(svcSection)
-	hdSeller := handler.NewSellerHandler(svcSeller)
+	hdSeller := sellerHandler.NewSellerHandler(svcSeller)
 	hdCarry := handler.NewCarryHandler(svcCarry)
 	hdWarehouse := handler.NewWarehouseHandler(svcWarehouse)
 	hdProduct := handler.NewProductHandler(svcProduct)
