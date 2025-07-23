@@ -30,6 +30,7 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 		response.Error(w, err)
 		return
 	}
+	// Construye el objeto empleado a partir de la request
 	emp := &models.Employee{
 		CardNumberID: req.CardNumberID,
 		FirstName:    req.FirstName,
@@ -40,11 +41,13 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	} else {
 		emp.WarehouseID = 0
 	}
+	// Llama al service para crear
 	created, err := h.service.Create(r.Context(), emp)
 	if err != nil {
 		response.Error(w, err)
 		return
 	}
+	// Convierte el modelo a doc para presentarlo al cliente
 	employeeDoc := mappers.MapEmployeeToEmployeeDoc(created)
 	response.JSON(w, http.StatusCreated, employeeDoc)
 }
@@ -57,6 +60,7 @@ func (h *EmployeeHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if len(employees) == 0 {
+		// Responde lista vacía si no hay empleados
 		response.JSON(w, http.StatusOK, []interface{}{})
 		return
 	}
