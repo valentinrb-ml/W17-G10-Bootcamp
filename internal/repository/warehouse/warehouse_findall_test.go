@@ -1,14 +1,15 @@
 package repository_test
 
 import (
-    "context"
-    "database/sql"
-    "testing"
+	"context"
+	"database/sql"
+	"testing"
 
-    "github.com/DATA-DOG/go-sqlmock"
-    "github.com/stretchr/testify/require"
-    "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
-    "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/require"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
 
 func TestWarehouseMySQL_FindAll(t *testing.T) {
@@ -56,6 +57,51 @@ func TestWarehouseMySQL_FindAll(t *testing.T) {
 			output: output {
 				warehouses: createExpectedWarehouses(),
 				err:       nil,
+			},
+		},
+		{
+			name: "success - no warehouses found",
+			arrange: arrange{
+				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := createMockDB()
+
+					rows := sqlmock.NewRows([]string{
+						"id", "warehouse_code", "address", "minimum_temperature", "minimum_capacity",
+						"telephone", "locality_id",
+					})
+
+					mock.ExpectQuery("SELECT (.+) FROM warehouse").
+						WillReturnRows(rows)
+
+					return mock, db
+				},
+			},
+			input: input {
+				context: context.Background(),
+			},
+			output: output {
+				warehouses: []warehouse.Warehouse{},
+				err:       nil,
+			},
+		},
+		{
+			name: "error - database error",
+			arrange: arrange{
+				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := createMockDB()
+
+					mock.ExpectQuery("SELECT (.+) FROM warehouse").
+						WillReturnError(sql.ErrConnDone)
+
+					return mock, db
+				},
+			},
+			input: input {
+				context: context.Background(),
+			},
+			output: output {
+				warehouses: nil,
+				err:       apperrors.NewAppError(apperrors.CodeInternal, "error getting warehouses"),
 			},
 		},
 	}
