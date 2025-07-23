@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/go-sql-driver/mysql"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
@@ -22,6 +23,7 @@ const (
 func (r *sectionRepository) FindAllSections(ctx context.Context) ([]models.Section, error) {
 	rows, err := r.mysql.QueryContext(ctx, querySectionGetAll)
 	if err != nil {
+		fmt.Println(err)
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the sections.")
 	}
 	defer rows.Close()
