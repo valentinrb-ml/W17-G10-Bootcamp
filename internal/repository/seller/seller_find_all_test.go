@@ -61,6 +61,19 @@ func TestSellerRepository_FindAll(t *testing.T) {
 			wantErr:        true,
 			expectedErrMsg: "internal server error",
 		},
+		{
+			name: "error - rows.Err fails",
+			mock: func(mock sqlmock.Sqlmock) {
+				rows := sqlmock.NewRows([]string{"id", "cid", "company_name", "address", "telephone", "locality_id"})
+				for _, s := range sellersStub {
+					rows.AddRow(s.Id, s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId)
+				}
+				rows.RowError(0, errors.New("row failure"))
+				mock.ExpectQuery("^SELECT (.+) FROM sellers").WillReturnRows(rows)
+			},
+			wantErr:        true,
+			expectedErrMsg: "internal server error",
+		},
 	}
 
 	for _, tt := range tests {
