@@ -1,13 +1,14 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
-	"net/http"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
 )
 
 type ProductHandler struct{ svc service.ProductService }
@@ -25,7 +26,7 @@ func (h *ProductHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var req product.ProductRequest
+	var req models.ProductRequest
 	if err := httputil.DecodeJSON(r, &req); err != nil {
 		response.Error(w, err)
 		return
@@ -101,7 +102,7 @@ func (h *ProductHandler) Patch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req product.ProductPatchRequest
+	var req models.ProductPatchRequest
 	if err = httputil.DecodeJSON(r, &req); err != nil {
 		response.Error(w, err)
 		return

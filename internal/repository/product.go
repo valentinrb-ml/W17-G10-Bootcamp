@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
 	"strings"
 	"time"
+
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -77,11 +78,11 @@ func NewProductRepository(db *sql.DB) (ProductRepository, error) {
 
 // CRUD
 
-func (r *productMySQLRepository) GetAll(ctx context.Context) ([]product.Product, error) {
+func (r *productMySQLRepository) GetAll(ctx context.Context) ([]models.Product, error) {
 	ctx, cancel := context.WithTimeout(ctx, queryTimeout)
 	defer cancel()
 
-	var dbRows []product.ProductDb
+	var dbRows []models.ProductDb
 	query := baseSelect + " ORDER BY id"
 
 	if err := r.db.SelectContext(ctx, &dbRows, query); err != nil {
@@ -89,31 +90,31 @@ func (r *productMySQLRepository) GetAll(ctx context.Context) ([]product.Product,
 		return nil, apperrors.Wrap(err, "failed to get all products")
 	}
 
-	products := make([]product.Product, len(dbRows))
+	products := make([]models.Product, len(dbRows))
 	for i, dp := range dbRows {
 		products[i] = mappers.DbToDomain(dp)
 	}
 	return products, nil
 }
 
-func (r *productMySQLRepository) GetByID(ctx context.Context, id int) (product.Product, error) {
+func (r *productMySQLRepository) GetByID(ctx context.Context, id int) (models.Product, error) {
 	ctx, cancel := context.WithTimeout(ctx, queryTimeout)
 	defer cancel()
 
-	var dp product.ProductDb
+	var dp models.ProductDb
 	if err := r.stmtByID.GetContext(ctx, &dp, id); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return product.Product{}, apperrors.NewAppError(
+			return models.Product{}, apperrors.NewAppError(
 				apperrors.CodeNotFound,
 				fmt.Sprintf("product with id %d not found", id),
 			)
 		}
-		return product.Product{}, apperrors.Wrap(err, "failed to get product by id")
+		return models.Product{}, apperrors.Wrap(err, "failed to get product by id")
 	}
 	return mappers.DbToDomain(dp), nil
 }
 
-func (r *productMySQLRepository) Save(ctx context.Context, p product.Product) (product.Product, error) {
+func (r *productMySQLRepository) Save(ctx context.Context, p models.Product) (models.Product, error) {
 	ctx, cancel := context.WithTimeout(ctx, queryTimeout)
 	defer cancel()
 
@@ -137,7 +138,7 @@ func (r *productMySQLRepository) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *productMySQLRepository) Patch(ctx context.Context, id int, req product.ProductPatchRequest) (product.Product, error) {
+func (r *productMySQLRepository) Patch(ctx context.Context, id int, req models.ProductPatchRequest) (models.Product, error) {
 	ctx, cancel := context.WithTimeout(ctx, queryTimeout)
 	defer cancel()
 
@@ -200,17 +201,17 @@ func (r *productMySQLRepository) Patch(ctx context.Context, id int, req product.
 
 	res, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
-		return product.Product{}, r.handleDBError(err, "failed to patch product")
+		return models.Product{}, r.handleDBError(err, "failed to patch product")
 	}
 	if n, _ := res.RowsAffected(); n == 0 {
-		return product.Product{}, apperrors.NewAppError(apperrors.CodeNotFound, "product not found")
+		return models.Product{}, apperrors.NewAppError(apperrors.CodeNotFound, "product not found")
 	}
 
 	return r.GetByID(ctx, id)
 }
 
 // privates (create / update)
-func (r *productMySQLRepository) create(ctx context.Context, p product.Product) (product.Product, error) {
+func (r *productMySQLRepository) create(ctx context.Context, p models.Product) (models.Product, error) {
 	d := mappers.FromDomainToDb(p)
 
 	res, err := r.stmtInsert.ExecContext(ctx,
@@ -218,18 +219,18 @@ func (r *productMySQLRepository) create(ctx context.Context, p product.Product) 
 		d.NetWeight, d.ExpRate, d.RecFreeze, d.FreezeRate,
 		d.TypeID, d.SellerID)
 	if err != nil {
-		return product.Product{}, r.handleDBError(err, "failed to create product")
+		return models.Product{}, r.handleDBError(err, "failed to create product")
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return product.Product{}, apperrors.Wrap(err, "failed to fetch new id")
+		return models.Product{}, apperrors.Wrap(err, "failed to fetch new id")
 	}
 	p.ID = int(id)
 	return p, nil
 }
 
-func (r *productMySQLRepository) update(ctx context.Context, p product.Product) (product.Product, error) {
+func (r *productMySQLRepository) update(ctx context.Context, p models.Product) (models.Product, error) {
 	d := mappers.FromDomainToDb(p)
 
 	_, err := r.stmtUpdate.ExecContext(ctx,
@@ -237,7 +238,7 @@ func (r *productMySQLRepository) update(ctx context.Context, p product.Product) 
 		d.NetWeight, d.ExpRate, d.RecFreeze, d.FreezeRate,
 		d.TypeID, d.SellerID, d.ID)
 	if err != nil {
-		return product.Product{}, r.handleDBError(err, "failed to update product")
+		return models.Product{}, r.handleDBError(err, "failed to update product")
 	}
 	return p, nil
 }

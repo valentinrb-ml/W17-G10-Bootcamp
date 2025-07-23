@@ -2,10 +2,11 @@ package service
 
 import (
 	"context"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/productrecord"
+
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_record"
 )
 
 type ProductRecordService interface {
-	Create(ctx context.Context, record productrecord.ProductRecord) (productrecord.ProductRecordResponse, error)
-	GetRecordsReport(ctx context.Context, productID int) (productrecord.ProductRecordsReportResponse, error)
+	Create(ctx context.Context, record models.ProductRecord) (models.ProductRecordResponse, error)
+	GetRecordsReport(ctx context.Context, productID int) (models.ProductRecordsReportResponse, error)
 }

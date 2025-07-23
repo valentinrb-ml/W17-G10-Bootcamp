@@ -1,15 +1,16 @@
 package handler
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_batches"
-	"net/http"
-	"strconv"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_batches"
 )
 
 // ProductBatchesHandler handles HTTP requests for product batches endpoints.
@@ -73,6 +74,6 @@ func (h *ProductBatchesHandler) GetReportProduct(w http.ResponseWriter, r *http.
 		response.Error(w, err)
 		return
 	}
+
 	response.JSON(w, http.StatusOK, report)
-	return
 }

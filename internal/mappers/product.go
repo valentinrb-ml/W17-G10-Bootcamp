@@ -2,17 +2,18 @@ package mappers
 
 import (
 	"database/sql"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
+
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
 )
 
 // Request DTO -> Domain
-func ToDomain(r product.ProductRequest) product.Product {
-	return product.Product{
+func ToDomain(r models.ProductRequest) models.Product {
+	return models.Product{
 		Code:        r.ProductCode,
 		Description: r.Description,
-		Dimensions:  product.Dimensions{Width: r.Width, Height: r.Height, Length: r.Length},
+		Dimensions:  models.Dimensions{Width: r.Width, Height: r.Height, Length: r.Length},
 		NetWeight:   r.NetWeight,
-		Expiration: product.Expiration{
+		Expiration: models.Expiration{
 			Rate:                    r.ExpirationRate,
 			RecommendedFreezingTemp: r.RecommendedFreezingTemperature,
 			FreezingRate:            r.FreezingRate,
@@ -23,10 +24,10 @@ func ToDomain(r product.ProductRequest) product.Product {
 }
 
 // Domain -> Response DTO.
-func FromDomain(p product.Product) product.ProductResponse {
-	return product.ProductResponse{
+func FromDomain(p models.Product) models.ProductResponse {
+	return models.ProductResponse{
 		ID: p.ID,
-		ProductData: product.ProductData{
+		ProductData: models.ProductData{
 			ProductCode:                    p.Code,
 			Description:                    p.Description,
 			Width:                          p.Dimensions.Width,
@@ -43,8 +44,8 @@ func FromDomain(p product.Product) product.ProductResponse {
 }
 
 // Helper for lists
-func FromDomainList(list []product.Product) []product.ProductResponse {
-	out := make([]product.ProductResponse, 0, len(list))
+func FromDomainList(list []models.Product) []models.ProductResponse {
+	out := make([]models.ProductResponse, 0, len(list))
 	for _, p := range list {
 		out = append(out, FromDomain(p))
 	}
@@ -52,14 +53,14 @@ func FromDomainList(list []product.Product) []product.ProductResponse {
 }
 
 // Response DTO -> Domain (used by the Loader)
-func ResponseToDomain(r product.ProductResponse) product.Product {
-	return product.Product{
+func ResponseToDomain(r models.ProductResponse) models.Product {
+	return models.Product{
 		ID:          r.ID,
 		Code:        r.ProductCode,
 		Description: r.Description,
-		Dimensions:  product.Dimensions{Width: r.Width, Height: r.Height, Length: r.Length},
+		Dimensions:  models.Dimensions{Width: r.Width, Height: r.Height, Length: r.Length},
 		NetWeight:   r.NetWeight,
-		Expiration: product.Expiration{
+		Expiration: models.Expiration{
 			Rate:                    r.ExpirationRate,
 			RecommendedFreezingTemp: r.RecommendedFreezingTemperature,
 			FreezingRate:            r.FreezingRate,
@@ -70,20 +71,20 @@ func ResponseToDomain(r product.ProductResponse) product.Product {
 }
 
 // DB -> Domain
-func DbToDomain(d product.ProductDb) product.Product {
+func DbToDomain(d models.ProductDb) models.Product {
 	var seller *int
 	if d.SellerID.Valid {
 		v := int(d.SellerID.Int64)
 		seller = &v
 	}
 
-	return product.Product{
+	return models.Product{
 		ID:          d.ID,
 		Code:        d.Code,
 		Description: d.Description,
-		Dimensions:  product.Dimensions{Width: d.Width, Height: d.Height, Length: d.Length},
+		Dimensions:  models.Dimensions{Width: d.Width, Height: d.Height, Length: d.Length},
 		NetWeight:   d.NetWeight,
-		Expiration: product.Expiration{
+		Expiration: models.Expiration{
 			Rate:                    d.ExpRate,
 			RecommendedFreezingTemp: d.RecFreeze,
 			FreezingRate:            d.FreezeRate,
@@ -94,13 +95,13 @@ func DbToDomain(d product.ProductDb) product.Product {
 }
 
 // Domain -> DB
-func FromDomainToDb(p product.Product) product.ProductDb {
+func FromDomainToDb(p models.Product) models.ProductDb {
 	var seller sql.NullInt64
 	if p.SellerID != nil {
 		seller = sql.NullInt64{Int64: int64(*p.SellerID), Valid: true}
 	}
 
-	return product.ProductDb{
+	return models.ProductDb{
 		ID:          p.ID,
 		Code:        p.Code,
 		Description: p.Description,

@@ -1,6 +1,6 @@
 package mappers
 
-import "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/productrecord"
+import productrecord "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_record"
 
 // ProductRecordRequestToDomain convert request to domain
 func ProductRecordRequestToDomain(req productrecord.ProductRecordRequest) productrecord.ProductRecord {
