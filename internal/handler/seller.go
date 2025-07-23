@@ -5,7 +5,6 @@ import (
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
@@ -139,21 +138,4 @@ func (h *SellerHandler) FindById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.JSON(w, http.StatusOK, s)
-}
-
-func handleApiError(w http.ResponseWriter, err error) bool {
-	if err == nil {
-		return false
-	}
-	if errorResp, ok := err.(*api.ServiceError); ok {
-		// response.Error(w, errorResp.ResponseCode, errorResp.Message)
-		// response.Error(w, errorResp.ResponseCode, errorResp.Message)
-		response.Error(w, errorResp)
-	} else {
-		// response.Error(w, http.StatusInternalServerError, err.Error())
-		// response.Error(w, http.StatusInternalServerError, err.Error())
-		response.Error(w, err)
-	}
-
-	return true
 }

@@ -1,13 +1,14 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
-	"net/http"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
 
 // SectionDefault handles HTTP requests related to warehouse sections.
@@ -93,15 +94,16 @@ func (h *SectionDefault) CreateSection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err1 := validators.ValidateSectionRequest(sectionReq)
-	if err1 != nil {
-		response.Error(w, err1)
+	err := validators.ValidateSectionRequest(sectionReq)
+	if err != nil {
+		response.Error(w, err)
 		return
 	}
 
 	sec := mappers.RequestSectionToSection(sectionReq)
-	newSection, err2 := h.sv.CreateSection(ctx, sec)
-	if handleApiError(w, err2) {
+	newSection, err := h.sv.CreateSection(ctx, sec)
+	if err != nil {
+		response.Error(w, err)
 		return
 	}
 
