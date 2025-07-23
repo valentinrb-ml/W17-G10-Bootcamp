@@ -11,10 +11,11 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	empRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
 
-	// inbRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/inbound_order"
+	inbRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/inbound_order"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/router"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	empService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/employee"
+	// inbService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/inbound_order"
 )
 
 type ConfigServerChi struct {
@@ -52,7 +53,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoProductBatches := repository.NewProductBatchesRepository(mysql)
 	repoCarry := repository.NewCarryRepository(mysql)
 	repoGeography := repository.NewGeographyRepository(mysql)
-	repoInboundOrder := repository.NewInboundOrderRepository(mysql)
+	repoInboundOrder := inbRepo.NewInboundOrderRepository(mysql)
 	repoPurchaseOrder := repository.NewPurchaseOrderRepository(mysql)
 	repoProductRecord, err := repository.NewProductRecordRepository(mysql)
 	if err != nil {

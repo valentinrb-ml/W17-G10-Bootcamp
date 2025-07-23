@@ -6,6 +6,7 @@ import (
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	empRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
+	inbRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/inbound_order"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/inbound_order"
@@ -13,14 +14,14 @@ import (
 
 // Servicio principal para Inbound Orders, incluye lógica de validación
 type InboundOrderDefault struct {
-	repo          repository.InboundOrderRepository
+	repo          inbRepo.InboundOrderRepository
 	employeeRepo  empRepo.EmployeeRepository
 	warehouseRepo repository.WarehouseRepository
 }
 
 // Constructor del servicio de inbound orders
 func NewInboundOrderService(
-	r repository.InboundOrderRepository,
+	r inbRepo.InboundOrderRepository,
 	er empRepo.EmployeeRepository,
 	wr repository.WarehouseRepository) *InboundOrderDefault {
 	return &InboundOrderDefault{
