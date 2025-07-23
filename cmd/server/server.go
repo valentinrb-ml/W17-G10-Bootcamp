@@ -11,6 +11,7 @@ import (
 	empRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/router"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
+	empService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/employee"
 )
 
 type ConfigServerChi struct {
@@ -61,7 +62,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	svcSection := service.NewSectionServer(repoSection)
 	svcProduct := service.NewProductService(repoProduct)
 	svcWarehouse := service.NewWarehouseService(repoWarehouse)
-	svcEmployee := service.NewEmployeeDefault(repoEmployee, repoWarehouse)
+	svcEmployee := empService.NewEmployeeDefault(repoEmployee, repoWarehouse)
 	svcProductBatches := service.NewProductBatchesService(repoProductBatches)
 	svcCarry := service.NewCarryService(repoCarry, repoGeography)
 	svcGeography := service.NewGeographyService(repoGeography)
