@@ -1,3 +1,9 @@
+# RUN PROJECT
+# Runs the project from cmd/main.go
+.PHONY: run
+run:
+	go run cmd/main.go
+
 # RUN ALL TESTS
 # Runs all tests in the current directory and subdirectories, showing detailed output.
 .PHONY: test
