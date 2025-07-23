@@ -10,7 +10,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/productrecord"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_record"
 )
 
 const (
@@ -71,7 +71,7 @@ func NewProductRecordRepository(db *sql.DB) (ProductRecordRepository, error) {
 	}, nil
 }
 
-func (r *productRecordMySQLRepository) Create(ctx context.Context, record productrecord.ProductRecord) (productrecord.ProductRecord, error) {
+func (r *productRecordMySQLRepository) Create(ctx context.Context, record models.ProductRecord) (models.ProductRecord, error) {
 	ctx, cancel := context.WithTimeout(ctx, productRecordQueryTimeout)
 	defer cancel()
 
@@ -81,23 +81,23 @@ func (r *productRecordMySQLRepository) Create(ctx context.Context, record produc
 		record.SalePrice,
 		record.ProductID)
 	if err != nil {
-		return productrecord.ProductRecord{}, r.handleDBError(err, "failed to create product record")
+		return models.ProductRecord{}, r.handleDBError(err, "failed to create product record")
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return productrecord.ProductRecord{}, apperrors.Wrap(err, "failed to fetch new product record id")
+		return models.ProductRecord{}, apperrors.Wrap(err, "failed to fetch new product record id")
 	}
 
 	record.ID = int(id)
 	return record, nil
 }
 
-func (r *productRecordMySQLRepository) GetRecordsReport(ctx context.Context, productID int) ([]productrecord.ProductRecordReport, error) {
+func (r *productRecordMySQLRepository) GetRecordsReport(ctx context.Context, productID int) ([]models.ProductRecordReport, error) {
 	ctx, cancel := context.WithTimeout(ctx, productRecordQueryTimeout)
 	defer cancel()
 
-	var reports []productrecord.ProductRecordReport
+	var reports []models.ProductRecordReport
 
 	if productID == 0 {
 		if err := r.stmtReportAll.SelectContext(ctx, &reports); err != nil {

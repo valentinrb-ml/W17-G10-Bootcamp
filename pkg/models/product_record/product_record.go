@@ -1,4 +1,4 @@
-package productrecord
+package models
 
 import "time"
 

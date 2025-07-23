@@ -8,7 +8,7 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/productrecord"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_record"
 )
 
 type ProductRecordHandler struct {
@@ -20,7 +20,7 @@ func NewProductRecordHandler(svc service.ProductRecordService) *ProductRecordHan
 }
 
 func (h *ProductRecordHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var req productrecord.ProductRecordRequest
+	var req models.ProductRecordRequest
 
 	if err := httputil.DecodeJSON(r, &req); err != nil {
 		response.Error(w, err)
