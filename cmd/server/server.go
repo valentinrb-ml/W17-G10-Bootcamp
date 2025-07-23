@@ -7,8 +7,11 @@ import (
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
 	empHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
+	inbHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/inbound_order"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	empRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
+
+	// inbRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/inbound_order"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/router"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	empService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/employee"
@@ -80,7 +83,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdEmployee := empHandler.NewEmployeeHandler(svcEmployee)
 	hdProductBatches := handler.NewProductBatchesHandler(svcProductBatches)
 	hdGeography := handler.NewGeographyHandler(svcGeography)
-	hdInboundOrder := handler.NewInboundOrderHandler(svcInboundOrder)
+	hdInboundOrder := inbHandler.NewInboundOrderHandler(svcInboundOrder)
 	hdPurchaseOrder := handler.NewPurchaseOrderHandler(svcPurchaseOrder)
 	hdProductRecord := handler.NewProductRecordHandler(svcProductRecord)
 

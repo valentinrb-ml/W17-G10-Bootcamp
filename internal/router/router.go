@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
 	empHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
+	inbHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/inbound_order"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 )
 
@@ -18,7 +19,7 @@ func NewAPIRouter(
 	hdProductBatches *handler.ProductBatchesHandler,
 	hdPurchaseOrder *handler.PurchaseOrderHandler,
 	hdGeography *handler.GeographyHandler,
-	hdInboundOrder *handler.InboundOrderHandler,
+	hdInboundOrder *inbHandler.InboundOrderHandler,
 	hdCarry *handler.CarryHandler,
 	hdProductRecord *handler.ProductRecordHandler,
 ) *chi.Mux {
