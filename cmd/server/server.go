@@ -12,6 +12,7 @@ import (
 	empRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
 
 	inbRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/inbound_order"
+	wRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/router"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	empService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/employee"
@@ -44,7 +45,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoSection := repository.NewSectionRepository(mysql)
 	repoSeller := repository.NewSellerRepository(mysql)
 	repoBuyer := repository.NewBuyerRepository(mysql)
-	repoWarehouse := repository.NewWarehouseRepository(mysql)
+	repoWarehouse := wRepo.NewWarehouseRepository(mysql)
 	repoProduct, err := repository.NewProductRepository(mysql)
 	if err != nil {
 		return err

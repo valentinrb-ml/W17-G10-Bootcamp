@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
 
