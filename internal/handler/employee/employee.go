@@ -1,4 +1,4 @@
-package handler
+package employee
 
 import (
 	"encoding/json"
