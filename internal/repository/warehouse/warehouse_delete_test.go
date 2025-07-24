@@ -9,6 +9,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
 	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/testhelpers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 )
 
@@ -36,7 +37,7 @@ func TestWarehouseMySQL_Delete(t *testing.T) {
 			name: "success - warehouse deleted",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					mock.ExpectExec("DELETE FROM warehouse WHERE id = ?").
 						WithArgs(1).
@@ -57,7 +58,7 @@ func TestWarehouseMySQL_Delete(t *testing.T) {
 			name: "error - warehouse not found",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					mock.ExpectExec("DELETE FROM warehouse WHERE id = ?").
 						WithArgs(99).
@@ -78,7 +79,7 @@ func TestWarehouseMySQL_Delete(t *testing.T) {
 			name: "error - database error",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					mock.ExpectExec("DELETE FROM warehouse WHERE id = ?").
 						WithArgs(1).
@@ -99,7 +100,7 @@ func TestWarehouseMySQL_Delete(t *testing.T) {
 			name: "error - rows affected check failed",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					result := sqlmock.NewErrorResult(sql.ErrTxDone)
 					mock.ExpectExec("DELETE FROM warehouse WHERE id = ?").
@@ -121,7 +122,7 @@ func TestWarehouseMySQL_Delete(t *testing.T) {
 			name: "error - foreign key constraint violation",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					mysqlErr := &mysql.MySQLError{
 						Number:  1451,
