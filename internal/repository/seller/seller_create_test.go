@@ -13,16 +13,6 @@ import (
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
 
-func newTestSeller() models.Seller {
-	return models.Seller{
-		Cid:         101,
-		CompanyName: "Acme",
-		Address:     "Test Calle 123",
-		Telephone:   "555-1234",
-		LocalityId:  "5000",
-	}
-}
-
 func TestSellerRepository_Create(t *testing.T) {
 	type args struct {
 		seller models.Seller
@@ -42,7 +32,7 @@ func TestSellerRepository_Create(t *testing.T) {
 					WithArgs(s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId).
 					WillReturnResult(sqlmock.NewResult(31, 1))
 			},
-			args:    args{seller: newTestSeller()},
+			args:    args{seller: repository.SellersMapStub[1]},
 			wantErr: false,
 		},
 		{
@@ -56,7 +46,7 @@ func TestSellerRepository_Create(t *testing.T) {
 					WithArgs(s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId).
 					WillReturnError(mysqlErr)
 			},
-			args:           args{seller: newTestSeller()},
+			args:           args{seller: repository.SellersMapStub[1]},
 			wantErr:        true,
 			expectedErrMsg: "cid is already used",
 		},
@@ -71,7 +61,7 @@ func TestSellerRepository_Create(t *testing.T) {
 					WithArgs(s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId).
 					WillReturnError(mysqlErr)
 			},
-			args:           args{seller: newTestSeller()},
+			args:           args{seller: repository.SellersMapStub[1]},
 			wantErr:        true,
 			expectedErrMsg: "locality is already used",
 		},
@@ -86,7 +76,7 @@ func TestSellerRepository_Create(t *testing.T) {
 					WithArgs(s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId).
 					WillReturnError(mysqlErr)
 			},
-			args:           args{seller: newTestSeller()},
+			args:           args{seller: repository.SellersMapStub[1]},
 			wantErr:        true,
 			expectedErrMsg: "data conflict",
 		},
@@ -101,7 +91,7 @@ func TestSellerRepository_Create(t *testing.T) {
 					WithArgs(s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId).
 					WillReturnError(mysqlErr)
 			},
-			args:           args{seller: newTestSeller()},
+			args:           args{seller: repository.SellersMapStub[1]},
 			wantErr:        true,
 			expectedErrMsg: "locality does not exist",
 		},
@@ -112,7 +102,7 @@ func TestSellerRepository_Create(t *testing.T) {
 					WithArgs(s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId).
 					WillReturnError(errors.New("connection lost"))
 			},
-			args:           args{seller: newTestSeller()},
+			args:           args{seller: repository.SellersMapStub[1]},
 			wantErr:        true,
 			expectedErrMsg: "internal server error",
 		},

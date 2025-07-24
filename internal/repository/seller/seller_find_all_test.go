@@ -26,13 +26,13 @@ func TestSellerRepository_FindAll(t *testing.T) {
 			name: "success - sellers found",
 			mock: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows([]string{"id", "cid", "company_name", "address", "telephone", "locality_id"})
-				for _, s := range sellersStub {
+				for _, s := range repository.FindAllSellersStub() {
 					rows.AddRow(s.Id, s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId)
 				}
 				mock.ExpectQuery("^SELECT (.+) FROM sellers").WillReturnRows(rows)
 			},
 			wantErr:        false,
-			expectedResult: sellersStub,
+			expectedResult: repository.FindAllSellersStub(),
 		},
 		{
 			name: "success - empty slice",
@@ -65,7 +65,7 @@ func TestSellerRepository_FindAll(t *testing.T) {
 			name: "error - rows.Err fails",
 			mock: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows([]string{"id", "cid", "company_name", "address", "telephone", "locality_id"})
-				for _, s := range sellersStub {
+				for _, s := range repository.FindAllSellersStub() {
 					rows.AddRow(s.Id, s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId)
 				}
 				rows.RowError(0, errors.New("row failure"))
@@ -99,23 +99,4 @@ func TestSellerRepository_FindAll(t *testing.T) {
 			require.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
-}
-
-var sellersStub = []models.Seller{
-	{
-		Id:          1,
-		Cid:         101,
-		CompanyName: "Frutas del Sur",
-		Address:     "Calle 1",
-		Telephone:   "221-111",
-		LocalityId:  "1900",
-	},
-	{
-		Id:          2,
-		Cid:         102,
-		CompanyName: "Verdulería Norte",
-		Address:     "Calle 2",
-		Telephone:   "221-112",
-		LocalityId:  "5000",
-	},
 }
