@@ -1,4 +1,4 @@
-package product_record
+package handler
 
 import (
 	productRecordMappers "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers/product_record"

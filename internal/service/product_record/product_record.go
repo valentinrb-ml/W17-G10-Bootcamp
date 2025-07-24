@@ -1,19 +1,19 @@
-package product_record
+package service
 
 import (
 	"context"
 	"errors"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/product_record"
+	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/product_record"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_record"
 )
 
 type productRecordService struct {
-	repo product_record.ProductRecordRepository
+	repo repository.ProductRecordRepository
 }
 
-func NewProductRecordService(repo product_record.ProductRecordRepository) ProductRecordService {
+func NewProductRecordService(repo repository.ProductRecordRepository) ProductRecordService {
 	return &productRecordService{repo: repo}
 }
 

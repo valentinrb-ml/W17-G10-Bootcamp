@@ -1,4 +1,4 @@
-package product
+package mappers
 
 import (
 	"database/sql"

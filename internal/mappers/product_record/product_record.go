@@ -1,4 +1,4 @@
-package product_record
+package mappers
 
 import productrecord "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_record"
 
