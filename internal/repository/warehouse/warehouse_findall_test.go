@@ -43,8 +43,8 @@ func TestWarehouseMySQL_FindAll(t *testing.T) {
 						"id", "warehouse_code", "address", "minimum_temperature", "minimum_capacity",
 						"telephone", "locality_id",
 					}).
-						AddRow(1, "WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001").
-						AddRow(2, "WH002", "456 Elm St", 15.5, 2000, "555-5678", "LOC002")
+						AddRow(1, "WH001", "123 Main St", 10.5, 1000, "5551234567", "LOC001").
+						AddRow(2, "WH002", "456 Elm St", 15.5, 2000, "5555678901", "LOC002")
 
 					mock.ExpectQuery("SELECT (.+) FROM warehouse").
 						WillReturnRows(rows)
@@ -115,7 +115,7 @@ func TestWarehouseMySQL_FindAll(t *testing.T) {
 					rows := sqlmock.NewRows([]string{
 						"id", "warehouse_code", "address", "minimum_temperature",
 						"minimum_capacity", "telephone", "locality_id",
-					}).AddRow("invalid_id", "WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001")
+					}).AddRow("invalid_id", "WH001", "123 Main St", 10.5, 1000, "5551234567", "LOC001")
 
 					mock.ExpectQuery("SELECT (.+) FROM warehouse").
 						WillReturnRows(rows)
@@ -141,7 +141,7 @@ func TestWarehouseMySQL_FindAll(t *testing.T) {
 						"id", "warehouse_code", "address", "minimum_temperature",
 						"minimum_capacity", "telephone", "locality_id",
 					}).
-						AddRow(1, "WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001").
+						AddRow(1, "WH001", "123 Main St", 10.5, 1000, "5551234567", "LOC001").
 						RowError(0, sql.ErrConnDone)
 
 					mock.ExpectQuery("SELECT (.+) FROM warehouse").

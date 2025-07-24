@@ -43,7 +43,7 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 					mock, db := testhelpers.CreateMockDB()
 
 					mock.ExpectExec("UPDATE warehouse SET (.+) WHERE id = ?").
-						WithArgs("WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001", 1).
+						WithArgs("WH001", "123 Main St", 10.5, 1000, "5551234567", "LOC001", 1).
 						WillReturnResult(sqlmock.NewResult(0, 1))
 
 					return mock, db
@@ -66,7 +66,7 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 					mock, db := testhelpers.CreateMockDB()
 
 					mock.ExpectExec("UPDATE warehouse SET (.+) WHERE id = ?").
-						WithArgs("WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001", 999).
+						WithArgs("WH001", "123 Main St", 10.5, 1000, "5551234567", "LOC001", 999).
 						WillReturnResult(sqlmock.NewResult(0, 0))
 
 					return mock, db
@@ -94,7 +94,7 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 					}
 
 					mock.ExpectExec("UPDATE warehouse SET (.+) WHERE id = ?").
-						WithArgs("WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001", 1).
+						WithArgs("WH001", "123 Main St", 10.5, 1000, "5551234567", "LOC001", 1).
 						WillReturnError(mysqlErr)
 
 					return mock, db
@@ -117,7 +117,7 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 					mock, db := testhelpers.CreateMockDB()
 
 					mock.ExpectExec("UPDATE warehouse SET (.+) WHERE id = ?").
-						WithArgs("WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001", 1).
+						WithArgs("WH001", "123 Main St", 10.5, 1000, "5551234567", "LOC001", 1).
 						WillReturnError(sql.ErrConnDone)
 
 					return mock, db
@@ -141,7 +141,7 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 
 					result := sqlmock.NewErrorResult(sql.ErrTxDone)
 					mock.ExpectExec("UPDATE warehouse SET (.+) WHERE id = ?").
-						WithArgs("WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001", 1).
+						WithArgs("WH001", "123 Main St", 10.5, 1000, "5551234567", "LOC001", 1).
 						WillReturnResult(result)
 
 					return mock, db
