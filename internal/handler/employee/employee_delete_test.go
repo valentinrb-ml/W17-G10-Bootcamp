@@ -1,4 +1,4 @@
-package handler
+package handler_test
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
+	handler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
 	employeeMocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/employee"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 )
@@ -44,7 +45,7 @@ func TestEmployeeHandler_Delete(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			mockSvc := &employeeMocks.EmployeeServiceMock{MockDelete: tc.mockDeleteFn}
-			h := NewEmployeeHandler(mockSvc)
+			h := handler.NewEmployeeHandler(mockSvc)
 
 			req := httptest.NewRequest("DELETE", "/employees/"+strconv.Itoa(tc.id), nil)
 			w := httptest.NewRecorder()

@@ -1,4 +1,4 @@
-package handler
+package handler_test
 
 import (
 	"bytes"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
+	handler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
 	employeeMocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/employee"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
@@ -62,7 +63,7 @@ func TestEmployeeHandler_Update(t *testing.T) {
 			mockSvc := &employeeMocks.EmployeeServiceMock{
 				MockUpdate: tc.mockUpdateFn,
 			}
-			h := NewEmployeeHandler(mockSvc)
+			h := handler.NewEmployeeHandler(mockSvc)
 
 			patchBody, _ := json.Marshal(tc.patch)
 			url := "/employees/" + strconv.Itoa(tc.id)
