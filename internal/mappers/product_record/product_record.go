@@ -9,10 +9,3 @@ func ProductRecordRequestToDomain(req productrecord.ProductRecordRequest) produc
 		ProductRecordCore: req.Data,
 	}
 }
-
-// ProductRecordReportToResponse converts the report to response
-func ProductRecordReportToResponse(reports []productrecord.ProductRecordReport) productrecord.ProductRecordsReportResponse {
-	return productrecord.ProductRecordsReportResponse{
-		Data: reports,
-	}
-}
