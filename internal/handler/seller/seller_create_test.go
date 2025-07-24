@@ -14,34 +14,8 @@ import (
 	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/seller"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
+	testhelpers "github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
-
-func dummyRequestSeller() models.RequestSeller {
-	cid := 101
-	companyName := "Frutas del Sur"
-	address := "Calle 1"
-	telephone := "221-111"
-	localityId := "1900"
-
-	return models.RequestSeller{
-		Cid:         &cid,
-		CompanyName: &companyName,
-		Address:     &address,
-		Telephone:   &telephone,
-		LocalityId:  &localityId,
-	}
-}
-
-func dummyResponseSeller() models.ResponseSeller {
-	return models.ResponseSeller{
-		Id:          1,
-		Cid:         101,
-		CompanyName: "Frutas del Sur",
-		Address:     "Calle 1",
-		Telephone:   "221-111",
-		LocalityId:  "1900",
-	}
-}
 
 func TestSellerHandler_Create(t *testing.T) {
 	type args struct {
@@ -60,18 +34,18 @@ func TestSellerHandler_Create(t *testing.T) {
 		{
 			name: "success",
 			args: args{
-				requestBody: dummyRequestSeller(),
+				requestBody: testhelpers.DummyRequestSeller(),
 			},
 			mockService: func() *mocks.SellerServiceMock {
 				mock := &mocks.SellerServiceMock{}
 				mock.CreateFn = func(ctx context.Context, req models.RequestSeller) (*models.ResponseSeller, error) {
-					expected := dummyResponseSeller()
+					expected := testhelpers.DummyResponseSeller()
 					return &expected, nil
 				}
 				return mock
 			},
 			wantStatus:       http.StatusCreated,
-			wantResponseBody: dummyResponseSeller(),
+			wantResponseBody: testhelpers.DummyResponseSeller(),
 		},
 		{
 			name: "error - invalid request payload",
@@ -100,7 +74,7 @@ func TestSellerHandler_Create(t *testing.T) {
 		{
 			name: "error - service layer returns error",
 			args: args{
-				requestBody: dummyRequestSeller(),
+				requestBody: testhelpers.DummyRequestSeller(),
 			},
 			mockService: func() *mocks.SellerServiceMock {
 				mock := &mocks.SellerServiceMock{}

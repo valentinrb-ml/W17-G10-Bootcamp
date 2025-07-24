@@ -1,6 +1,46 @@
-package repository
+package testhelpers
 
-import models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
+import (
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
+)
+
+func DummyRequestSeller() models.RequestSeller {
+	cid := 101
+	companyName := "Frutas del Sur"
+	address := "Calle 1"
+	telephone := "221-111"
+	localityId := "1900"
+
+	return models.RequestSeller{
+		Cid:         &cid,
+		CompanyName: &companyName,
+		Address:     &address,
+		Telephone:   &telephone,
+		LocalityId:  &localityId,
+	}
+}
+
+func DummyResponseSeller() models.ResponseSeller {
+	return models.ResponseSeller{
+		Id:          1,
+		Cid:         101,
+		CompanyName: "Frutas del Sur",
+		Address:     "Calle 1",
+		Telephone:   "221-111",
+		LocalityId:  "1900",
+	}
+}
+
+func DummySeller() models.Seller {
+	return models.Seller{
+		Id:          1,
+		Cid:         101,
+		CompanyName: "Frutas del Sur",
+		Address:     "Calle 1",
+		Telephone:   "221-111",
+		LocalityId:  "1900",
+	}
+}
 
 var SellersMapStub = map[int]models.Seller{
 	1: {

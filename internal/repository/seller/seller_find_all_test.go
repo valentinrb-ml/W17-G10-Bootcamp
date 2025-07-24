@@ -10,6 +10,7 @@ import (
 
 	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/seller"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
+	testhelpers "github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestSellerRepository_FindAll(t *testing.T) {
@@ -26,13 +27,13 @@ func TestSellerRepository_FindAll(t *testing.T) {
 			name: "success - sellers found",
 			mock: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows([]string{"id", "cid", "company_name", "address", "telephone", "locality_id"})
-				for _, s := range repository.FindAllSellersStub() {
+				for _, s := range testhelpers.FindAllSellersStub() {
 					rows.AddRow(s.Id, s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId)
 				}
 				mock.ExpectQuery("^SELECT (.+) FROM sellers").WillReturnRows(rows)
 			},
 			wantErr:        false,
-			expectedResult: repository.FindAllSellersStub(),
+			expectedResult: testhelpers.FindAllSellersStub(),
 		},
 		{
 			name: "success - empty slice",
@@ -65,7 +66,7 @@ func TestSellerRepository_FindAll(t *testing.T) {
 			name: "error - rows.Err fails",
 			mock: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows([]string{"id", "cid", "company_name", "address", "telephone", "locality_id"})
-				for _, s := range repository.FindAllSellersStub() {
+				for _, s := range testhelpers.FindAllSellersStub() {
 					rows.AddRow(s.Id, s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId)
 				}
 				rows.RowError(0, errors.New("row failure"))
