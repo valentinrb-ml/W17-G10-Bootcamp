@@ -15,7 +15,7 @@ import (
 func TestSellerService_Create_Success(t *testing.T) {
 	mockRepo := &mocks.SellerRepositoryMock{
 		CreateFn: func(ctx context.Context, s models.Seller) (*models.Seller, error) {
-			result := testhelpers.DummySeller()
+			result := testhelpers.SellersMapStub[1]
 			return &result, nil
 		},
 	}
@@ -32,7 +32,7 @@ func TestSellerService_Create_Success(t *testing.T) {
 func TestSellerService_Update_Success(t *testing.T) {
 	mockRepo := &mocks.SellerRepositoryMock{
 		FindByIdFn: func(ctx context.Context, id int) (*models.Seller, error) {
-			result := testhelpers.DummySeller()
+			result := testhelpers.SellersMapStub[1]
 			return &result, nil
 		},
 		UpdateFn: func(ctx context.Context, id int, s models.Seller) error {
@@ -64,7 +64,7 @@ func TestSellerService_Delete_Success(t *testing.T) {
 func TestSellerService_FindAll_Success(t *testing.T) {
 	mockRepo := &mocks.SellerRepositoryMock{
 		FindAllFn: func(ctx context.Context) ([]models.Seller, error) {
-			return []models.Seller{testhelpers.DummySeller()}, nil
+			return []models.Seller{testhelpers.SellersMapStub[1]}, nil
 		},
 	}
 	svc := service.NewSellerService(mockRepo, nil)
@@ -79,7 +79,7 @@ func TestSellerService_FindAll_Success(t *testing.T) {
 func TestSellerService_FindById_Success(t *testing.T) {
 	mockRepo := &mocks.SellerRepositoryMock{
 		FindByIdFn: func(ctx context.Context, id int) (*models.Seller, error) {
-			result := testhelpers.DummySeller()
+			result := testhelpers.SellersMapStub[1]
 			return &result, nil
 		},
 	}

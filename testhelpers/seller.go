@@ -31,17 +31,6 @@ func DummyResponseSeller() models.ResponseSeller {
 	}
 }
 
-func DummySeller() models.Seller {
-	return models.Seller{
-		Id:          1,
-		Cid:         101,
-		CompanyName: "Frutas del Sur",
-		Address:     "Calle 1",
-		Telephone:   "221-111",
-		LocalityId:  "1900",
-	}
-}
-
 var SellersMapStub = map[int]models.Seller{
 	1: {
 		Id:          1,
