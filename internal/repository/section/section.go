@@ -28,7 +28,7 @@ func (r *sectionRepository) FindAllSections(ctx context.Context) ([]models.Secti
 	}
 	defer rows.Close()
 
-	var sections []models.Section
+	sections := make([]models.Section, 0)
 
 	for rows.Next() {
 		var s models.Section
