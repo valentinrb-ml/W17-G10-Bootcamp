@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	buyerRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/buyer"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
@@ -16,9 +16,9 @@ type BuyerService interface {
 }
 
 type buyerService struct {
-	rp repository.BuyerRepository
+	rp buyerRepo.BuyerRepository
 }
 
-func NewBuyerService(rp repository.BuyerRepository) BuyerService {
+func NewBuyerService(rp buyerRepo.BuyerRepository) BuyerService {
 	return &buyerService{rp: rp}
 }
