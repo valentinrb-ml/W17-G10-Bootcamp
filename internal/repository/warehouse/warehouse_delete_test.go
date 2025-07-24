@@ -6,8 +6,9 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
+	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 )
 
@@ -114,6 +115,31 @@ func TestWarehouseMySQL_Delete(t *testing.T) {
 			},
 			output: output{
 				err: apperrors.Wrap(sql.ErrTxDone, "error deleting warehouse"),
+			},
+		},
+		{
+			name: "error - foreign key constraint violation",
+			arrange: arrange{
+				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := createMockDB()
+
+					mysqlErr := &mysql.MySQLError{
+						Number:  1451,
+						Message: "Cannot delete or update a parent row: a foreign key constraint fails",
+					}
+					mock.ExpectExec("DELETE FROM warehouse WHERE id = ?").
+						WithArgs(1).
+						WillReturnError(mysqlErr)
+
+					return mock, db
+				},
+			},
+			input: input{
+				id:      1,
+				context: context.Background(),
+			},
+			output: output{
+				err: apperrors.NewAppError(apperrors.CodeConflict, "cannot delete warehouse: it is being referenced by other records"),
 			},
 		},
 	}

@@ -10,11 +10,10 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
 
-
 // SQL queries for warehouse operations
 const (
 	queryWarehouseCreate   = `INSERT INTO warehouse (warehouse_code, address, minimum_temperature, minimum_capacity, telephone, locality_id) VALUES (?, ?, ?, ?, ?, ?)`
-	queryWarehouseFindAll  = `SELECT id, warehouse_code, address, minimum_temperature, minimum_capacity, telephone, locality_id FROM warehouse`
+	queryWarehouseFindAll  = `SELECT id, warehouse_code, address, minimum_temperature, minimum_capacity, telephone, locality_id FROM warehouse ORDER BY id ASC`
 	queryWarehouseFindById = `SELECT id, warehouse_code, address, minimum_temperature, minimum_capacity, telephone, locality_id FROM warehouse WHERE id = ?`
 	queryWarehouseUpdate   = `UPDATE warehouse SET warehouse_code = ?, address = ?, minimum_temperature = ?, minimum_capacity = ?, telephone = ?, locality_id = ? WHERE id = ?`
 	queryWarehouseDelete   = `DELETE FROM warehouse WHERE id = ?`
@@ -66,7 +65,6 @@ func (r *WarehouseMySQL) FindAll(ctx context.Context) ([]warehouse.Warehouse, er
 	return whs, nil
 }
 
-
 // FindById retrieves a specific warehouse by its ID from the database
 // Returns the warehouse if found or an error if not found or operation fails
 func (r *WarehouseMySQL) FindById(ctx context.Context, id int) (*warehouse.Warehouse, error) {
@@ -113,6 +111,11 @@ func (r *WarehouseMySQL) Update(ctx context.Context, id int, w warehouse.Warehou
 func (r *WarehouseMySQL) Delete(ctx context.Context, id int) error {
 	res, err := r.db.ExecContext(ctx, queryWarehouseDelete, id)
 	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			if mysqlErr.Number == 1451 {
+				return apperrors.NewAppError(apperrors.CodeConflict, "cannot delete warehouse: it is being referenced by other records")
+			}
+		}
 		return apperrors.Wrap(err, "error deleting warehouse")
 	}
 	rowsAffected, err := res.RowsAffected()
