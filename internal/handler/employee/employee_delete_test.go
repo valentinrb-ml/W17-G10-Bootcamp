@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks"
+	employeeMocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/employee"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 )
 
@@ -43,10 +43,7 @@ func TestEmployeeHandler_Delete(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockSvc := &mocks.EmployeeServiceMock{
-				MockDelete: tc.mockDeleteFn,
-				// Los demás métodos pueden quedar nil.
-			}
+			mockSvc := &employeeMocks.EmployeeServiceMock{MockDelete: tc.mockDeleteFn}
 			h := NewEmployeeHandler(mockSvc)
 
 			req := httptest.NewRequest("DELETE", "/employees/"+strconv.Itoa(tc.id), nil)

@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/stretchr/testify/require"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks"
+	employeeMocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/employee"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
 )
@@ -46,7 +46,7 @@ func TestEmployeeHandler_GetAll(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			mockSvc := &mocks.EmployeeServiceMock{MockFindAll: tc.mockFindAll}
+			mockSvc := &employeeMocks.EmployeeServiceMock{MockFindAll: tc.mockFindAll}
 			h := NewEmployeeHandler(mockSvc)
 
 			req := httptest.NewRequest("GET", "/employees", nil)
@@ -93,7 +93,7 @@ func TestEmployeeHandler_GetByID(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			mockSvc := &mocks.EmployeeServiceMock{MockFindByID: tc.mockFindByID}
+			mockSvc := &employeeMocks.EmployeeServiceMock{MockFindByID: tc.mockFindByID}
 			h := NewEmployeeHandler(mockSvc)
 
 			req := httptest.NewRequest("GET", "/employees/"+strconv.Itoa(tc.id), nil)

@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks"
+	employeeMocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/employee"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
 )
@@ -73,7 +73,7 @@ func TestEmployeeHandler_Create(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockSvc := &mocks.EmployeeServiceMock{MockCreate: tc.mockCreateFn}
+			mockSvc := &employeeMocks.EmployeeServiceMock{MockCreate: tc.mockCreateFn}
 			h := NewEmployeeHandler(mockSvc)
 
 			body, _ := json.Marshal(tc.payload)

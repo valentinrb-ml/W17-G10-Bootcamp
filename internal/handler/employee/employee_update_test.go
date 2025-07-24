@@ -11,7 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks"
+	employeeMocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/employee"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
 )
@@ -59,9 +59,8 @@ func TestEmployeeHandler_Update(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockSvc := &mocks.EmployeeServiceMock{
+			mockSvc := &employeeMocks.EmployeeServiceMock{
 				MockUpdate: tc.mockUpdateFn,
-				// Puede dejar los demás métodos en nil si no son usados por este handler.
 			}
 			h := NewEmployeeHandler(mockSvc)
 

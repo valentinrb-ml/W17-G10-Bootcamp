@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	empRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
+	wRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
@@ -14,11 +14,11 @@ import (
 // Servicio principal de empleados, implementa operaciones de negocio.
 type EmployeeDefault struct {
 	repo          empRepo.EmployeeRepository
-	warehouseRepo repository.WarehouseRepository
+	warehouseRepo wRepo.WarehouseRepository
 }
 
 // Constructor del servicio de empleados
-func NewEmployeeDefault(r empRepo.EmployeeRepository, wrepo repository.WarehouseRepository) *EmployeeDefault {
+func NewEmployeeDefault(r empRepo.EmployeeRepository, wrepo wRepo.WarehouseRepository) *EmployeeDefault {
 	return &EmployeeDefault{
 		repo:          r,
 		warehouseRepo: wrepo,
