@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mocks"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/warehouse"
+	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/testhelpers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
@@ -39,24 +39,9 @@ func TestWarehouseDefault_Update(t *testing.T) {
 			arrange: arrange{
 				mockRepo: func() *mocks.WarehouseRepositoryMock {
 					mock := &mocks.WarehouseRepositoryMock{}
-					existing := &warehouse.Warehouse{
-						Id:                 1,
-						WarehouseCode:      "WH-001",
-						Address:            "Test Address",
-						Telephone:          "123456789",
-						MinimumCapacity:    100,
-						MinimumTemperature: -10.5,
-						LocalityId:         "1900",
-					}
-					updated := &warehouse.Warehouse{
-						Id:                 1,
-						WarehouseCode:      "WH-001",
-						Address:            "Test Address",
-						Telephone:          "123456789",
-						MinimumCapacity:    200,
-						MinimumTemperature: -10.5,
-						LocalityId:         "1900",
-					}
+					existing := testhelpers.CreateExpectedWarehouse(1)
+					updated := testhelpers.CreateExpectedWarehouse(1)
+					updated.MinimumCapacity = 200
 
 					mock.FuncFindById = func(ctx context.Context, id int) (*warehouse.Warehouse, error) {
 						return existing, nil
@@ -75,15 +60,11 @@ func TestWarehouseDefault_Update(t *testing.T) {
 				context: context.Background(),
 			},
 			output: output{
-				result: &warehouse.Warehouse{
-					Id:                 1,
-					WarehouseCode:      "WH-001",
-					Address:            "Test Address",
-					Telephone:          "123456789",
-					MinimumCapacity:    200,
-					MinimumTemperature: -10.5,
-					LocalityId:         "1900",
-				},
+				result: func() *warehouse.Warehouse {
+					result := testhelpers.CreateExpectedWarehouse(1)
+					result.MinimumCapacity = 200
+					return result
+				}(),
 				err: nil,
 			},
 		},
@@ -115,15 +96,7 @@ func TestWarehouseDefault_Update(t *testing.T) {
 			arrange: arrange{
 				mockRepo: func() *mocks.WarehouseRepositoryMock {
 					mock := &mocks.WarehouseRepositoryMock{}
-					existing := &warehouse.Warehouse{
-						Id:                 1,
-						WarehouseCode:      "WH-001",
-						Address:            "Test Address",
-						Telephone:          "123456789",
-						MinimumCapacity:    100,
-						MinimumTemperature: -10.5,
-						LocalityId:         "1900",
-					}
+					existing := testhelpers.CreateExpectedWarehouse(1)
 
 					mock.FuncFindById = func(ctx context.Context, id int) (*warehouse.Warehouse, error) {
 						return existing, nil
@@ -148,15 +121,7 @@ func TestWarehouseDefault_Update(t *testing.T) {
 			arrange: arrange{
 				mockRepo: func() *mocks.WarehouseRepositoryMock {
 					mock := &mocks.WarehouseRepositoryMock{}
-					existing := &warehouse.Warehouse{
-						Id:                 1,
-						WarehouseCode:      "WH-001",
-						Address:            "Test Address",
-						Telephone:          "123456789",
-						MinimumCapacity:    100,
-						MinimumTemperature: -10.5,
-						LocalityId:         "1900",
-					}
+					existing := testhelpers.CreateExpectedWarehouse(1)
 
 					mock.FuncFindById = func(ctx context.Context, id int) (*warehouse.Warehouse, error) {
 						return existing, nil
@@ -184,24 +149,9 @@ func TestWarehouseDefault_Update(t *testing.T) {
 			arrange: arrange{
 				mockRepo: func() *mocks.WarehouseRepositoryMock {
 					mock := &mocks.WarehouseRepositoryMock{}
-					existing := &warehouse.Warehouse{
-						Id:                 1,
-						WarehouseCode:      "WH-001",
-						Address:            "Test Address",
-						Telephone:          "123456789",
-						MinimumCapacity:    100,
-						MinimumTemperature: -10.5,
-						LocalityId:         "1900",
-					}
-					updated := &warehouse.Warehouse{
-						Id:                 1,
-						WarehouseCode:      "WH-001",
-						Address:            "New Address",
-						Telephone:          "123456789",
-						MinimumCapacity:    100,
-						MinimumTemperature: -10.5,
-						LocalityId:         "1900",
-					}
+					existing := testhelpers.CreateExpectedWarehouse(1)
+					updated := testhelpers.CreateExpectedWarehouse(1)
+					updated.Address = "New Address"
 
 					mock.FuncFindById = func(ctx context.Context, id int) (*warehouse.Warehouse, error) {
 						return existing, nil
@@ -220,15 +170,11 @@ func TestWarehouseDefault_Update(t *testing.T) {
 				context: context.Background(),
 			},
 			output: output{
-				result: &warehouse.Warehouse{
-					Id:                 1,
-					WarehouseCode:      "WH-001",
-					Address:            "New Address",
-					Telephone:          "123456789",
-					MinimumCapacity:    100,
-					MinimumTemperature: -10.5,
-					LocalityId:         "1900",
-				},
+				result: func() *warehouse.Warehouse {
+					result := testhelpers.CreateExpectedWarehouse(1)
+					result.Address = "New Address"
+					return result
+				}(),
 				err: nil,
 			},
 		},
@@ -256,5 +202,3 @@ func TestWarehouseDefault_Update(t *testing.T) {
 		})
 	}
 }
-
-// Helper functions moved to testhelpers package
