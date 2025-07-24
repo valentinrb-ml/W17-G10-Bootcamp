@@ -41,28 +41,6 @@ func (r *buyerRepository) Create(ctx context.Context, b models.Buyer) (*models.B
 	return &b, nil
 }
 
-// func (r *buyerRepository) Delete(ctx context.Context, id int) error {
-// 	result, err := r.mysql.ExecContext(ctx, queryBuyerDelete, id)
-// 	if err != nil {
-// 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1451 {
-// 			return apperrors.NewAppError(apperrors.CodeConflict, "Cannot delete buyer: there are purchase orders associated with this buyer.")
-// 		}
-// 		return apperrors.NewAppError(apperrors.CodeInternal,
-// 			fmt.Sprintf("An internal server error occurred while deleting the buyer: %s", err.Error()))
-// 	}
-
-// 	rowsAffected, err := result.RowsAffected()
-// 	if err != nil {
-// 		return apperrors.NewAppError(apperrors.CodeInternal,
-// 			fmt.Sprintf("An internal server error occurred while deleting the buyer: %s", err.Error()))
-// 	}
-
-//		if rowsAffected == 0 {
-//			return apperrors.NewAppError(apperrors.CodeNotFound, "The buyer you are trying to delete does not exist")
-//		}
-//		return nil
-//	}
-
 func (r *buyerRepository) Update(ctx context.Context, id int, b models.Buyer) error {
 	_, err := r.mysql.ExecContext(
 		ctx,
