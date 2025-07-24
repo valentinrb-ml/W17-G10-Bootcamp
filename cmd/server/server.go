@@ -3,6 +3,12 @@ package server
 import (
 	"database/sql"
 	"fmt"
+	productHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product"
+	productRecordHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_record"
+	productRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/product"
+	productRecordRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/product_record"
+	productService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product"
+	productRecordService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product_record"
 	"net/http"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
@@ -46,7 +52,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoSeller := repository.NewSellerRepository(mysql)
 	repoBuyer := repository.NewBuyerRepository(mysql)
 	repoWarehouse := wRepo.NewWarehouseRepository(mysql)
-	repoProduct, err := repository.NewProductRepository(mysql)
+	repoProduct, err := productRepository.NewProductRepository(mysql)
 	if err != nil {
 		return err
 	}
@@ -56,7 +62,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoGeography := repository.NewGeographyRepository(mysql)
 	repoInboundOrder := inbRepo.NewInboundOrderRepository(mysql)
 	repoPurchaseOrder := repository.NewPurchaseOrderRepository(mysql)
-	repoProductRecord, err := repository.NewProductRecordRepository(mysql)
+	repoProductRecord, err := productRecordRepository.NewProductRecordRepository(mysql)
 	if err != nil {
 		return err
 	}
@@ -65,7 +71,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	svcSeller := service.NewSellerService(repoSeller, repoGeography)
 	svcBuyer := service.NewBuyerService(repoBuyer)
 	svcSection := service.NewSectionServer(repoSection)
-	svcProduct := service.NewProductService(repoProduct)
+	svcProduct := productService.NewProductService(repoProduct)
 	svcWarehouse := service.NewWarehouseService(repoWarehouse)
 	svcEmployee := empService.NewEmployeeDefault(repoEmployee, repoWarehouse)
 	svcProductBatches := service.NewProductBatchesService(repoProductBatches)
@@ -73,7 +79,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	svcGeography := service.NewGeographyService(repoGeography)
 	svcInboundOrder := inbService.NewInboundOrderService(repoInboundOrder, repoEmployee, repoWarehouse)
 	svcPurchaseOrder := service.NewPurchaseOrderService(repoPurchaseOrder)
-	svcProductRecord := service.NewProductRecordService(repoProductRecord)
+	svcProductRecord := productRecordService.NewProductRecordService(repoProductRecord)
 
 	// - handler
 	hdBuyer := handler.NewBuyerHandler(svcBuyer)
@@ -81,13 +87,13 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdSeller := handler.NewSellerHandler(svcSeller)
 	hdCarry := handler.NewCarryHandler(svcCarry)
 	hdWarehouse := handler.NewWarehouseHandler(svcWarehouse)
-	hdProduct := handler.NewProductHandler(svcProduct)
 	hdEmployee := empHandler.NewEmployeeHandler(svcEmployee)
+	hdProduct := productHandler.NewProductHandler(svcProduct)
 	hdProductBatches := handler.NewProductBatchesHandler(svcProductBatches)
 	hdGeography := handler.NewGeographyHandler(svcGeography)
 	hdInboundOrder := inbHandler.NewInboundOrderHandler(svcInboundOrder)
 	hdPurchaseOrder := handler.NewPurchaseOrderHandler(svcPurchaseOrder)
-	hdProductRecord := handler.NewProductRecordHandler(svcProductRecord)
+	hdProductRecord := productRecordHandler.NewProductRecordHandler(svcProductRecord)
 
 	// router
 	rt := router.NewAPIRouter(
