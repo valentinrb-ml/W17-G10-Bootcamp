@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
 
@@ -17,8 +17,7 @@ type SectionService interface {
 
 // SectionDefault is the default implementation of SectionService.
 type SectionDefault struct {
-	rp          repository.SectionRepository
-	rpWareHouse repository.WarehouseRepository
+	rp repository.SectionRepository
 }
 
 // NewSectionServer creates a new SectionDefault service with the given SectionRepository.
