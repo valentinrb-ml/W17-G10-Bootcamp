@@ -14,21 +14,21 @@ import (
 
 func TestWarehouseMySQL_FindAll(t *testing.T) {
 	type arrange struct {
-        dbMock func() (sqlmock.Sqlmock, *sql.DB)
-    }
-    type input struct {
-        context context.Context
-    }
-    type output struct {
-        warehouses []warehouse.Warehouse
-        err        error
-    }
-    type testCase struct {
-        name    string
-        arrange arrange
-        input   input
-        output  output
-    }
+		dbMock func() (sqlmock.Sqlmock, *sql.DB)
+	}
+	type input struct {
+		context context.Context
+	}
+	type output struct {
+		warehouses []warehouse.Warehouse
+		err        error
+	}
+	type testCase struct {
+		name    string
+		arrange arrange
+		input   input
+		output  output
+	}
 
 	// test cases
 	testCases := []testCase{
@@ -51,12 +51,12 @@ func TestWarehouseMySQL_FindAll(t *testing.T) {
 					return mock, db
 				},
 			},
-			input: input {
+			input: input{
 				context: context.Background(),
 			},
-			output: output {
+			output: output{
 				warehouses: createExpectedWarehouses(),
-				err:       nil,
+				err:        nil,
 			},
 		},
 		{
@@ -76,12 +76,12 @@ func TestWarehouseMySQL_FindAll(t *testing.T) {
 					return mock, db
 				},
 			},
-			input: input {
+			input: input{
 				context: context.Background(),
 			},
-			output: output {
+			output: output{
 				warehouses: []warehouse.Warehouse{},
-				err:       nil,
+				err:        nil,
 			},
 		},
 		{
@@ -96,41 +96,94 @@ func TestWarehouseMySQL_FindAll(t *testing.T) {
 					return mock, db
 				},
 			},
-			input: input {
+			input: input{
 				context: context.Background(),
 			},
-			output: output {
+			output: output{
 				warehouses: nil,
-				err:       apperrors.NewAppError(apperrors.CodeInternal, "error getting warehouses"),
+				err:        apperrors.NewAppError(apperrors.CodeInternal, "error getting warehouses"),
+			},
+		},
+		{
+			name: "error - scan error continues",
+			arrange: arrange{
+				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := createMockDB()
+
+					// Row con datos corruptos que causará error en Scan
+					rows := sqlmock.NewRows([]string{
+						"id", "warehouse_code", "address", "minimum_temperature",
+						"minimum_capacity", "telephone", "locality_id",
+					}).AddRow("invalid_id", "WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001")
+
+					mock.ExpectQuery("SELECT (.+) FROM warehouse").
+						WillReturnRows(rows)
+
+					return mock, db
+				},
+			},
+			input: input{
+				context: context.Background(),
+			},
+			output: output{
+				warehouses: []warehouse.Warehouse{},
+				err:        nil,
+			},
+		},
+		{
+			name: "error - rows iteration error",
+			arrange: arrange{
+				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := createMockDB()
+
+					rows := sqlmock.NewRows([]string{
+						"id", "warehouse_code", "address", "minimum_temperature",
+						"minimum_capacity", "telephone", "locality_id",
+					}).
+						AddRow(1, "WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001").
+						RowError(0, sql.ErrConnDone)
+
+					mock.ExpectQuery("SELECT (.+) FROM warehouse").
+						WillReturnRows(rows)
+
+					return mock, db
+				},
+			},
+			input: input{
+				context: context.Background(),
+			},
+			output: output{
+				warehouses: nil,
+				err:        apperrors.Wrap(sql.ErrConnDone, "error getting warehouses"),
 			},
 		},
 	}
 
 	// run test cases
-    for _, tc := range testCases {
-        t.Run(tc.name, func(t *testing.T) {
-            // arrange
-            mock, db := tc.arrange.dbMock()
-            defer db.Close()
-            repo := repository.NewWarehouseRepository(db)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// arrange
+			mock, db := tc.arrange.dbMock()
+			defer db.Close()
+			repo := repository.NewWarehouseRepository(db)
 
-            // act
-            result, err := repo.FindAll(tc.input.context)
+			// act
+			result, err := repo.FindAll(tc.input.context)
 
-            // assert
-            if tc.output.err != nil {
-                require.Error(t, err)
-                require.Equal(t, tc.output.err.Error(), err.Error())
-                require.Nil(t, result)
-            } else {
-                require.NoError(t, err)
-                require.Equal(t, len(tc.output.warehouses), len(result))
-                if len(tc.output.warehouses) > 0 {
-                    require.Equal(t, tc.output.warehouses[0].Id, result[0].Id)
-                    require.Equal(t, tc.output.warehouses[0].WarehouseCode, result[0].WarehouseCode)
-                }
-            }
-            require.NoError(t, mock.ExpectationsWereMet())
-        })
-    }
+			// assert
+			if tc.output.err != nil {
+				require.Error(t, err)
+				require.Equal(t, tc.output.err.Error(), err.Error())
+				require.Nil(t, result)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, len(tc.output.warehouses), len(result))
+				if len(tc.output.warehouses) > 0 {
+					require.Equal(t, tc.output.warehouses[0].Id, result[0].Id)
+					require.Equal(t, tc.output.warehouses[0].WarehouseCode, result[0].WarehouseCode)
+				}
+			}
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
 }
