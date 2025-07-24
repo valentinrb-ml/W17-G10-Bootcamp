@@ -18,15 +18,19 @@ type SellerRepositoryMock struct {
 func (m *SellerRepositoryMock) Create(ctx context.Context, s models.Seller) (*models.Seller, error) {
 	return m.CreateFn(ctx, s)
 }
+
 func (m *SellerRepositoryMock) Update(ctx context.Context, id int, s models.Seller) error {
 	return m.UpdateFn(ctx, id, s)
 }
+
 func (m *SellerRepositoryMock) Delete(ctx context.Context, id int) error {
 	return m.DeleteFn(ctx, id)
 }
+
 func (m *SellerRepositoryMock) FindAll(ctx context.Context) ([]models.Seller, error) {
 	return m.FindAllFn(ctx)
 }
+
 func (m *SellerRepositoryMock) FindById(ctx context.Context, id int) (*models.Seller, error) {
 	return m.FindByIdFn(ctx, id)
 }
