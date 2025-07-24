@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/go-sql-driver/mysql"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
 
 const (
@@ -22,11 +23,12 @@ const (
 func (r *sectionRepository) FindAllSections(ctx context.Context) ([]models.Section, error) {
 	rows, err := r.mysql.QueryContext(ctx, querySectionGetAll)
 	if err != nil {
+		fmt.Println(err)
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the sections.")
 	}
 	defer rows.Close()
 
-	var sections []models.Section
+	sections := make([]models.Section, 0)
 
 	for rows.Next() {
 		var s models.Section
@@ -44,7 +46,7 @@ func (r *sectionRepository) FindAllSections(ctx context.Context) ([]models.Secti
 
 // FindById retrieves a Section by its id.
 // Returns a pointer to Section or error if not found.
-func (r sectionRepository) FindById(ctx context.Context, id int) (*models.Section, error) {
+func (r *sectionRepository) FindById(ctx context.Context, id int) (*models.Section, error) {
 	var s models.Section
 	err := r.mysql.QueryRowContext(ctx, querySectionGetOne, id).Scan(&s.Id, &s.SectionNumber, &s.CurrentCapacity, &s.CurrentTemperature, &s.MaximumCapacity, &s.MinimumCapacity, &s.MinimumTemperature, &s.ProductTypeId, &s.WarehouseId)
 
@@ -52,6 +54,7 @@ func (r sectionRepository) FindById(ctx context.Context, id int) (*models.Sectio
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "The section you are looking for does not exist.")
 		}
+		fmt.Print(err)
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the section.")
 	}
 
@@ -60,7 +63,7 @@ func (r sectionRepository) FindById(ctx context.Context, id int) (*models.Sectio
 
 // DeleteSection deletes a Section by its id.
 // Returns error if the section does not exist or if there are foreign key constraints.
-func (r sectionRepository) DeleteSection(ctx context.Context, id int) error {
+func (r *sectionRepository) DeleteSection(ctx context.Context, id int) error {
 	result, err := r.mysql.ExecContext(ctx, querySectionDelete, id)
 	if err != nil {
 		var mysqlErr *mysql.MySQLError

@@ -3,6 +3,7 @@ package server
 import (
 	"database/sql"
 	"fmt"
+	secRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
 	"net/http"
 
 	productHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product"
@@ -52,7 +53,8 @@ type ServerChi struct {
 // Run is a method that runs the server
 func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	// - repository
-	repoSection := repository.NewSectionRepository(mysql)
+
+	repoSection := secRepo.NewSectionRepository(mysql)
 	repoSeller := sellerRepository.NewSellerRepository(mysql)
 	repoBuyer := repository.NewBuyerRepository(mysql)
 	repoWarehouse := wRepo.NewWarehouseRepository(mysql)
