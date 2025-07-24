@@ -12,13 +12,6 @@ import (
 	productService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product"
 	productRecordService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product_record"
 
-	productHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product"
-	productRecordHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_record"
-	productRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/product"
-	productRecordRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/product_record"
-	productService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product"
-	productRecordService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product_record"
-
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
 	empHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
 	inbHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/inbound_order"
@@ -108,8 +101,8 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// router
 	rt := router.NewAPIRouter(
-		hdBuyer, hdSection, hdSeller, hdWarehouse, hdProduct,
-		hdEmployee, hdProductBatches, hdPurchaseOrder,
+		hdBuyer, hdSection, hdSeller, hdWarehouse, hdEmployee,
+		hdProduct, hdProductBatches, hdPurchaseOrder,
 		hdGeography, hdInboundOrder, hdCarry, hdProductRecord,
 	)
 
