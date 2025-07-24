@@ -1,4 +1,4 @@
-package repository_test
+package testhelpers
 
 import (
 	"database/sql"
@@ -7,8 +7,8 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
 
-// createTestWarehouse creates a warehouse for testing purposes
-func createTestWarehouse() warehouse.Warehouse {
+// CreateTestWarehouse creates a warehouse for testing purposes
+func CreateTestWarehouse() warehouse.Warehouse {
 	return warehouse.Warehouse{
 		WarehouseCode:      "WH001",
 		Address:            "123 Main St",
@@ -19,14 +19,15 @@ func createTestWarehouse() warehouse.Warehouse {
 	}
 }
 
-// createExpectedWarehouse creates a warehouse with ID for expected results
-func createExpectedWarehouse(id int) *warehouse.Warehouse {
-	w := createTestWarehouse()
+// CreateExpectedWarehouse creates a warehouse with ID for expected results
+func CreateExpectedWarehouse(id int) *warehouse.Warehouse {
+	w := CreateTestWarehouse()
 	w.Id = id
 	return &w
 }
 
-func createExpectedWarehouses() []warehouse.Warehouse {
+// CreateTestWarehouses creates multiple warehouses for testing
+func CreateTestWarehouses() []warehouse.Warehouse {
 	return []warehouse.Warehouse{
 		{
 			Id:                 1,
@@ -49,11 +50,24 @@ func createExpectedWarehouses() []warehouse.Warehouse {
 	}
 }
 
-// createMockDB creates a mock database for testing
-func createMockDB() (sqlmock.Sqlmock, *sql.DB) {
+// CreateMockDB creates a mock database for testing (for repository tests)
+func CreateMockDB() (sqlmock.Sqlmock, *sql.DB) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		panic(err)
 	}
 	return mock, db
+}
+
+// Helper functions for pointer values
+func IntPtr(i int) *int {
+	return &i
+}
+
+func StringPtr(s string) *string {
+	return &s
+}
+
+func Float64Ptr(f float64) *float64 {
+	return &f
 }

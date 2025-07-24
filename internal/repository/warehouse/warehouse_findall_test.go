@@ -8,6 +8,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
@@ -36,7 +37,7 @@ func TestWarehouseMySQL_FindAll(t *testing.T) {
 			name: "success - warehouses found",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					rows := sqlmock.NewRows([]string{
 						"id", "warehouse_code", "address", "minimum_temperature", "minimum_capacity",
@@ -55,7 +56,7 @@ func TestWarehouseMySQL_FindAll(t *testing.T) {
 				context: context.Background(),
 			},
 			output: output{
-				warehouses: createExpectedWarehouses(),
+				warehouses: testhelpers.CreateTestWarehouses(),
 				err:        nil,
 			},
 		},
@@ -63,7 +64,7 @@ func TestWarehouseMySQL_FindAll(t *testing.T) {
 			name: "success - no warehouses found",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					rows := sqlmock.NewRows([]string{
 						"id", "warehouse_code", "address", "minimum_temperature", "minimum_capacity",
@@ -88,7 +89,7 @@ func TestWarehouseMySQL_FindAll(t *testing.T) {
 			name: "error - database error",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					mock.ExpectQuery("SELECT (.+) FROM warehouse").
 						WillReturnError(sql.ErrConnDone)
@@ -108,7 +109,7 @@ func TestWarehouseMySQL_FindAll(t *testing.T) {
 			name: "error - scan error continues",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					// Row con datos corruptos que causará error en Scan
 					rows := sqlmock.NewRows([]string{
@@ -134,7 +135,7 @@ func TestWarehouseMySQL_FindAll(t *testing.T) {
 			name: "error - rows iteration error",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					rows := sqlmock.NewRows([]string{
 						"id", "warehouse_code", "address", "minimum_temperature",
