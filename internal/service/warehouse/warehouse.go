@@ -23,11 +23,7 @@ func (s *WarehouseDefault) FindAll(ctx context.Context) ([]warehouse.Warehouse, 
 // FindById retrieves a specific warehouse by its ID from the repository
 // Returns the warehouse if found or an error if not found or operation fails
 func (s *WarehouseDefault) FindById(ctx context.Context, id int) (*warehouse.Warehouse, error) {
-	w, err := s.rp.FindById(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return w, nil
+	return s.rp.FindById(ctx, id)
 }
 
 // Update modifies an existing warehouse with the provided patch data
