@@ -1,10 +1,10 @@
 package handler
 
 import (
+	productRecordMappers "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers/product_record"
+	productRecordService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product_record"
 	"net/http"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
@@ -12,10 +12,10 @@ import (
 )
 
 type ProductRecordHandler struct {
-	svc service.ProductRecordService
+	svc productRecordService.ProductRecordService
 }
 
-func NewProductRecordHandler(svc service.ProductRecordService) *ProductRecordHandler {
+func NewProductRecordHandler(svc productRecordService.ProductRecordService) *ProductRecordHandler {
 	return &ProductRecordHandler{svc: svc}
 }
 
@@ -32,7 +32,7 @@ func (h *ProductRecordHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	record := mappers.ProductRecordRequestToDomain(req)
+	record := productRecordMappers.ProductRecordRequestToDomain(req)
 
 	result, err := h.svc.Create(r.Context(), record)
 	if err != nil {

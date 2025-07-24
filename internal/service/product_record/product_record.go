@@ -3,9 +3,7 @@ package service
 import (
 	"context"
 	"errors"
-
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/product_record"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_record"
@@ -37,11 +35,11 @@ func (s *productRecordService) Create(ctx context.Context, record models.Product
 	return savedRecord, nil
 }
 
-func (s *productRecordService) GetRecordsReport(ctx context.Context, productID int) (models.ProductRecordsReportResponse, error) {
+func (s *productRecordService) GetRecordsReport(ctx context.Context, productID int) ([]models.ProductRecordReport, error) {
 	reports, err := s.repo.GetRecordsReport(ctx, productID)
 	if err != nil {
-		return models.ProductRecordsReportResponse{}, err
+		return []models.ProductRecordReport{}, err
 	}
 
-	return mappers.ProductRecordReportToResponse(reports), nil
+	return reports, nil
 }

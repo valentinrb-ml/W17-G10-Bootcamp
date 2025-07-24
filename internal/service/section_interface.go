@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	wRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
 
 // SectionService defines the business logic interface for sections.
