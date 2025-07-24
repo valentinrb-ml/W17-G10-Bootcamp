@@ -3,8 +3,9 @@ package server
 import (
 	"database/sql"
 	"fmt"
-	secRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
 	"net/http"
+
+	secRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
 
 	productHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product"
 	productRecordHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_record"
@@ -27,7 +28,7 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 
 	buyerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/buyer"
-	buyerRespository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/buyer"
+	buyerRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/buyer"
 	buyerService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/buyer"
 	empService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/employee"
 	inbService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/inbound_order"
