@@ -1,10 +1,9 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
+	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/buyer"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
@@ -29,7 +28,7 @@ func (h *BuyerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("Request received: %+v\n", br)
+	//fmt.Printf("Request received: %+v\n", br)
 	if err := validators.ValidateRequestBuyer(br); err != nil {
 		response.Error(w, err)
 		return
