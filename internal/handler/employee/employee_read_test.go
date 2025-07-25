@@ -8,15 +8,15 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-
 	"github.com/stretchr/testify/require"
 	handler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
 	employeeMocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/employee"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
-// Test for GET /employees (find_all)
+// Test para GET /employees (find_all)
 func TestEmployeeHandler_GetAll(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -26,19 +26,22 @@ func TestEmployeeHandler_GetAll(t *testing.T) {
 	}{
 		{
 			name: "find_all",
+			// Usamos el helper para poblar la lista de empleados dummy
 			mockFindAll: func(ctx context.Context) ([]*models.Employee, error) {
-				return []*models.Employee{
-					{ID: 1, CardNumberID: "E001", FirstName: "Lucas", LastName: "Martinez", WarehouseID: 1},
-					{ID: 2, CardNumberID: "E002", FirstName: "Paola", LastName: "Gomez", WarehouseID: 1},
-				}, nil
+				emps := testhelpers.CreateTestEmployees()
+				var empsPtrs []*models.Employee
+				for i := range emps {
+					empsPtrs = append(empsPtrs, &emps[i])
+				}
+				return empsPtrs, nil
 			},
 			wantStatus:  http.StatusOK,
-			wantBodyHas: `"card_number_id":"E001"`,
+			wantBodyHas: `"card_number_id":"EMP001"`, // checa que JWT de testhelpers esté presente
 		},
 		{
 			name: "find_all_empty",
 			mockFindAll: func(ctx context.Context) ([]*models.Employee, error) {
-				return []*models.Employee{}, nil
+				return []*models.Employee{}, nil // caso vacío
 			},
 			wantStatus:  http.StatusOK,
 			wantBodyHas: `[]`, // respuesta vacía
@@ -47,9 +50,11 @@ func TestEmployeeHandler_GetAll(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			// Crea el mock del service usando la función del test
 			mockSvc := &employeeMocks.EmployeeServiceMock{MockFindAll: tc.mockFindAll}
 			h := handler.NewEmployeeHandler(mockSvc)
 
+			// Ejecuta el GET como lo haría el router
 			req := httptest.NewRequest("GET", "/employees", nil)
 			w := httptest.NewRecorder()
 
@@ -57,13 +62,14 @@ func TestEmployeeHandler_GetAll(t *testing.T) {
 			res := w.Result()
 			defer res.Body.Close()
 
+			// Checa código HTTP y que en el body está el dato esperado
 			require.Equal(t, tc.wantStatus, res.StatusCode)
 			require.Contains(t, w.Body.String(), tc.wantBodyHas)
 		})
 	}
 }
 
-// Test for GET /employees/{id}
+// Test para GET /employees/{id}
 func TestEmployeeHandler_GetByID(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -74,12 +80,12 @@ func TestEmployeeHandler_GetByID(t *testing.T) {
 	}{
 		{
 			name: "find_by_id_existent",
-			id:   1,
+			id:   func() int { return testhelpers.CreateTestEmployee().ID }(), // Consistencia
 			mockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
-				return &models.Employee{ID: 1, CardNumberID: "E001", FirstName: "Lucas", LastName: "Martinez", WarehouseID: 1}, nil
+				return testhelpers.CreateExpectedEmployee(id), nil // Devuelve un empleado dummy usando el helper
 			},
 			wantStatus:  http.StatusOK,
-			wantBodyHas: `"card_number_id":"E001"`,
+			wantBodyHas: `"card_number_id":"EMP001"`, // o cambia según helper
 		},
 		{
 			name: "find_by_id_non_existent",
@@ -100,7 +106,7 @@ func TestEmployeeHandler_GetByID(t *testing.T) {
 			req := httptest.NewRequest("GET", "/employees/"+strconv.Itoa(tc.id), nil)
 			w := httptest.NewRecorder()
 
-			// Para emular el router de chi, seteamos chi context param
+			// Emula el router de chi (param id)
 			rctx := chi.NewRouteContext()
 			rctx.URLParams.Add("id", strconv.Itoa(tc.id))
 			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
