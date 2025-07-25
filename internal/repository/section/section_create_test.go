@@ -7,6 +7,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
+	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 	"testing"
@@ -32,27 +33,9 @@ func TestSectionRepository_CreateSection(t *testing.T) {
 		output  output
 	}
 
-	inputSec := &models.Section{
-		SectionNumber:      1,
-		CurrentCapacity:    2,
-		CurrentTemperature: 3,
-		MaximumCapacity:    4,
-		MinimumCapacity:    5,
-		MinimumTemperature: 6,
-		ProductTypeId:      7,
-		WarehouseId:        8,
-	}
-	expSec := &models.Section{
-		Id:                 1,
-		SectionNumber:      1,
-		CurrentCapacity:    2,
-		CurrentTemperature: 3,
-		MaximumCapacity:    4,
-		MinimumCapacity:    5,
-		MinimumTemperature: 6,
-		ProductTypeId:      7,
-		WarehouseId:        8,
-	}
+	inputSec := mocks.DummySection(1)
+
+	expSec := mocks.DummySection(1)
 
 	testCases := []testCase{
 		{
@@ -67,8 +50,8 @@ func TestSectionRepository_CreateSection(t *testing.T) {
 						).WillReturnResult(sqlmock.NewResult(1, 1))
 				},
 			},
-			input:  input{sec: inputSec},
-			output: output{expectedError: false, expected: expSec, err: nil},
+			input:  input{sec: &inputSec},
+			output: output{expectedError: false, expected: &expSec, err: nil},
 		},
 		{
 			name: "foreign key constraint error",
@@ -82,7 +65,7 @@ func TestSectionRepository_CreateSection(t *testing.T) {
 					).WillReturnError(myErr)
 				},
 			},
-			input: input{inputSec},
+			input: input{&inputSec},
 			output: output{
 				expected:      nil,
 				expectedError: true,
@@ -101,7 +84,7 @@ func TestSectionRepository_CreateSection(t *testing.T) {
 					).WillReturnError(myErr)
 				},
 			},
-			input: input{inputSec},
+			input: input{&inputSec},
 			output: output{
 				expected:      nil,
 				expectedError: true,
@@ -120,7 +103,7 @@ func TestSectionRepository_CreateSection(t *testing.T) {
 					).WillReturnError(errors.New("unknown db error"))
 				},
 			},
-			input: input{inputSec},
+			input: input{&inputSec},
 			output: output{
 				expected: nil, expectedError: true,
 				err: apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while creating the section."),
@@ -138,7 +121,7 @@ func TestSectionRepository_CreateSection(t *testing.T) {
 					).WillReturnResult(sqlmock.NewErrorResult(errors.New("lastInsertId error")))
 				},
 			},
-			input: input{inputSec},
+			input: input{&inputSec},
 			output: output{
 				expected:      nil,
 				expectedError: true,

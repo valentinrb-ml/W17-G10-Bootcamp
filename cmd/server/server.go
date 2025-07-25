@@ -33,6 +33,7 @@ import (
 	buyerService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/buyer"
 	empService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/employee"
 	inbService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/inbound_order"
+	secService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/section"
 	sellerService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/seller"
 	wService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/warehouse"
 
@@ -86,8 +87,9 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// - service
 	svcSeller := sellerService.NewSellerService(repoSeller, repoGeography)
+
+	svcSection := secService.NewSectionService(repoSection)
 	svcBuyer := buyerService.NewBuyerService(repoBuyer)
-	svcSection := service.NewSectionServer(repoSection)
 	svcProduct := productService.NewProductService(repoProduct)
 	svcEmployee := empService.NewEmployeeDefault(repoEmployee, repoWarehouse)
 	svcWarehouse := wService.NewWarehouseService(repoWarehouse)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
+	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 	"testing"
@@ -24,9 +25,10 @@ func TestSectionRepository_FindById(t *testing.T) {
 	type testCase struct {
 		name string
 		input
-		arrange arrange
-		output  output
+		arrange
+		output
 	}
+	expSec := mocks.DummySection(1)
 	testCases := []testCase{
 		{
 			name: "returns sections by id",
@@ -34,23 +36,13 @@ func TestSectionRepository_FindById(t *testing.T) {
 				rows := sqlmock.NewRows([]string{
 					"id", "section_number", "current_capacity", "current_temperature",
 					"maximum_capacity", "minimum_capacity", "minimum_temperature", "product_type_id", "warehouse_id",
-				}).AddRow(1, 10, 20, 7, 100, 10, 5, 2, 3)
+				}).AddRow(expSec.Id, expSec.SectionNumber, expSec.CurrentCapacity, expSec.CurrentTemperature, expSec.MaximumCapacity, expSec.MinimumCapacity, expSec.MinimumTemperature, expSec.ProductTypeId, expSec.WarehouseId)
 				m.ExpectQuery(`^SELECT id, section_number, current_capacity, current_temperature, maximum_capacity, minimum_capacity, minimum_temperature, product_type_id, warehouse_id FROM sections WHERE id = ?`).
 					WillReturnRows(rows)
 			}},
 			input: input{id: 1},
 			output: output{
-				expected: &models.Section{
-					Id:                 1,
-					SectionNumber:      10,
-					CurrentCapacity:    20,
-					CurrentTemperature: 7,
-					MaximumCapacity:    100,
-					MinimumCapacity:    10,
-					MinimumTemperature: 5,
-					ProductTypeId:      2,
-					WarehouseId:        3,
-				},
+				expected:      &expSec,
 				expectedError: false,
 				err:           nil,
 			},
@@ -104,7 +96,7 @@ func TestSectionRepository_FindById(t *testing.T) {
 			tc.arrange.dbMock(mock)
 
 			result, err := repo.FindById(context.Background(), tc.id)
-			if tc.output.err != nil {
+			if tc.output.expectedError {
 				require.Error(t, err)
 				require.Equal(t, tc.output.err.Error(), err.Error())
 				require.Nil(t, result)
