@@ -12,11 +12,12 @@ import (
 
 	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/buyer"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestBuyerRepository_Delete(t *testing.T) {
 	type arrange struct {
-		dbMock func() (sqlmock.Sqlmock, *sql.DB)
+		dbMock func(id int) (sqlmock.Sqlmock, *sql.DB)
 	}
 	type input struct {
 		id  int
@@ -32,20 +33,24 @@ func TestBuyerRepository_Delete(t *testing.T) {
 		output  output
 	}
 
+	// Test ID base para reutilización
+	const testID = 1
+	const notFoundID = 999
+
 	testCases := []testCase{
 		{
 			name: "success - buyer deleted successfully",
 			arrange: arrange{
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
+				dbMock: func(id int) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
 					mock.ExpectExec("DELETE FROM buyers WHERE id = ?").
-						WithArgs(1).
-						WillReturnResult(sqlmock.NewResult(0, 1)) // 1 row affected
+						WithArgs(id).
+						WillReturnResult(sqlmock.NewResult(0, 1))
 					return mock, db
 				},
 			},
 			input: input{
-				id:  1,
+				id:  testID,
 				ctx: context.Background(),
 			},
 			output: output{
@@ -55,16 +60,16 @@ func TestBuyerRepository_Delete(t *testing.T) {
 		{
 			name: "error - buyer not found",
 			arrange: arrange{
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
+				dbMock: func(id int) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
 					mock.ExpectExec("DELETE FROM buyers WHERE id = ?").
-						WithArgs(999).
-						WillReturnResult(sqlmock.NewResult(0, 0)) // 0 rows affected
+						WithArgs(id).
+						WillReturnResult(sqlmock.NewResult(0, 0))
 					return mock, db
 				},
 			},
 			input: input{
-				id:  999,
+				id:  notFoundID,
 				ctx: context.Background(),
 			},
 			output: output{
@@ -74,20 +79,20 @@ func TestBuyerRepository_Delete(t *testing.T) {
 		{
 			name: "error - buyer has purchase orders (FK constraint)",
 			arrange: arrange{
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
+				dbMock: func(id int) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
 					mysqlErr := &mysql.MySQLError{
 						Number:  1451,
 						Message: "Cannot delete or update a parent row: a foreign key constraint fails",
 					}
 					mock.ExpectExec("DELETE FROM buyers WHERE id = ?").
-						WithArgs(1).
+						WithArgs(id).
 						WillReturnError(mysqlErr)
 					return mock, db
 				},
 			},
 			input: input{
-				id:  1,
+				id:  testID,
 				ctx: context.Background(),
 			},
 			output: output{
@@ -97,16 +102,16 @@ func TestBuyerRepository_Delete(t *testing.T) {
 		{
 			name: "error - database connection failed",
 			arrange: arrange{
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
+				dbMock: func(id int) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
 					mock.ExpectExec("DELETE FROM buyers WHERE id = ?").
-						WithArgs(1).
+						WithArgs(id).
 						WillReturnError(errors.New("connection failed"))
 					return mock, db
 				},
 			},
 			input: input{
-				id:  1,
+				id:  testID,
 				ctx: context.Background(),
 			},
 			output: output{
@@ -118,7 +123,7 @@ func TestBuyerRepository_Delete(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// Arrange
-			mock, db := tc.arrange.dbMock()
+			mock, db := tc.arrange.dbMock(tc.input.id)
 			defer db.Close()
 			repo := repository.NewBuyerRepository(db)
 

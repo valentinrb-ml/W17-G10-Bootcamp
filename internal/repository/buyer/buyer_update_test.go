@@ -13,11 +13,12 @@ import (
 	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/buyer"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestBuyerRepository_Update(t *testing.T) {
 	type arrange struct {
-		dbMock func() (sqlmock.Sqlmock, *sql.DB)
+		dbMock func(id int, b models.Buyer) (sqlmock.Sqlmock, *sql.DB)
 	}
 	type input struct {
 		id    int
@@ -34,26 +35,29 @@ func TestBuyerRepository_Update(t *testing.T) {
 		output  output
 	}
 
-	testBuyer := models.Buyer{
-		CardNumberId: "CARD-001",
-		FirstName:    "John",
-		LastName:     "Doe",
-	}
+	// const para IDs de prueba
+	const (
+		testID     = 1
+		notFoundID = 999
+	)
+
+	// builder para crear buyer de prueba
+	testBuyer := testhelpers.NewBuyerBuilder().Build()
 
 	testCases := []testCase{
 		{
 			name: "success - buyer updated successfully",
 			arrange: arrange{
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
-					mock.ExpectExec("UPDATE buyers SET").
-						WithArgs("CARD-001", "John", "Doe", 1).
-						WillReturnResult(sqlmock.NewResult(0, 1)) // 1 row affected
+				dbMock: func(id int, b models.Buyer) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
+					mock.ExpectExec("UPDATE buyers SET id_card_number = \\?, first_name = \\?, last_name = \\? WHERE id = \\?").
+						WithArgs(b.CardNumberId, b.FirstName, b.LastName, id).
+						WillReturnResult(sqlmock.NewResult(0, 1))
 					return mock, db
 				},
 			},
 			input: input{
-				id:    1,
+				id:    testID,
 				buyer: testBuyer,
 				ctx:   context.Background(),
 			},
@@ -64,20 +68,20 @@ func TestBuyerRepository_Update(t *testing.T) {
 		{
 			name: "error - id_card_number duplicate",
 			arrange: arrange{
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
+				dbMock: func(id int, b models.Buyer) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
 					mysqlErr := &mysql.MySQLError{
 						Number:  1062,
 						Message: "Duplicate entry 'CARD-001' for key 'id_card_number'",
 					}
-					mock.ExpectExec("UPDATE buyers SET").
-						WithArgs("CARD-001", "John", "Doe", 1).
+					mock.ExpectExec("UPDATE buyers SET id_card_number = \\?, first_name = \\?, last_name = \\? WHERE id = \\?").
+						WithArgs(b.CardNumberId, b.FirstName, b.LastName, id).
 						WillReturnError(mysqlErr)
 					return mock, db
 				},
 			},
 			input: input{
-				id:    1,
+				id:    testID,
 				buyer: testBuyer,
 				ctx:   context.Background(),
 			},
@@ -88,36 +92,36 @@ func TestBuyerRepository_Update(t *testing.T) {
 		{
 			name: "error - buyer not found",
 			arrange: arrange{
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
-					mock.ExpectExec("UPDATE buyers SET").
-						WithArgs("CARD-001", "John", "Doe", 999).
-						WillReturnResult(sqlmock.NewResult(0, 0)) // 0 rows affected
+				dbMock: func(id int, b models.Buyer) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
+					mock.ExpectExec("UPDATE buyers SET id_card_number = \\?, first_name = \\?, last_name = \\? WHERE id = \\?").
+						WithArgs(b.CardNumberId, b.FirstName, b.LastName, id).
+						WillReturnResult(sqlmock.NewResult(0, 0))
 					return mock, db
 				},
 			},
 			input: input{
-				id:    999,
+				id:    notFoundID,
 				buyer: testBuyer,
 				ctx:   context.Background(),
 			},
 			output: output{
-				err: nil, // En tu implementación actual no se maneja este caso
+				err: nil,
 			},
 		},
 		{
 			name: "error - database connection failed",
 			arrange: arrange{
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
-					mock.ExpectExec("UPDATE buyers SET").
-						WithArgs("CARD-001", "John", "Doe", 1).
+				dbMock: func(id int, b models.Buyer) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
+					mock.ExpectExec("UPDATE buyers SET id_card_number = \\?, first_name = \\?, last_name = \\? WHERE id = \\?").
+						WithArgs(b.CardNumberId, b.FirstName, b.LastName, id).
 						WillReturnError(errors.New("connection failed"))
 					return mock, db
 				},
 			},
 			input: input{
-				id:    1,
+				id:    testID,
 				buyer: testBuyer,
 				ctx:   context.Background(),
 			},
@@ -130,7 +134,7 @@ func TestBuyerRepository_Update(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// Arrange
-			mock, db := tc.arrange.dbMock()
+			mock, db := tc.arrange.dbMock(tc.input.id, tc.input.buyer)
 			defer db.Close()
 			repo := repository.NewBuyerRepository(db)
 

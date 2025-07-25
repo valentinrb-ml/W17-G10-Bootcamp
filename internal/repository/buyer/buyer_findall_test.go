@@ -12,11 +12,12 @@ import (
 	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/buyer"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestBuyerRepository_FindAll(t *testing.T) {
 	type arrange struct {
-		dbMock func() (sqlmock.Sqlmock, *sql.DB)
+		dbMock func(buyers []models.Buyer) (sqlmock.Sqlmock, *sql.DB)
 	}
 	type output struct {
 		buyers []models.Buyer
@@ -28,31 +29,16 @@ func TestBuyerRepository_FindAll(t *testing.T) {
 		output  output
 	}
 
-	testBuyers := []models.Buyer{
-		{
-			Id:           1,
-			CardNumberId: "CARD-001",
-			FirstName:    "John",
-			LastName:     "Doe",
-		},
-		{
-			Id:           2,
-			CardNumberId: "CARD-002",
-			FirstName:    "Jane",
-			LastName:     "Smith",
-		},
-	}
+	// Usamos el helper para crear buyers de prueba
+	testBuyers := testhelpers.CreateTestBuyers(2)
 
 	testCases := []testCase{
 		{
 			name: "success - found multiple buyers",
 			arrange: arrange{
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
-					rows := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name"}).
-						AddRow(1, "CARD-001", "John", "Doe").
-						AddRow(2, "CARD-002", "Jane", "Smith")
-
+				dbMock: func(buyers []models.Buyer) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
+					rows := testhelpers.CreateBuyerRows(mock, buyers)
 					mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name FROM buyers").
 						WillReturnRows(rows)
 					return mock, db
@@ -66,8 +52,8 @@ func TestBuyerRepository_FindAll(t *testing.T) {
 		{
 			name: "success - no buyers found",
 			arrange: arrange{
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
+				dbMock: func(_ []models.Buyer) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
 					rows := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name"})
 					mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name FROM buyers").
 						WillReturnRows(rows)
@@ -82,8 +68,8 @@ func TestBuyerRepository_FindAll(t *testing.T) {
 		{
 			name: "error - database query failed",
 			arrange: arrange{
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
+				dbMock: func(_ []models.Buyer) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
 					mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name FROM buyers").
 						WillReturnError(errors.New("connection failed"))
 					return mock, db
@@ -97,8 +83,8 @@ func TestBuyerRepository_FindAll(t *testing.T) {
 		{
 			name: "error - row scanning failed",
 			arrange: arrange{
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
+				dbMock: func(_ []models.Buyer) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
 					rows := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name"}).
 						AddRow("invalid_id", "CARD-001", "John", "Doe") // Valor incorrecto para id
 
@@ -115,10 +101,9 @@ func TestBuyerRepository_FindAll(t *testing.T) {
 		{
 			name: "error - rows iteration failed",
 			arrange: arrange{
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
-					rows := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name"}).
-						AddRow(1, "CARD-001", "John", "Doe").
+				dbMock: func(buyers []models.Buyer) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
+					rows := testhelpers.CreateBuyerRows(mock, buyers).
 						CloseError(errors.New("rows error"))
 
 					mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name FROM buyers").
@@ -136,7 +121,7 @@ func TestBuyerRepository_FindAll(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// Arrange
-			mock, db := tc.arrange.dbMock()
+			mock, db := tc.arrange.dbMock(testBuyers)
 			defer db.Close()
 			repo := repository.NewBuyerRepository(db)
 
@@ -151,7 +136,6 @@ func TestBuyerRepository_FindAll(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			// Manejar comparación de slices nil vs vacíos
 			if tc.output.buyers == nil {
 				require.Nil(t, buyers)
 			} else {

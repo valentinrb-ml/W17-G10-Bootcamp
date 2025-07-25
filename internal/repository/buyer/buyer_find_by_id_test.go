@@ -12,11 +12,12 @@ import (
 	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/buyer"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestBuyerRepository_FindById(t *testing.T) {
 	type arrange struct {
-		dbMock func() (sqlmock.Sqlmock, *sql.DB)
+		dbMock func(id int) (sqlmock.Sqlmock, *sql.DB)
 		id     int
 	}
 	type output struct {
@@ -29,39 +30,37 @@ func TestBuyerRepository_FindById(t *testing.T) {
 		output  output
 	}
 
+	const testID = 1
+
 	testCases := []testCase{
 		{
 			name: "success - buyer found",
 			arrange: arrange{
-				id: 1,
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
-					row := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name"}).
-						AddRow(1, "CARD-001", "John", "Doe")
+				id: testID,
+				dbMock: func(id int) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
+					expectedBuyer := testhelpers.CreateTestBuyerWithID(id)
+					rows := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name"}).
+						AddRow(expectedBuyer.Id, expectedBuyer.CardNumberId, expectedBuyer.FirstName, expectedBuyer.LastName)
 					mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name FROM buyers WHERE id = \\?").
-						WithArgs(1).
-						WillReturnRows(row)
+						WithArgs(id).
+						WillReturnRows(rows)
 					return mock, db
 				},
 			},
 			output: output{
-				buyer: &models.Buyer{
-					Id:           1,
-					CardNumberId: "CARD-001",
-					FirstName:    "John",
-					LastName:     "Doe",
-				},
-				err: nil,
+				buyer: testhelpers.CreateTestBuyerWithID(testID),
+				err:   nil,
 			},
 		},
 		{
 			name: "error - buyer not found",
 			arrange: arrange{
-				id: 1,
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
+				id: testID,
+				dbMock: func(id int) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
 					mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name FROM buyers WHERE id = \\?").
-						WithArgs(1).
+						WithArgs(id).
 						WillReturnError(sql.ErrNoRows)
 					return mock, db
 				},
@@ -74,11 +73,11 @@ func TestBuyerRepository_FindById(t *testing.T) {
 		{
 			name: "error - database error",
 			arrange: arrange{
-				id: 1,
-				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					db, mock, _ := sqlmock.New()
+				id: testID,
+				dbMock: func(id int) (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockBuyerDB()
 					mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name FROM buyers WHERE id = \\?").
-						WithArgs(1).
+						WithArgs(id).
 						WillReturnError(errors.New("database error"))
 					return mock, db
 				},
@@ -93,7 +92,7 @@ func TestBuyerRepository_FindById(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// Arrange
-			mock, db := tc.arrange.dbMock()
+			mock, db := tc.arrange.dbMock(tc.arrange.id)
 			defer db.Close()
 			repo := repository.NewBuyerRepository(db)
 
