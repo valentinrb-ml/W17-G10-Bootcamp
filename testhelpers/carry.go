@@ -58,3 +58,14 @@ func CreateTestCarriesReportSlice() []carry.CarriesReport {
         },
     }
 }
+
+// CreateTestCarryRequest creates a test carry request
+func CreateTestCarryRequest() carry.CarryRequest {
+    return carry.CarryRequest{
+        Cid:         "CAR001",
+        CompanyName: "Test Company",
+        Address:     "Test Address",
+        Telephone:   "5551234567",
+        LocalityId:  "1",
+    }
+}

@@ -31,3 +31,17 @@ cover-html: cover
 .PHONY: cover-summary
 cover-summary: cover
 	go tool cover -func=coverage.out
+
+# CARRY MODULE COVERAGE
+# Runs tests and shows coverage for carry module (service, handler, repository)
+.PHONY: cover-carry
+cover-carry:
+	go test ./internal/service/carry/... ./internal/handler/carry/... ./internal/repository/carry/... -coverprofile=carry_coverage.out && \
+	go tool cover -func=carry_coverage.out
+
+# WAREHOUSE MODULE COVERAGE
+# Runs tests and shows coverage for warehouse module (service, handler, repository)
+.PHONY: cover-warehouse
+cover-warehouse:
+	go test ./internal/service/warehouse/... ./internal/handler/warehouse/... ./internal/repository/warehouse/... -coverprofile=warehouse_coverage.out && \
+	go tool cover -func=warehouse_coverage.out
