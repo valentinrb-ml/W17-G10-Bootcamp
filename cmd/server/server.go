@@ -3,8 +3,9 @@ package server
 import (
 	"database/sql"
 	"fmt"
-	secRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
 	"net/http"
+
+	secRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
 
 	productHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product"
 	productRecordHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_record"
@@ -25,10 +26,19 @@ import (
 	wRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/router"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
+
+	buyerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/buyer"
+	buyerRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/buyer"
+	buyerService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/buyer"
 	empService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/employee"
 	inbService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/inbound_order"
 	secService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/section"
 	sellerService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/seller"
+	wService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/warehouse"
+
+	geographyHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/geography"
+	geographyRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/geography"
+	geographyService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/geography"
 )
 
 type ConfigServerChi struct {
@@ -57,7 +67,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	repoSection := secRepo.NewSectionRepository(mysql)
 	repoSeller := sellerRepository.NewSellerRepository(mysql)
-	repoBuyer := repository.NewBuyerRepository(mysql)
+	repoBuyer := buyerRepository.NewBuyerRepository(mysql)
 	repoWarehouse := wRepo.NewWarehouseRepository(mysql)
 	repoProduct, err := productRepository.NewProductRepository(mysql)
 	if err != nil {
@@ -66,7 +76,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoEmployee := empRepo.NewEmployeeRepository(mysql)
 	repoProductBatches := repository.NewProductBatchesRepository(mysql)
 	repoCarry := repository.NewCarryRepository(mysql)
-	repoGeography := repository.NewGeographyRepository(mysql)
+	repoGeography := geographyRepository.NewGeographyRepository(mysql)
 	repoInboundOrder := inbRepo.NewInboundOrderRepository(mysql)
 	repoPurchaseOrder := repository.NewPurchaseOrderRepository(mysql)
 	repoProductRecord, err := productRecordRepository.NewProductRecordRepository(mysql)
@@ -76,20 +86,21 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// - service
 	svcSeller := sellerService.NewSellerService(repoSeller, repoGeography)
-	svcBuyer := service.NewBuyerService(repoBuyer)
+
 	svcSection := secService.NewSectionService(repoSection)
+	svcBuyer := buyerService.NewBuyerService(repoBuyer)
 	svcProduct := productService.NewProductService(repoProduct)
-	svcWarehouse := service.NewWarehouseService(repoWarehouse)
 	svcEmployee := empService.NewEmployeeDefault(repoEmployee, repoWarehouse)
+	svcWarehouse := wService.NewWarehouseService(repoWarehouse)
 	svcProductBatches := service.NewProductBatchesService(repoProductBatches)
 	svcCarry := service.NewCarryService(repoCarry, repoGeography)
-	svcGeography := service.NewGeographyService(repoGeography)
+	svcGeography := geographyService.NewGeographyService(repoGeography)
 	svcInboundOrder := inbService.NewInboundOrderService(repoInboundOrder, repoEmployee, repoWarehouse)
 	svcPurchaseOrder := service.NewPurchaseOrderService(repoPurchaseOrder)
 	svcProductRecord := productRecordService.NewProductRecordService(repoProductRecord)
 
 	// - handler
-	hdBuyer := handler.NewBuyerHandler(svcBuyer)
+	hdBuyer := buyerHandler.NewBuyerHandler(svcBuyer)
 	hdSection := handler.NewSectionHandler(svcSection)
 	hdSeller := sellerHandler.NewSellerHandler(svcSeller)
 	hdCarry := handler.NewCarryHandler(svcCarry)
@@ -97,7 +108,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdEmployee := empHandler.NewEmployeeHandler(svcEmployee)
 	hdProduct := productHandler.NewProductHandler(svcProduct)
 	hdProductBatches := handler.NewProductBatchesHandler(svcProductBatches)
-	hdGeography := handler.NewGeographyHandler(svcGeography)
+	hdGeography := geographyHandler.NewGeographyHandler(svcGeography)
 	hdInboundOrder := inbHandler.NewInboundOrderHandler(svcInboundOrder)
 	hdPurchaseOrder := handler.NewPurchaseOrderHandler(svcPurchaseOrder)
 	hdProductRecord := productRecordHandler.NewProductRecordHandler(svcProductRecord)

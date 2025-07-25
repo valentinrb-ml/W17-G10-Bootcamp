@@ -4,7 +4,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
+	buyerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/buyer"
 	empHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
+	geographyHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/geography"
 	inbHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/inbound_order"
 	productHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product"
 	ProductRecordHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_record"
@@ -13,7 +15,7 @@ import (
 )
 
 func NewAPIRouter(
-	hdBuyer *handler.BuyerHandler,
+	hdBuyer *buyerHandler.BuyerHandler,
 	hdSection *handler.SectionDefault,
 	hdSeller *sellerHandler.SellerHandler,
 	hdWarehouse *handler.WarehouseHandler,
@@ -21,7 +23,7 @@ func NewAPIRouter(
 	hdProduct *productHandler.ProductHandler,
 	hdProductBatches *handler.ProductBatchesHandler,
 	hdPurchaseOrder *handler.PurchaseOrderHandler,
-	hdGeography *handler.GeographyHandler,
+	hdGeography *geographyHandler.GeographyHandler,
 	hdInboundOrder *inbHandler.InboundOrderHandler,
 	hdCarry *handler.CarryHandler,
 	hdProductRecord *ProductRecordHandler.ProductRecordHandler,

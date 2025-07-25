@@ -9,6 +9,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
@@ -39,7 +40,7 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 			name: "success - warehouse updated",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					mock.ExpectExec("UPDATE warehouse SET (.+) WHERE id = ?").
 						WithArgs("WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001", 1).
@@ -50,11 +51,11 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 			},
 			input: input{
 				id:        1,
-				warehouse: createTestWarehouse(),
+				warehouse: testhelpers.CreateTestWarehouse(),
 				context:   context.Background(),
 			},
 			output: output{
-				warehouse: createExpectedWarehouse(1),
+				warehouse: testhelpers.CreateExpectedWarehouse(1),
 				err:       nil,
 			},
 		},
@@ -62,7 +63,7 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 			name: "error - warehouse not found",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					mock.ExpectExec("UPDATE warehouse SET (.+) WHERE id = ?").
 						WithArgs("WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001", 999).
@@ -73,7 +74,7 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 			},
 			input: input{
 				id:        999,
-				warehouse: createTestWarehouse(),
+				warehouse: testhelpers.CreateTestWarehouse(),
 				context:   context.Background(),
 			},
 			output: output{
@@ -85,7 +86,7 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 			name: "error - warehouse_code already exists",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					mysqlErr := &mysql.MySQLError{
 						Number:  1062,
@@ -101,7 +102,7 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 			},
 			input: input{
 				id:        1,
-				warehouse: createTestWarehouse(),
+				warehouse: testhelpers.CreateTestWarehouse(),
 				context:   context.Background(),
 			},
 			output: output{
@@ -113,7 +114,7 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 			name: "error - database error",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					mock.ExpectExec("UPDATE warehouse SET (.+) WHERE id = ?").
 						WithArgs("WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001", 1).
@@ -124,7 +125,7 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 			},
 			input: input{
 				id:        1,
-				warehouse: createTestWarehouse(),
+				warehouse: testhelpers.CreateTestWarehouse(),
 				context:   context.Background(),
 			},
 			output: output{
@@ -136,7 +137,7 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 			name: "error - rows affected check failed",
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-					mock, db := createMockDB()
+					mock, db := testhelpers.CreateMockDB()
 
 					result := sqlmock.NewErrorResult(sql.ErrTxDone)
 					mock.ExpectExec("UPDATE warehouse SET (.+) WHERE id = ?").
@@ -148,7 +149,7 @@ func TestWarehouseMySQL_Update(t *testing.T) {
 			},
 			input: input{
 				id:        1,
-				warehouse: createTestWarehouse(),
+				warehouse: testhelpers.CreateTestWarehouse(),
 				context:   context.Background(),
 			},
 			output: output{
