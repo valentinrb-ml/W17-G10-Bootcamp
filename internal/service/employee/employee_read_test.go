@@ -13,6 +13,7 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
+// Test para la lectura de empleados en el service (FindAll y FindByID) usando helpers centralizados
 func TestEmployeeService_Read(t *testing.T) {
 	testCases := []struct {
 		name        string
@@ -21,29 +22,31 @@ func TestEmployeeService_Read(t *testing.T) {
 		inputID     int
 		wantErr     bool
 		wantErrCode string
-		wantLen     int
-		wantID      int
+		wantLen     int // cantidad esperada para FindAll
+		wantID      int // id esperado para FindByID
 	}{
 		{
 			name: "find_all",
+			// Simula el repo devolviendo empleados usando el helper (DRY)
 			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
-				emps := testhelpers.CreateTestEmployees()
+				emps := testhelpers.CreateTestEmployees() // Slice de empleados dummy
 				var empsPtrs []*models.Employee
 				for i := range emps {
-					empsPtrs = append(empsPtrs, &emps[i])
+					empsPtrs = append(empsPtrs, &emps[i]) // Pasa a []*models.Employee
 				}
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindAll: func(ctx context.Context) ([]*models.Employee, error) {
-						return empsPtrs, nil
+						return empsPtrs, nil // Devuelve todos los empleados "de la BD"
 					},
 				}
 			},
 			findAll: true,
 			wantErr: false,
-			wantLen: 2,
+			wantLen: 2, // Según los dummy del helper
 		},
 		{
 			name: "find_by_id_non_existent",
+			// Simula repo que devuelve error not found
 			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
@@ -52,12 +55,13 @@ func TestEmployeeService_Read(t *testing.T) {
 				}
 			},
 			findAll:     false,
-			inputID:     99,
+			inputID:     99, // id que no existe
 			wantErr:     true,
 			wantErrCode: apperrors.CodeNotFound,
 		},
 		{
 			name: "find_by_id_existent",
+			// Usa el helper para definir el empleado encontrado
 			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
@@ -66,31 +70,34 @@ func TestEmployeeService_Read(t *testing.T) {
 				}
 			},
 			findAll: false,
-			inputID: 15,
+			inputID: 15, // id esperado
 			wantErr: false,
-			wantID:  15,
+			wantID:  15, // id esperado en la respuesta
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			// Instancia los mocks necesarios para service
 			emRepo := tc.repoMock()
 			whRepo := &warehouseMocks.WarehouseRepositoryMock{}
 			svc := service.NewEmployeeDefault(emRepo, whRepo)
 
 			if tc.findAll {
+				// Test para FindAll: checa tamaño y no error
 				result, err := svc.FindAll(context.Background())
 				require.False(t, tc.wantErr)
 				require.NoError(t, err)
 				require.Len(t, result, tc.wantLen)
 			} else {
+				// Test para FindByID: checa error si corresponde, y valor si corresponde
 				res, err := svc.FindByID(context.Background(), tc.inputID)
 				if tc.wantErr {
 					require.Error(t, err)
 					appErr, ok := err.(*apperrors.AppError)
 					require.True(t, ok)
 					require.Equal(t, tc.wantErrCode, appErr.Code)
-					require.Nil(t, res)
+					require.Nil(t, res) // Para el caso de not found, el resultado debe ser nil
 				} else {
 					require.NoError(t, err)
 					require.NotNil(t, res)

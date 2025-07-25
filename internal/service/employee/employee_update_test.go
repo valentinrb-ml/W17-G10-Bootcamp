@@ -16,6 +16,7 @@ import (
 
 func strPtr(s string) *string { return &s }
 
+// Tests actualización de empleados usando helpers para DRY y centralización de datos.
 func TestEmployeeService_Update(t *testing.T) {
 	testCases := []struct {
 		name          string
@@ -33,12 +34,14 @@ func TestEmployeeService_Update(t *testing.T) {
 				base := testhelpers.CreateTestEmployee()
 				updatedFirstName := base.FirstName
 				return &employeeMocks.EmployeeRepositoryMock{
+					// Simula que el empleado existe antes del update
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
 						emp := base
 						emp.ID = id
 						emp.FirstName = updatedFirstName
 						return &emp, nil
 					},
+					// Simula que el cambio de nombre se guarda
 					MockUpdate: func(ctx context.Context, id int, e *models.Employee) error {
 						updatedFirstName = e.FirstName // Simula persistir el cambio
 						return nil
@@ -53,6 +56,7 @@ func TestEmployeeService_Update(t *testing.T) {
 		{
 			name: "update_non_existent",
 			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
+				// Simula que el empleado no existe (devuelve nil y error)
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
 						return nil, apperrors.NewAppError(apperrors.CodeNotFound, "employee not found")
@@ -71,18 +75,21 @@ func TestEmployeeService_Update(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			// Instanciar los mocks del repositorio y warehouse
 			emRepo := tc.repoMock()
 			whRepo := &warehouseMocks.WarehouseRepositoryMock{}
 			svc := service.NewEmployeeDefault(emRepo, whRepo)
-
+			// Ejecutar el update
 			res, err := svc.Update(context.Background(), tc.inputID, tc.patch)
 			if tc.wantErr {
+				// Caso de error esperado: debe ser del tipo/código correcto y resultado nulo
 				require.Error(t, err)
 				appErr, ok := err.(*apperrors.AppError)
 				require.True(t, ok)
 				require.Equal(t, tc.wantErrCode, appErr.Code)
 				require.Nil(t, res)
 			} else {
+				// Caso exitoso: no error, resultado no nulo y nombre actualizado
 				require.NoError(t, err)
 				require.NotNil(t, res)
 				if tc.wantFirstName != "" && res.FirstName != tc.wantFirstName {
