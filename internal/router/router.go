@@ -12,6 +12,7 @@ import (
 	ProductRecordHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_record"
 	sellerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/seller"
 	warehouseHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/warehouse"
+	carryHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/carry"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 )
 
@@ -26,7 +27,7 @@ func NewAPIRouter(
 	hdPurchaseOrder *handler.PurchaseOrderHandler,
 	hdGeography *geographyHandler.GeographyHandler,
 	hdInboundOrder *inbHandler.InboundOrderHandler,
-	hdCarry *handler.CarryHandler,
+	hdCarry *carryHandler.CarryHandler,
 	hdProductRecord *ProductRecordHandler.ProductRecordHandler,
 ) *chi.Mux {
 	root := chi.NewRouter()

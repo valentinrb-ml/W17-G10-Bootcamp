@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	carryRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/carry"
 	geographyRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/geography"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/carry"
 )
@@ -14,11 +14,11 @@ type CarryService interface {
 }
 
 type CarryDefault struct {
-	rp    repository.CarryRepository
+	rp    carryRepo.CarryRepository
 	rpGeo geographyRepo.GeographyRepository
 }
 
-func NewCarryService(rp repository.CarryRepository, rpGeo geographyRepo.GeographyRepository) *CarryDefault {
+func NewCarryService(rp carryRepo.CarryRepository, rpGeo geographyRepo.GeographyRepository) *CarryDefault {
 	return &CarryDefault{
 		rp:    rp,
 		rpGeo: rpGeo,
