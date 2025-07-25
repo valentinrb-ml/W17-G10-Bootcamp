@@ -18,6 +18,7 @@ import (
 	empHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
 	inbHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/inbound_order"
 	sellerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/seller"
+	warehouseHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	empRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
 
@@ -102,7 +103,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdSection := handler.NewSectionHandler(svcSection)
 	hdSeller := sellerHandler.NewSellerHandler(svcSeller)
 	hdCarry := handler.NewCarryHandler(svcCarry)
-	hdWarehouse := handler.NewWarehouseHandler(svcWarehouse)
+	hdWarehouse := warehouseHandler.NewWarehouseHandler(svcWarehouse)
 	hdEmployee := empHandler.NewEmployeeHandler(svcEmployee)
 	hdProduct := productHandler.NewProductHandler(svcProduct)
 	hdProductBatches := handler.NewProductBatchesHandler(svcProductBatches)

@@ -19,7 +19,6 @@ func NewWarehouseHandler(sv service.WarehouseService) *WarehouseHandler {
 }
 
 type WarehouseHandler struct {
-	// sv is the service that will be used by the handler
 	sv service.WarehouseService
 }
 
