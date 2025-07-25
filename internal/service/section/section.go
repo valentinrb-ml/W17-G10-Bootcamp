@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
@@ -33,7 +32,6 @@ func (s *SectionDefault) DeleteSection(ctx context.Context, id int) error {
 	}
 	return nil
 }
-
 
 // CreateSection creates a new section using the repository.
 func (s *SectionDefault) CreateSection(ctx context.Context, sec models.Section) (*models.Section, error) {
