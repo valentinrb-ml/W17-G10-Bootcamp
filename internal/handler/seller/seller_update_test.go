@@ -21,6 +21,7 @@ import (
 func TestSellerHandler_Update(t *testing.T) {
 	type args struct {
 		requestBody any
+		routeID     string
 	}
 
 	tests := []struct {
@@ -36,6 +37,7 @@ func TestSellerHandler_Update(t *testing.T) {
 			name: "success",
 			args: args{
 				requestBody: testhelpers.DummyRequestSeller(),
+				routeID:     "1",
 			},
 			mockService: func() *mocks.SellerServiceMock {
 				mock := &mocks.SellerServiceMock{}
@@ -49,9 +51,23 @@ func TestSellerHandler_Update(t *testing.T) {
 			wantResponseBody: testhelpers.DummyResponseSeller(),
 		},
 		{
+			name: "error - invalid id param (missing)",
+			args: args{
+				requestBody: testhelpers.DummyRequestSeller(),
+				routeID:     "",
+			},
+			mockService: func() *mocks.SellerServiceMock {
+				return &mocks.SellerServiceMock{}
+			},
+			wantStatus:      http.StatusBadRequest,
+			wantErrorCode:   apperrors.CodeBadRequest,
+			wantErrorMsgSub: "id parameter is required",
+		},
+		{
 			name: "error - invalid request payload",
 			args: args{
 				requestBody: `{invalid json}`,
+				routeID:     "1",
 			},
 			mockService: func() *mocks.SellerServiceMock {
 				return &mocks.SellerServiceMock{}
@@ -64,6 +80,7 @@ func TestSellerHandler_Update(t *testing.T) {
 			name: "error - invalid Seller validation",
 			args: args{
 				requestBody: models.RequestSeller{},
+				routeID:     "1",
 			},
 			mockService: func() *mocks.SellerServiceMock {
 				return &mocks.SellerServiceMock{}
@@ -76,6 +93,7 @@ func TestSellerHandler_Update(t *testing.T) {
 			name: "error - service layer returns error",
 			args: args{
 				requestBody: testhelpers.DummyRequestSeller(),
+				routeID:     "1",
 			},
 			mockService: func() *mocks.SellerServiceMock {
 				mock := &mocks.SellerServiceMock{}
@@ -102,13 +120,14 @@ func TestSellerHandler_Update(t *testing.T) {
 				requestBodyBytes = b
 			}
 
-			// PATCH con id
 			req, err := http.NewRequest(http.MethodPatch, "/api/v1/sellers", bytes.NewReader(requestBodyBytes))
 			require.NoError(t, err)
 			req.Header.Set("Content-Type", "application/json")
 
 			routeCtx := chi.NewRouteContext()
-			routeCtx.URLParams.Add("id", "1")
+			if tt.args.routeID != "" {
+				routeCtx.URLParams.Add("id", tt.args.routeID)
+			}
 			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeCtx))
 
 			rec := httptest.NewRecorder()
