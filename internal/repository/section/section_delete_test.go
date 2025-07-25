@@ -94,7 +94,7 @@ func TestSectionRepository_DeleteSection(t *testing.T) {
 			tc.arrange.dbMock(mock)
 			err = repo.DeleteSection(context.Background(), tc.input.id)
 
-			if tc.output.err != nil {
+			if tc.output.expectedError {
 				require.Error(t, err)
 				require.Equal(t, tc.output.err.Error(), err.Error())
 				return

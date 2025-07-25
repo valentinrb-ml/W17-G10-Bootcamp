@@ -43,7 +43,7 @@ func TestWarehouseMySQL_FindById(t *testing.T) {
 					rows := sqlmock.NewRows([]string{
 						"id", "warehouse_code", "address", "minimum_temperature", "minimum_capacity",
 						"telephone", "locality_id",
-					}).AddRow(1, "WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001")
+					}).AddRow(1, "WH001", "123 Main St", 10.5, 1000, "5551234567", "LOC001")
 
 					mock.ExpectQuery("SELECT (.+) FROM warehouse WHERE id = ?").
 						WithArgs(1).

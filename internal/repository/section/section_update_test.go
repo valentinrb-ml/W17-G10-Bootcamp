@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"testing"
 
@@ -33,16 +34,7 @@ func TestSectionRepository_UpdateSection(t *testing.T) {
 		output  output
 	}
 
-	sec := &models.Section{
-		SectionNumber:      1,
-		CurrentCapacity:    2,
-		CurrentTemperature: 3,
-		MaximumCapacity:    4,
-		MinimumCapacity:    5,
-		MinimumTemperature: 6,
-		ProductTypeId:      7,
-		WarehouseId:        8,
-	}
+	sec := mocks.DummySection(1)
 
 	testCases := []testCase{
 		{
@@ -58,8 +50,8 @@ func TestSectionRepository_UpdateSection(t *testing.T) {
 						WillReturnResult(sqlmock.NewResult(0, 1))
 				},
 			},
-			input:  input{id: 123, sec: sec},
-			output: output{expected: sec, expectedError: false, err: nil},
+			input:  input{id: 123, sec: &sec},
+			output: output{expected: &sec, expectedError: false, err: nil},
 		},
 		{
 			name: "not found: section does not exist",
@@ -74,7 +66,7 @@ func TestSectionRepository_UpdateSection(t *testing.T) {
 						WillReturnResult(sqlmock.NewResult(0, 0)) // 0 rows affected
 				},
 			},
-			input: input{id: 999, sec: sec},
+			input: input{id: 999, sec: &sec},
 			output: output{
 				expected:      nil,
 				expectedError: true,
@@ -92,7 +84,7 @@ func TestSectionRepository_UpdateSection(t *testing.T) {
 					).WillReturnError(myErr)
 				},
 			},
-			input: input{id: 124, sec: sec},
+			input: input{id: 124, sec: &sec},
 			output: output{
 				expected:      nil,
 				expectedError: true,
@@ -111,7 +103,7 @@ func TestSectionRepository_UpdateSection(t *testing.T) {
 					).WillReturnError(myErr)
 				},
 			},
-			input: input{id: 125, sec: sec},
+			input: input{id: 125, sec: &sec},
 			output: output{
 				expected: nil, expectedError: true,
 				err: apperrors.NewAppError(apperrors.CodeBadRequest, "Warehouse id or product type id does not exist.")},
@@ -127,7 +119,7 @@ func TestSectionRepository_UpdateSection(t *testing.T) {
 					).WillReturnError(errors.New("unknown db error"))
 				},
 			},
-			input: input{id: 126, sec: sec},
+			input: input{id: 126, sec: &sec},
 			output: output{
 				expected: nil, expectedError: true,
 				err: apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while updating the section.")},
@@ -143,7 +135,7 @@ func TestSectionRepository_UpdateSection(t *testing.T) {
 					).WillReturnResult(sqlmock.NewErrorResult(errors.New("rowsAffected error")))
 				},
 			},
-			input: input{id: 127, sec: sec},
+			input: input{id: 127, sec: &sec},
 			output: output{
 				expected: nil, expectedError: true,
 				err: apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while updating the section.")},
@@ -160,7 +152,7 @@ func TestSectionRepository_UpdateSection(t *testing.T) {
 			tc.arrange.dbMock(mock)
 			result, err := repo.UpdateSection(context.Background(), tc.input.id, tc.input.sec)
 
-			if tc.output.err != nil {
+			if tc.output.expectedError {
 				require.Error(t, err)
 				require.Equal(t, tc.output.err.Error(), err.Error())
 				require.Nil(t, result)

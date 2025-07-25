@@ -14,7 +14,19 @@ func CreateTestWarehouse() warehouse.Warehouse {
 		Address:            "123 Main St",
 		MinimumTemperature: 10.5,
 		MinimumCapacity:    1000,
-		Telephone:          "555-1234",
+		Telephone:          "5551234567", // Formato válido sin guiones
+		LocalityId:         "LOC001",
+	}
+}
+
+// CreateTestWarehouseRequest creates a WarehouseRequest for testing handler endpoints
+func CreateTestWarehouseRequest() warehouse.WarehouseRequest {
+	return warehouse.WarehouseRequest{
+		WarehouseCode:      "WH001",
+		Address:            "123 Main St",
+		MinimumTemperature: Float64Ptr(10.5),
+		MinimumCapacity:    1000,
+		Telephone:          "5551234567", // Formato válido sin guiones
 		LocalityId:         "LOC001",
 	}
 }
@@ -35,7 +47,7 @@ func CreateTestWarehouses() []warehouse.Warehouse {
 			Address:            "123 Main St",
 			MinimumTemperature: 10.5,
 			MinimumCapacity:    1000,
-			Telephone:          "555-1234",
+			Telephone:          "5551234567", // Formato válido sin guiones
 			LocalityId:         "LOC001",
 		},
 		{
@@ -44,7 +56,7 @@ func CreateTestWarehouses() []warehouse.Warehouse {
 			Address:            "456 Elm St",
 			MinimumTemperature: 15.5,
 			MinimumCapacity:    2000,
-			Telephone:          "555-5678",
+			Telephone:          "5555678901", // Formato válido sin guiones
 			LocalityId:         "LOC002",
 		},
 	}

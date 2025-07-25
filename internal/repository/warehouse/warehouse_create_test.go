@@ -41,7 +41,7 @@ func TestWarehouseMySQL_Create(t *testing.T) {
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
 					mock, db := testhelpers.CreateMockDB()
 					mock.ExpectExec("INSERT INTO warehouse").
-						WithArgs("WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001").
+						WithArgs("WH001", "123 Main St", 10.5, 1000, "5551234567", "LOC001").
 						WillReturnResult(sqlmock.NewResult(1, 1))
 					return mock, db
 				},
@@ -67,7 +67,7 @@ func TestWarehouseMySQL_Create(t *testing.T) {
 					}
 
 					mock.ExpectExec("INSERT INTO warehouse").
-						WithArgs("WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001").
+						WithArgs("WH001", "123 Main St", 10.5, 1000, "5551234567", "LOC001").
 						WillReturnError(mysqlErr)
 					return mock, db
 				},
@@ -88,7 +88,7 @@ func TestWarehouseMySQL_Create(t *testing.T) {
 					mock, db := testhelpers.CreateMockDB()
 					
 					mock.ExpectExec("INSERT INTO warehouse").
-						WithArgs("WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001").
+						WithArgs("WH001", "123 Main St", 10.5, 1000, "5551234567", "LOC001").
 						WillReturnError(sql.ErrConnDone)
 					return mock, db
 				},
@@ -111,7 +111,7 @@ func TestWarehouseMySQL_Create(t *testing.T) {
 					//Simulo error al obtener ID
 					result := sqlmock.NewErrorResult(sql.ErrNoRows)
 					mock.ExpectExec("INSERT INTO warehouse").
-						WithArgs("WH001", "123 Main St", 10.5, 1000, "555-1234", "LOC001").
+						WithArgs("WH001", "123 Main St", 10.5, 1000, "5551234567", "LOC001").
 						WillReturnResult(result)
 
 					return mock, db
