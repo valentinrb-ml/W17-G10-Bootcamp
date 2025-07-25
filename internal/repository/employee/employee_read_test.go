@@ -12,6 +12,7 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
+// Test FindByID y FindByCardNumberID, usando helpers dummy y sqlmock para queries
 func TestEmployeeRepository_Read(t *testing.T) {
 	testCases := []struct {
 		name      string
@@ -25,7 +26,8 @@ func TestEmployeeRepository_Read(t *testing.T) {
 		{
 			name:   "byID_ok",
 			method: "FindByID",
-			id:     1,
+			// Simula que la query retorna el empleado esperado
+			id: 1,
 			setup: func(mock sqlmock.Sqlmock, expected *models.Employee) {
 				rows := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name", "wareHouse_id"}).
 					AddRow(expected.ID, expected.CardNumberID, expected.FirstName, expected.LastName, expected.WarehouseID)
@@ -40,6 +42,7 @@ func TestEmployeeRepository_Read(t *testing.T) {
 			name:   "byID_not_found",
 			method: "FindByID",
 			id:     20,
+			// Simula que no hay ningún empleado con ese id
 			setup: func(mock sqlmock.Sqlmock, _ *models.Employee) {
 				mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees WHERE id=?").
 					WithArgs(20).
@@ -52,6 +55,7 @@ func TestEmployeeRepository_Read(t *testing.T) {
 			name:   "byID_query_err",
 			method: "FindByID",
 			id:     21,
+			// Simula un error de ejecución de la query
 			setup: func(mock sqlmock.Sqlmock, _ *models.Employee) {
 				mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees WHERE id=?").
 					WithArgs(21).
@@ -65,6 +69,7 @@ func TestEmployeeRepository_Read(t *testing.T) {
 			name:   "byCard_ok",
 			method: "FindByCardNumberID",
 			cardID: "EMP001",
+			// Simula una búsqueda por número de tarjeta exitosa
 			setup: func(mock sqlmock.Sqlmock, expected *models.Employee) {
 				rows := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name", "wareHouse_id"}).
 					AddRow(expected.ID, expected.CardNumberID, expected.FirstName, expected.LastName, expected.WarehouseID)
@@ -79,6 +84,7 @@ func TestEmployeeRepository_Read(t *testing.T) {
 			name:   "byCard_not_found",
 			method: "FindByCardNumberID",
 			cardID: "QX",
+			// No existe empleado con el card_number dado
 			setup: func(mock sqlmock.Sqlmock, _ *models.Employee) {
 				mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees WHERE id_card_number=?").
 					WithArgs("QX").
@@ -91,6 +97,7 @@ func TestEmployeeRepository_Read(t *testing.T) {
 			name:   "byCard_query_err",
 			method: "FindByCardNumberID",
 			cardID: "ERRCARD",
+			// Simula error en la query por card_number_id
 			setup: func(mock sqlmock.Sqlmock, _ *models.Employee) {
 				mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees WHERE id_card_number=?").
 					WithArgs("ERRCARD").
@@ -103,6 +110,7 @@ func TestEmployeeRepository_Read(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			// Crea la DB y el mock con helpers
 			mock, db := testhelpers.CreateMockDB()
 			defer db.Close()
 
@@ -152,6 +160,8 @@ func TestEmployeeRepository_Read(t *testing.T) {
 		})
 	}
 }
+
+// Test para FindAll, usando helpers para el listado y cubriendo todos los posibles errores/resultados
 func TestEmployeeRepository_FindAll(t *testing.T) {
 	testCases := []struct {
 		name      string

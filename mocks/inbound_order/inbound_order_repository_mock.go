@@ -6,6 +6,7 @@ import (
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/inbound_order"
 )
 
+// Interfaz del repository
 type InboundOrderRepositoryMock struct {
 	MockCreate              func(ctx context.Context, o *models.InboundOrder) (*models.InboundOrder, error)
 	MockExistsByOrderNumber func(ctx context.Context, orderNumber string) (bool, error)
