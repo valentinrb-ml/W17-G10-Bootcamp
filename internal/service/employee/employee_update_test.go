@@ -11,10 +11,12 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
 	wmodels "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func strPtr(s string) *string { return &s }
 
+// Tests actualización de empleados usando helpers para DRY y centralización de datos.
 func TestEmployeeService_Update(t *testing.T) {
 	testCases := []struct {
 		name          string
@@ -23,22 +25,23 @@ func TestEmployeeService_Update(t *testing.T) {
 		inputID       int
 		wantErr       bool
 		wantErrCode   string
-		wantFirstName string // Para el caso exitoso
+		wantFirstName string
 	}{
 		{
 			name: "update_existent",
 			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
-				updatedFirstName := "Before"
+				// Usa helper:
+				base := testhelpers.CreateTestEmployee()
+				updatedFirstName := base.FirstName
 				return &employeeMocks.EmployeeRepositoryMock{
+					// Simula que el empleado existe antes del update
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
-						return &models.Employee{
-							ID:           id,
-							CardNumberID: "E001",
-							FirstName:    updatedFirstName, // Devuelve el valor actualizado
-							LastName:     "Test",
-							WarehouseID:  1,
-						}, nil
+						emp := base
+						emp.ID = id
+						emp.FirstName = updatedFirstName
+						return &emp, nil
 					},
+					// Simula que el cambio de nombre se guarda
 					MockUpdate: func(ctx context.Context, id int, e *models.Employee) error {
 						updatedFirstName = e.FirstName // Simula persistir el cambio
 						return nil
@@ -53,6 +56,7 @@ func TestEmployeeService_Update(t *testing.T) {
 		{
 			name: "update_non_existent",
 			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
+				// Simula que el empleado no existe (devuelve nil y error)
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
 						return nil, apperrors.NewAppError(apperrors.CodeNotFound, "employee not found")
@@ -71,17 +75,21 @@ func TestEmployeeService_Update(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			// Instanciar los mocks del repositorio y warehouse
 			emRepo := tc.repoMock()
 			whRepo := &warehouseMocks.WarehouseRepositoryMock{}
 			svc := service.NewEmployeeDefault(emRepo, whRepo)
-
+			// Ejecutar el update
 			res, err := svc.Update(context.Background(), tc.inputID, tc.patch)
 			if tc.wantErr {
+				// Caso de error esperado: debe ser del tipo/código correcto y resultado nulo
 				require.Error(t, err)
 				appErr, ok := err.(*apperrors.AppError)
 				require.True(t, ok)
 				require.Equal(t, tc.wantErrCode, appErr.Code)
+				require.Nil(t, res)
 			} else {
+				// Caso exitoso: no error, resultado no nulo y nombre actualizado
 				require.NoError(t, err)
 				require.NotNil(t, res)
 				if tc.wantFirstName != "" && res.FirstName != tc.wantFirstName {
@@ -148,10 +156,16 @@ func TestEmployeeService_Update_extraCases(t *testing.T) {
 			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
-						return &models.Employee{ID: 1, CardNumberID: "C"}, nil
+						e := testhelpers.CreateTestEmployee()
+						e.ID = 1
+						e.CardNumberID = "C"
+						return &e, nil
 					},
 					MockFindByCardNumberID: func(ctx context.Context, cardNumberID string) (*models.Employee, error) {
-						return &models.Employee{ID: 99, CardNumberID: cardNumberID}, nil
+						e := testhelpers.CreateTestEmployee()
+						e.ID = 99
+						e.CardNumberID = cardNumberID
+						return &e, nil
 					},
 					MockUpdate: func(ctx context.Context, id int, e *models.Employee) error { return nil },
 				}
@@ -166,7 +180,10 @@ func TestEmployeeService_Update_extraCases(t *testing.T) {
 			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
-						return &models.Employee{ID: id, CardNumberID: "A"}, nil
+						e := testhelpers.CreateTestEmployee()
+						e.ID = id
+						e.CardNumberID = "A"
+						return &e, nil
 					},
 					MockUpdate: func(ctx context.Context, id int, emp *models.Employee) error { return nil },
 				}
@@ -187,7 +204,10 @@ func TestEmployeeService_Update_extraCases(t *testing.T) {
 			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
-						return &models.Employee{ID: id, CardNumberID: "A"}, nil
+						e := testhelpers.CreateTestEmployee()
+						e.ID = id
+						e.CardNumberID = "A"
+						return &e, nil
 					},
 					MockUpdate: func(ctx context.Context, id int, emp *models.Employee) error { return nil },
 				}
@@ -208,7 +228,10 @@ func TestEmployeeService_Update_extraCases(t *testing.T) {
 			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
-						return &models.Employee{ID: id, CardNumberID: "A"}, nil
+						e := testhelpers.CreateTestEmployee()
+						e.ID = id
+						e.CardNumberID = "A"
+						return &e, nil
 					},
 					MockUpdate: func(ctx context.Context, id int, emp *models.Employee) error { return nil },
 				}
@@ -227,7 +250,10 @@ func TestEmployeeService_Update_extraCases(t *testing.T) {
 			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
-						return &models.Employee{ID: id, CardNumberID: "X"}, nil
+						e := testhelpers.CreateTestEmployee()
+						e.ID = id
+						e.CardNumberID = "X"
+						return &e, nil
 					},
 					MockUpdate: func(ctx context.Context, id int, emp *models.Employee) error {
 						return context.Canceled
@@ -249,7 +275,10 @@ func TestEmployeeService_Update_extraCases(t *testing.T) {
 						if step == 2 {
 							return nil, context.DeadlineExceeded
 						}
-						return &models.Employee{ID: id, CardNumberID: "X"}, nil
+						e := testhelpers.CreateTestEmployee()
+						e.ID = id
+						e.CardNumberID = "X"
+						return &e, nil
 					},
 					MockUpdate: func(ctx context.Context, id int, emp *models.Employee) error { return nil },
 				}
@@ -258,6 +287,7 @@ func TestEmployeeService_Update_extraCases(t *testing.T) {
 			checkWrap: "failed fetching employee after update",
 		},
 	}
+
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			svc := service.NewEmployeeDefault(tc.repoMock(), tc.whMock())

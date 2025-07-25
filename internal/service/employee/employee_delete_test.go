@@ -10,8 +10,10 @@ import (
 	warehouseMocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
+// Test de Delete: valida eliminación exitosa y caso de empleado inexistente
 func TestEmployeeService_Delete(t *testing.T) {
 	testCases := []struct {
 		name        string
@@ -23,31 +25,70 @@ func TestEmployeeService_Delete(t *testing.T) {
 		{
 			name: "delete_ok",
 			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
+				// Usa helpers para simular la "BD" en memoria y mutar la lista real
+				// slice referenciado por puntero, para mutar (go slice semantics)
+				list := testhelpers.CreateTestEmployees()
+				var empsPtr []*models.Employee
+				for i := range list {
+					empsPtr = append(empsPtr, &list[i])
+				}
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
-						return &models.Employee{ID: id, CardNumberID: "E005"}, nil
+						// Buscar en el slice.
+						for _, e := range empsPtr {
+							if e.ID == id {
+								return e, nil
+							}
+						}
+						return nil, apperrors.NewAppError(apperrors.CodeNotFound, "employee not found")
 					},
 					MockDelete: func(ctx context.Context, id int) error {
+						// Elimina del slice (simula la BD)
+						var filtered []*models.Employee
+						for _, e := range empsPtr {
+							if e.ID != id {
+								filtered = append(filtered, e)
+							}
+						}
+						empsPtr = filtered // los que quedan
 						return nil
+					},
+					MockFindAll: func(ctx context.Context) ([]*models.Employee, error) {
+						return empsPtr, nil
 					},
 				}
 			},
-			inputID: 5,
+			inputID: 1, // El id que está en testhelpers.CreateTestEmployees()
 			wantErr: false,
 		},
 		{
 			name: "delete_non_existent",
 			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
+				list := testhelpers.CreateTestEmployees()
+				var empsPtr []*models.Employee
+				for i := range list {
+					empsPtr = append(empsPtr, &list[i])
+				}
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
+						for _, e := range empsPtr {
+							if e.ID == id {
+								return e, nil
+							}
+						}
+						// Simula que no encuentra el empleado
 						return nil, apperrors.NewAppError(apperrors.CodeNotFound, "employee not found")
 					},
 					MockDelete: func(ctx context.Context, id int) error {
+						// Simula error de no encontrado al borrar
 						return apperrors.NewAppError(apperrors.CodeNotFound, "employee not found")
+					},
+					MockFindAll: func(ctx context.Context) ([]*models.Employee, error) {
+						return empsPtr, nil
 					},
 				}
 			},
-			inputID:     99,
+			inputID:     999, // No existe
 			wantErr:     true,
 			wantErrCode: apperrors.CodeNotFound,
 		},
@@ -58,20 +99,34 @@ func TestEmployeeService_Delete(t *testing.T) {
 			emRepo := tc.repoMock()
 			whRepo := &warehouseMocks.WarehouseRepositoryMock{}
 			svc := service.NewEmployeeDefault(emRepo, whRepo)
-
+			// Ejecuta el delete del service
 			err := svc.Delete(context.Background(), tc.inputID)
+
 			if tc.wantErr {
+				// En error: checa que el error, el código y el valor encontrado sean nil
 				require.Error(t, err)
 				appErr, ok := err.(*apperrors.AppError)
 				require.True(t, ok)
 				require.Equal(t, tc.wantErrCode, appErr.Code)
+				res, _ := emRepo.MockFindByID(context.Background(), tc.inputID)
+				require.Nil(t, res)
 			} else {
+				// Si el delete es ok: chequea que no esté en la lista y que FindByID sea nil
 				require.NoError(t, err)
+				result, err := emRepo.MockFindAll(context.Background())
+				require.NoError(t, err)
+				for _, emp := range result {
+					require.NotEqual(t, tc.inputID, emp.ID, "Empleado eliminado no debe estar en la lista")
+				}
+				// FindByID después del delete debe ser nil
+				res, _ := emRepo.MockFindByID(context.Background(), tc.inputID)
+				require.Nil(t, res)
 			}
 		})
 	}
 }
 
+// Casos extra de error y boundary
 func TestEmployeeService_Delete_extraCases(t *testing.T) {
 	testCases := []struct {
 		name        string
