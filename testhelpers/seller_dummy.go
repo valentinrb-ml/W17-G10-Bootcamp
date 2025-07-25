@@ -1,6 +1,9 @@
 package testhelpers
 
 import (
+	"sort"
+
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
 
@@ -31,7 +34,7 @@ func DummyResponseSeller() models.ResponseSeller {
 	}
 }
 
-var SellersMapStub = map[int]models.Seller{
+var SellersDummyMap = map[int]models.Seller{
 	1: {
 		Id:          1,
 		Cid:         101,
@@ -74,13 +77,30 @@ var SellersMapStub = map[int]models.Seller{
 	},
 }
 
-func FindAllSellersStub() []models.Seller {
-	out := make([]models.Seller, 0, len(SellersMapStub))
-	for i := 1; i <= len(SellersMapStub); i++ {
-		if seller, ok := SellersMapStub[i]; ok {
+func FindAllSellersDummy() []models.Seller {
+	out := make([]models.Seller, 0, len(SellersDummyMap))
+	for i := 1; i <= len(SellersDummyMap); i++ {
+		if seller, ok := SellersDummyMap[i]; ok {
 			out = append(out, seller)
 		}
 	}
 
 	return out
+}
+
+func FindAllSellersResponseDummy() []models.ResponseSeller {
+	var keys []int
+	for k := range SellersDummyMap {
+		keys = append(keys, k)
+	}
+
+	sort.Ints(keys)
+
+	var sellersList []models.Seller
+	for _, k := range keys {
+		sellersList = append(sellersList, SellersDummyMap[k])
+	}
+
+	ms := mappers.ToResponseSellerList(sellersList)
+	return ms
 }

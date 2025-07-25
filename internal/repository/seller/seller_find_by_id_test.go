@@ -28,7 +28,7 @@ func TestSellerRepository_FindById(t *testing.T) {
 		{
 			name: "success",
 			mock: func(mock sqlmock.Sqlmock, id int) {
-				s := testhelpers.SellersMapStub[1]
+				s := testhelpers.SellersDummyMap[1]
 				rows := sqlmock.NewRows([]string{"id", "cid", "company_name", "address", "telephone", "locality_id"}).
 					AddRow(s.Id, s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId)
 				mock.ExpectQuery("^SELECT (.+) FROM sellers WHERE id").
@@ -38,7 +38,7 @@ func TestSellerRepository_FindById(t *testing.T) {
 			args:    args{id: 1},
 			wantErr: false,
 			expectedResult: func() *models.Seller {
-				s := testhelpers.SellersMapStub[1]
+				s := testhelpers.SellersDummyMap[1]
 				return &s
 			}(),
 		},

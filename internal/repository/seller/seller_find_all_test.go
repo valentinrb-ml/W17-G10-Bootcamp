@@ -27,13 +27,13 @@ func TestSellerRepository_FindAll(t *testing.T) {
 			name: "success - sellers found",
 			mock: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows([]string{"id", "cid", "company_name", "address", "telephone", "locality_id"})
-				for _, s := range testhelpers.FindAllSellersStub() {
+				for _, s := range testhelpers.FindAllSellersDummy() {
 					rows.AddRow(s.Id, s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId)
 				}
 				mock.ExpectQuery("^SELECT (.+) FROM sellers").WillReturnRows(rows)
 			},
 			wantErr:        false,
-			expectedResult: testhelpers.FindAllSellersStub(),
+			expectedResult: testhelpers.FindAllSellersDummy(),
 		},
 		{
 			name: "success - empty slice",
@@ -66,7 +66,7 @@ func TestSellerRepository_FindAll(t *testing.T) {
 			name: "error - rows.Err fails",
 			mock: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows([]string{"id", "cid", "company_name", "address", "telephone", "locality_id"})
-				for _, s := range testhelpers.FindAllSellersStub() {
+				for _, s := range testhelpers.FindAllSellersDummy() {
 					rows.AddRow(s.Id, s.Cid, s.CompanyName, s.Address, s.Telephone, s.LocalityId)
 				}
 				rows.RowError(0, errors.New("row failure"))
