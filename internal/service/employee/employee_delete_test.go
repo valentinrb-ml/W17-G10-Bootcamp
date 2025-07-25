@@ -10,6 +10,7 @@ import (
 	warehouseMocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestEmployeeService_Delete(t *testing.T) {
@@ -25,7 +26,10 @@ func TestEmployeeService_Delete(t *testing.T) {
 			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
-						return &models.Employee{ID: id, CardNumberID: "E005"}, nil
+						e := testhelpers.CreateTestEmployee()
+						e.ID = id
+						e.CardNumberID = "E005"
+						return &e, nil
 					},
 					MockDelete: func(ctx context.Context, id int) error {
 						return nil
