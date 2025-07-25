@@ -16,8 +16,9 @@ import (
 )
 
 const (
-	queryLocalityCreate   = "INSERT INTO localities"
-	queryLocalityFindById = "SELECT id, name, province_id FROM localities WHERE id = \\?"
+	queryLocalityCreate      = "INSERT INTO localities"
+	queryLocalityFindById    = "SELECT id, name, province_id FROM localities WHERE id = \\?"
+	queryLocalityWithSellers = "SELECT l.id, l.name, COUNT\\(s.id\\) FROM localities l"
 )
 
 func TestGeographyRepository_CreateLocality(t *testing.T) {
@@ -157,6 +158,158 @@ func TestGeographyRepository_FindLocalityById(t *testing.T) {
 				require.NoError(t, err)
 				require.NotNil(t, got)
 				require.Equal(t, tt.argId, got.Id)
+			}
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestGeographyRepository_CountSellersByLocality(t *testing.T) {
+	tests := []struct {
+		name           string
+		setup          func(mock sqlmock.Sqlmock)
+		argId          string
+		wantErr        bool
+		expectedErrMsg string
+		expectResp     *models.ResponseLocalitySellers
+	}{
+		{
+			name: "success",
+			setup: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery("^" + queryLocalityWithSellers).
+					WithArgs("1900").
+					WillReturnRows(sqlmock.NewRows([]string{"id", "name", "count"}).
+						AddRow("1900", "La Plata", 5))
+			},
+			argId:      "1900",
+			wantErr:    false,
+			expectResp: &models.ResponseLocalitySellers{LocalityId: "1900", LocalityName: "La Plata", SellersCount: 5},
+		},
+		{
+			name: "not found",
+			setup: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery("^" + queryLocalityWithSellers).
+					WithArgs("doesnotexist").
+					WillReturnError(sql.ErrNoRows)
+			},
+			argId:          "doesnotexist",
+			wantErr:        true,
+			expectedErrMsg: "does not exist",
+		},
+		{
+			name: "db error",
+			setup: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery("^" + queryLocalityWithSellers).
+					WithArgs("5000").
+					WillReturnError(errors.New("db down"))
+			},
+			argId:          "5000",
+			wantErr:        true,
+			expectedErrMsg: "internal server error",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			require.NoError(t, err)
+			defer db.Close()
+
+			tt.setup(mock)
+			repo := repository.NewGeographyRepository(db)
+			got, err := repo.CountSellersByLocality(context.Background(), tt.argId)
+			if tt.wantErr {
+				require.Error(t, err)
+				if tt.expectedErrMsg != "" {
+					require.Contains(t, err.Error(), tt.expectedErrMsg)
+				}
+				require.Nil(t, got)
+			} else {
+				require.NoError(t, err)
+				require.NotNil(t, got)
+				require.Equal(t, tt.expectResp, got)
+			}
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestGeographyRepository_CountSellersGroupedByLocality(t *testing.T) {
+	tests := []struct {
+		name           string
+		setup          func(mock sqlmock.Sqlmock)
+		wantErr        bool
+		expectedErrMsg string
+		expectResp     []models.ResponseLocalitySellers
+	}{
+		{
+			name: "success (multiple localities)",
+			setup: func(mock sqlmock.Sqlmock) {
+				rows := sqlmock.NewRows([]string{"id", "name", "count"}).
+					AddRow("1900", "La Plata", 5).
+					AddRow("2000", "Rosario", 3)
+				mock.ExpectQuery("^" + queryLocalityWithSellers).
+					WillReturnRows(rows)
+			},
+			wantErr: false,
+			expectResp: []models.ResponseLocalitySellers{
+				{LocalityId: "1900", LocalityName: "La Plata", SellersCount: 5},
+				{LocalityId: "2000", LocalityName: "Rosario", SellersCount: 3},
+			},
+		},
+		{
+			name: "db error",
+			setup: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery("^" + queryLocalityWithSellers).
+					WillReturnError(errors.New("db down"))
+			},
+			wantErr:        true,
+			expectedErrMsg: "internal server error",
+		},
+		{
+			name: "row scan error",
+			setup: func(mock sqlmock.Sqlmock) {
+				rows := sqlmock.NewRows([]string{"id", "name", "count"}).
+					AddRow("1900", "La Plata", "notAnInt")
+				mock.ExpectQuery("^" + queryLocalityWithSellers).
+					WillReturnRows(rows)
+			},
+			wantErr:        true,
+			expectedErrMsg: "Failed to scan locality sellers count",
+		},
+		{
+			name: "rows iteration error",
+			setup: func(mock sqlmock.Sqlmock) {
+				rows := sqlmock.NewRows([]string{"id", "name", "count"}).
+					AddRow("1900", "La Plata", 2).
+					RowError(0, errors.New("row error"))
+				mock.ExpectQuery("^" + queryLocalityWithSellers).
+					WillReturnRows(rows)
+			},
+			wantErr:        true,
+			expectedErrMsg: "An error occurred while iterating over the localities",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			require.NoError(t, err)
+			defer db.Close()
+
+			tt.setup(mock)
+			repo := repository.NewGeographyRepository(db)
+			got, err := repo.CountSellersGroupedByLocality(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				if tt.expectedErrMsg != "" {
+					require.Contains(t, err.Error(), tt.expectedErrMsg)
+				}
+				require.Nil(t, got)
+			} else {
+				require.NoError(t, err)
+				require.NotNil(t, got)
+				require.Equal(t, tt.expectResp, got)
 			}
 			require.NoError(t, mock.ExpectationsWereMet())
 		})
