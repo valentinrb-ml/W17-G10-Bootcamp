@@ -16,32 +16,50 @@ import (
 func TestEmployeeService_Delete(t *testing.T) {
 	testCases := []struct {
 		name        string
-		repoMock    func() *employeeMocks.EmployeeRepositoryMock
+		repoMock    func(*bool) *employeeMocks.EmployeeRepositoryMock
 		inputID     int
+		preFillList bool // para saber si FindAll tiene la entidad antes
 		wantErr     bool
 		wantErrCode string
 	}{
 		{
 			name: "delete_ok",
-			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
+			repoMock: func(called *bool) *employeeMocks.EmployeeRepositoryMock {
+				list := testhelpers.CreateTestEmployees()
+				removed := false
+				findAllFunc := func(ctx context.Context) ([]*models.Employee, error) {
+					var ptrSlice []*models.Employee
+					for i := range list {
+						if removed && list[i].ID == 5 {
+							continue // omitido tras borrar
+						}
+						ptrSlice = append(ptrSlice, &list[i])
+					}
+					return ptrSlice, nil
+				}
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
-						e := testhelpers.CreateTestEmployee()
-						e.ID = id
-						e.CardNumberID = "E005"
-						return &e, nil
+						for i := range list {
+							if list[i].ID == id {
+								return &list[i], nil
+							}
+						}
+						return nil, apperrors.NewAppError(apperrors.CodeNotFound, "employee not found")
 					},
 					MockDelete: func(ctx context.Context, id int) error {
+						removed = true
 						return nil
 					},
+					MockFindAll: findAllFunc,
 				}
 			},
-			inputID: 5,
-			wantErr: false,
+			inputID:     5,
+			preFillList: true,
+			wantErr:     false,
 		},
 		{
 			name: "delete_non_existent",
-			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
+			repoMock: func(_ *bool) *employeeMocks.EmployeeRepositoryMock {
 				return &employeeMocks.EmployeeRepositoryMock{
 					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
 						return nil, apperrors.NewAppError(apperrors.CodeNotFound, "employee not found")
@@ -49,9 +67,18 @@ func TestEmployeeService_Delete(t *testing.T) {
 					MockDelete: func(ctx context.Context, id int) error {
 						return apperrors.NewAppError(apperrors.CodeNotFound, "employee not found")
 					},
+					MockFindAll: func(ctx context.Context) ([]*models.Employee, error) {
+						list := testhelpers.CreateTestEmployees()
+						var res []*models.Employee
+						for i := range list {
+							res = append(res, &list[i])
+						}
+						return res, nil
+					},
 				}
 			},
-			inputID:     99,
+			inputID:     999, // No existe
+			preFillList: false,
 			wantErr:     true,
 			wantErrCode: apperrors.CodeNotFound,
 		},
@@ -59,18 +86,31 @@ func TestEmployeeService_Delete(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			emRepo := tc.repoMock()
+			var called bool
+			emRepo := tc.repoMock(&called)
 			whRepo := &warehouseMocks.WarehouseRepositoryMock{}
 			svc := service.NewEmployeeDefault(emRepo, whRepo)
 
+			// Ejecuta el delete
 			err := svc.Delete(context.Background(), tc.inputID)
+
 			if tc.wantErr {
 				require.Error(t, err)
 				appErr, ok := err.(*apperrors.AppError)
 				require.True(t, ok)
 				require.Equal(t, tc.wantErrCode, appErr.Code)
+
+				// Busca luego para checar que realmente es nil
+				res, _ := emRepo.MockFindByID(context.Background(), tc.inputID)
+				require.Nil(t, res)
 			} else {
 				require.NoError(t, err)
+				// Después del delete corre FindAll y verifica que el elemento no esté en la lista
+				result, err := emRepo.MockFindAll(context.Background())
+				require.NoError(t, err)
+				for _, emp := range result {
+					require.NotEqual(t, tc.inputID, emp.ID, "Empleado eliminado no debe estar en la lista")
+				}
 			}
 		})
 	}
