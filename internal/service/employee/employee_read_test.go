@@ -7,50 +7,10 @@ import (
 	"github.com/stretchr/testify/require"
 	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/employee"
 	employeeMocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/employee"
+	warehouseMocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
-	wmodels "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
-
-// Mock warehouse repo mínimo solo para compilar el service
-type warehouseRepoMock struct {
-	MockCreate   func(ctx context.Context, w wmodels.Warehouse) (*wmodels.Warehouse, error)
-	MockFindAll  func(ctx context.Context) ([]wmodels.Warehouse, error)
-	MockFindById func(ctx context.Context, id int) (*wmodels.Warehouse, error)
-	MockUpdate   func(ctx context.Context, id int, w wmodels.Warehouse) (*wmodels.Warehouse, error)
-	MockDelete   func(ctx context.Context, id int) error
-}
-
-func (m *warehouseRepoMock) Create(ctx context.Context, w wmodels.Warehouse) (*wmodels.Warehouse, error) {
-	if m.MockCreate != nil {
-		return m.MockCreate(ctx, w)
-	}
-	return nil, nil
-}
-func (m *warehouseRepoMock) FindAll(ctx context.Context) ([]wmodels.Warehouse, error) {
-	if m.MockFindAll != nil {
-		return m.MockFindAll(ctx)
-	}
-	return nil, nil
-}
-func (m *warehouseRepoMock) FindById(ctx context.Context, id int) (*wmodels.Warehouse, error) {
-	if m.MockFindById != nil {
-		return m.MockFindById(ctx, id)
-	}
-	return nil, nil
-}
-func (m *warehouseRepoMock) Update(ctx context.Context, id int, w wmodels.Warehouse) (*wmodels.Warehouse, error) {
-	if m.MockUpdate != nil {
-		return m.MockUpdate(ctx, id, w)
-	}
-	return nil, nil
-}
-func (m *warehouseRepoMock) Delete(ctx context.Context, id int) error {
-	if m.MockDelete != nil {
-		return m.MockDelete(ctx, id)
-	}
-	return nil
-}
 
 func TestEmployeeService_Read(t *testing.T) {
 	testCases := []struct {
@@ -114,7 +74,7 @@ func TestEmployeeService_Read(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			emRepo := tc.repoMock()
-			whRepo := &warehouseRepoMock{}
+			whRepo := &warehouseMocks.WarehouseRepositoryMock{}
 			svc := service.NewEmployeeDefault(emRepo, whRepo)
 
 			if tc.findAll {
@@ -133,6 +93,98 @@ func TestEmployeeService_Read(t *testing.T) {
 					require.NoError(t, err)
 					require.NotNil(t, res)
 					require.Equal(t, tc.wantID, res.ID)
+				}
+			}
+		})
+	}
+}
+
+func TestEmployeeService_Read_extraCases(t *testing.T) {
+	testCases := []struct {
+		name        string
+		id          int
+		findAll     bool
+		repoMock    func() *employeeMocks.EmployeeRepositoryMock
+		wantErrCode string
+		checkWrap   string
+	}{
+		{
+			name: "invalid id for FindByID",
+			id:   0,
+			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
+				return &employeeMocks.EmployeeRepositoryMock{
+					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) { return nil, nil },
+				}
+			},
+			wantErrCode: apperrors.CodeValidationError,
+		},
+		{
+			name: "repo.FindByID returns error",
+			id:   5,
+			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
+				return &employeeMocks.EmployeeRepositoryMock{
+					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) { return nil, context.Canceled },
+				}
+			},
+			checkWrap: "failed fetching employee by id",
+		},
+		{
+			name: "repo.FindByID returns nil, nil",
+			id:   15,
+			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
+				return &employeeMocks.EmployeeRepositoryMock{
+					MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) { return nil, nil },
+				}
+			},
+			wantErrCode: apperrors.CodeNotFound,
+		},
+		{
+			name:    "repo.FindAll returns error",
+			findAll: true,
+			repoMock: func() *employeeMocks.EmployeeRepositoryMock {
+				return &employeeMocks.EmployeeRepositoryMock{
+					MockFindAll: func(ctx context.Context) ([]*models.Employee, error) { return nil, context.DeadlineExceeded },
+				}
+			},
+			checkWrap: "failed fetching all employees",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			emRepo := tc.repoMock()
+			whRepo := &warehouseMocks.WarehouseRepositoryMock{}
+			svc := service.NewEmployeeDefault(emRepo, whRepo)
+			if tc.findAll {
+				res, err := svc.FindAll(context.Background())
+				if tc.wantErrCode != "" {
+					require.Error(t, err)
+					appErr, ok := err.(*apperrors.AppError)
+					require.True(t, ok)
+					require.Equal(t, tc.wantErrCode, appErr.Code)
+					require.Nil(t, res)
+				} else if tc.checkWrap != "" {
+					require.Error(t, err)
+					require.Contains(t, err.Error(), tc.checkWrap)
+					require.Nil(t, res)
+				} else {
+					require.NoError(t, err)
+					require.NotNil(t, res)
+				}
+			} else {
+				res, err := svc.FindByID(context.Background(), tc.id)
+				if tc.wantErrCode != "" {
+					require.Error(t, err)
+					appErr, ok := err.(*apperrors.AppError)
+					require.True(t, ok)
+					require.Equal(t, tc.wantErrCode, appErr.Code)
+					require.Nil(t, res)
+				} else if tc.checkWrap != "" {
+					require.Error(t, err)
+					require.Contains(t, err.Error(), tc.checkWrap)
+					require.Nil(t, res)
+				} else {
+					require.NoError(t, err)
+					require.NotNil(t, res)
 				}
 			}
 		})
