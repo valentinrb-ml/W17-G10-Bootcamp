@@ -34,6 +34,10 @@ import (
 	inbService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/inbound_order"
 	sellerService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/seller"
 	wService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/warehouse"
+
+	geographyHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/geography"
+	geographyRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/geography"
+	geographyService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/geography"
 )
 
 type ConfigServerChi struct {
@@ -71,7 +75,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoEmployee := empRepo.NewEmployeeRepository(mysql)
 	repoProductBatches := repository.NewProductBatchesRepository(mysql)
 	repoCarry := repository.NewCarryRepository(mysql)
-	repoGeography := repository.NewGeographyRepository(mysql)
+	repoGeography := geographyRepository.NewGeographyRepository(mysql)
 	repoInboundOrder := inbRepo.NewInboundOrderRepository(mysql)
 	repoPurchaseOrder := repository.NewPurchaseOrderRepository(mysql)
 	repoProductRecord, err := productRecordRepository.NewProductRecordRepository(mysql)
@@ -88,7 +92,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	svcWarehouse := wService.NewWarehouseService(repoWarehouse)
 	svcProductBatches := service.NewProductBatchesService(repoProductBatches)
 	svcCarry := service.NewCarryService(repoCarry, repoGeography)
-	svcGeography := service.NewGeographyService(repoGeography)
+	svcGeography := geographyService.NewGeographyService(repoGeography)
 	svcInboundOrder := inbService.NewInboundOrderService(repoInboundOrder, repoEmployee, repoWarehouse)
 	svcPurchaseOrder := service.NewPurchaseOrderService(repoPurchaseOrder)
 	svcProductRecord := productRecordService.NewProductRecordService(repoProductRecord)
@@ -102,7 +106,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdEmployee := empHandler.NewEmployeeHandler(svcEmployee)
 	hdProduct := productHandler.NewProductHandler(svcProduct)
 	hdProductBatches := handler.NewProductBatchesHandler(svcProductBatches)
-	hdGeography := handler.NewGeographyHandler(svcGeography)
+	hdGeography := geographyHandler.NewGeographyHandler(svcGeography)
 	hdInboundOrder := inbHandler.NewInboundOrderHandler(svcInboundOrder)
 	hdPurchaseOrder := handler.NewPurchaseOrderHandler(svcPurchaseOrder)
 	hdProductRecord := productRecordHandler.NewProductRecordHandler(svcProductRecord)
