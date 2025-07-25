@@ -31,3 +31,30 @@ func CreateTestCarriesReport(localityID, localityName string, count int) *carry.
         CarriesCount: count,
     }
 }
+
+// CreateTestCarryForCreate creates a carry without ID for create operations
+func CreateTestCarryForCreate() carry.Carry {
+    return carry.Carry{
+        Cid:         "CAR001",
+        CompanyName: "Test Company",
+        Address:     "Test Address",
+        Telephone:   "5551234567",
+        LocalityId:  "1",
+    }
+}
+
+// CreateTestCarriesReportSlice creates a slice of carries reports
+func CreateTestCarriesReportSlice() []carry.CarriesReport {
+    return []carry.CarriesReport{
+        {
+            LocalityID:   "1",
+            LocalityName: "Test Locality 1",
+            CarriesCount: 5,
+        },
+        {
+            LocalityID:   "2", 
+            LocalityName: "Test Locality 2",
+            CarriesCount: 3,
+        },
+    }
+}

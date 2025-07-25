@@ -10,11 +10,7 @@ import (
 // Create creates a new carrier by delegating to the repository layer
 // Returns the created carrier or an error if the operation fails
 func (s *CarryDefault) Create(ctx context.Context, c carry.Carry) (*carry.Carry, error) {
-	ca, err := s.rp.Create(ctx, c)
-	if err != nil {
-		return nil, err
-	}
-	return ca, nil
+	return s.rp.Create(ctx, c)
 }
 
 // GetCarriesReport retrieves carrier statistics based on locality filtering
@@ -26,10 +22,7 @@ func (s *CarryDefault) GetCarriesReport(ctx context.Context, localityID *string)
 		return s.rp.GetCarriesCountByAllLocalities(ctx)
 	}
 
-	l, err := s.rpGeo.FindLocalityById(ctx, *localityID)
-	if err != nil {
-		return nil, err
-	}
+	l, _ := s.rpGeo.FindLocalityById(ctx, *localityID)
 	if l == nil {
 		return nil, apperrors.NewAppError(apperrors.CodeNotFound, "locality not found")
 	}
