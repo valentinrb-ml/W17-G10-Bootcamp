@@ -83,6 +83,32 @@ func TestWarehouseHandler_Create(t *testing.T) {
 			},
 		},
 		{
+			name: "error - create failed",
+			arrange: arrange{
+				mockService: func() *mocks.WarehouseServiceMock {
+					mock := &mocks.WarehouseServiceMock{}
+
+					mock.FuncCreate = func(ctx context.Context, w warehouseModel.Warehouse) (*warehouseModel.Warehouse, error) {
+						return nil, apperrors.NewAppError(apperrors.CodeValidationError, "invalid request body")
+					}
+					return mock
+				},
+				requestBody: func() *bytes.Buffer {
+					return bytes.NewBuffer([]byte(`{"address": "Av. Maipú 1234, CABA, Buenos Aires"}`))
+				},
+			},
+			output: output{
+				statusCode: http.StatusUnprocessableEntity,
+				responseBody: func() interface{} {
+					return map[string]interface{}{
+						"error":   "VALIDATION_ERROR",
+						"message": "invalid request body",
+					}
+				},
+				err: nil,
+			},
+		},
+		{
 			name: "error - warehouse_code already exists",
 			arrange: arrange{
 				mockService: func() *mocks.WarehouseServiceMock {
@@ -123,7 +149,7 @@ func TestWarehouseHandler_Create(t *testing.T) {
 				},
 				requestBody: func() *bytes.Buffer {
 					warehouseReq := testhelpers.CreateTestWarehouseRequest()
-					warehouseReq.WarehouseCode = "" // Campo inválido
+					warehouseReq.WarehouseCode = "" // Invalid field
 					jsonData, _ := json.Marshal(warehouseReq)
 					return bytes.NewBuffer(jsonData)
 				},
@@ -176,11 +202,11 @@ func TestWarehouseHandler_Create(t *testing.T) {
 			mockService := tc.arrange.mockService()
 			handler := handler.NewWarehouseHandler(mockService)
 
-			// Configurar router
+			// Configure router
 			router := chi.NewRouter()
 			router.Post("/warehouses", handler.Create)
 
-			// Crear request
+			// Create request
 			req := httptest.NewRequest(http.MethodPost, "/warehouses", tc.arrange.requestBody())
 			req.Header.Set("Content-Type", "application/json")
 			recorder := httptest.NewRecorder()
@@ -188,15 +214,15 @@ func TestWarehouseHandler_Create(t *testing.T) {
 			// act
 			router.ServeHTTP(recorder, req)
 
-			// assert - verificar status code
+			// assert - verify status code
 			require.Equal(t, tc.output.statusCode, recorder.Code)
 
-			// assert - verificar que el service fue llamado correctamente (solo en casos exitosos)
+			// assert - verify that service was called correctly (only in successful cases)
 			if tc.output.statusCode == http.StatusCreated {
 				require.Equal(t, 1, mockService.CreateCallCount)
 				require.Len(t, mockService.CreateCalls, 1)
 
-				// Verificar que se llamó con el warehouse correcto
+				// Verify that it was called with the correct warehouse
 				actualCall := mockService.CreateCalls[0]
 				require.Equal(t, "WH001", actualCall.Warehouse.WarehouseCode)
 				require.Equal(t, "123 Main St", actualCall.Warehouse.Address)
@@ -206,7 +232,7 @@ func TestWarehouseHandler_Create(t *testing.T) {
 				require.Equal(t, "LOC001", actualCall.Warehouse.LocalityId)
 			}
 
-			// assert - verificar respuesta JSON
+			// assert - verify JSON response
 			var actualResponse interface{}
 			err := json.Unmarshal(recorder.Body.Bytes(), &actualResponse)
 			require.NoError(t, err)
