@@ -8,13 +8,15 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
 	repo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
-func TestEmployeeRepository_FindByID_and_ByCardNumberID(t *testing.T) {
+func TestEmployeeRepository_Read(t *testing.T) {
 	testCases := []struct {
 		name      string
-		mockSetup func(sqlmock.Sqlmock)
-		method    string // "byID" o "byCardNumber"
+		setup     func(sqlmock.Sqlmock, *models.Employee)
+		method    string // "FindByID" o "FindByCardNumberID"
 		id        int
 		cardID    string
 		wantNil   bool
@@ -22,13 +24,13 @@ func TestEmployeeRepository_FindByID_and_ByCardNumberID(t *testing.T) {
 	}{
 		{
 			name:   "byID_ok",
-			method: "byID",
+			method: "FindByID",
 			id:     1,
-			mockSetup: func(mock sqlmock.Sqlmock) {
+			setup: func(mock sqlmock.Sqlmock, expected *models.Employee) {
 				rows := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name", "wareHouse_id"}).
-					AddRow(1, "C01", "Test", "Name", 91)
+					AddRow(expected.ID, expected.CardNumberID, expected.FirstName, expected.LastName, expected.WarehouseID)
 				mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees WHERE id=?").
-					WithArgs(1).
+					WithArgs(expected.ID).
 					WillReturnRows(rows)
 			},
 			wantNil:   false,
@@ -36,11 +38,11 @@ func TestEmployeeRepository_FindByID_and_ByCardNumberID(t *testing.T) {
 		},
 		{
 			name:   "byID_not_found",
-			method: "byID",
-			id:     7,
-			mockSetup: func(mock sqlmock.Sqlmock) {
+			method: "FindByID",
+			id:     20,
+			setup: func(mock sqlmock.Sqlmock, _ *models.Employee) {
 				mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees WHERE id=?").
-					WithArgs(7).
+					WithArgs(20).
 					WillReturnError(sql.ErrNoRows)
 			},
 			wantNil:   true,
@@ -48,11 +50,11 @@ func TestEmployeeRepository_FindByID_and_ByCardNumberID(t *testing.T) {
 		},
 		{
 			name:   "byID_query_err",
-			method: "byID",
-			id:     9,
-			mockSetup: func(mock sqlmock.Sqlmock) {
+			method: "FindByID",
+			id:     21,
+			setup: func(mock sqlmock.Sqlmock, _ *models.Employee) {
 				mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees WHERE id=?").
-					WithArgs(9).
+					WithArgs(21).
 					WillReturnError(sql.ErrConnDone)
 			},
 			wantNil:   true,
@@ -61,13 +63,13 @@ func TestEmployeeRepository_FindByID_and_ByCardNumberID(t *testing.T) {
 		// ByCardNumberID tests
 		{
 			name:   "byCard_ok",
-			method: "byCardNumber",
-			cardID: "C99",
-			mockSetup: func(mock sqlmock.Sqlmock) {
+			method: "FindByCardNumberID",
+			cardID: "EMP001",
+			setup: func(mock sqlmock.Sqlmock, expected *models.Employee) {
 				rows := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name", "wareHouse_id"}).
-					AddRow(2, "C99", "Eri", "Rey", 11)
+					AddRow(expected.ID, expected.CardNumberID, expected.FirstName, expected.LastName, expected.WarehouseID)
 				mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees WHERE id_card_number=?").
-					WithArgs("C99").
+					WithArgs(expected.CardNumberID).
 					WillReturnRows(rows)
 			},
 			wantNil:   false,
@@ -75,9 +77,9 @@ func TestEmployeeRepository_FindByID_and_ByCardNumberID(t *testing.T) {
 		},
 		{
 			name:   "byCard_not_found",
-			method: "byCardNumber",
+			method: "FindByCardNumberID",
 			cardID: "QX",
-			mockSetup: func(mock sqlmock.Sqlmock) {
+			setup: func(mock sqlmock.Sqlmock, _ *models.Employee) {
 				mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees WHERE id_card_number=?").
 					WithArgs("QX").
 					WillReturnError(sql.ErrNoRows)
@@ -87,11 +89,11 @@ func TestEmployeeRepository_FindByID_and_ByCardNumberID(t *testing.T) {
 		},
 		{
 			name:   "byCard_query_err",
-			method: "byCardNumber",
-			cardID: "EX",
-			mockSetup: func(mock sqlmock.Sqlmock) {
+			method: "FindByCardNumberID",
+			cardID: "ERRCARD",
+			setup: func(mock sqlmock.Sqlmock, _ *models.Employee) {
 				mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees WHERE id_card_number=?").
-					WithArgs("EX").
+					WithArgs("ERRCARD").
 					WillReturnError(sql.ErrConnDone)
 			},
 			wantNil:   true,
@@ -101,37 +103,48 @@ func TestEmployeeRepository_FindByID_and_ByCardNumberID(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			db, mock, err := sqlmock.New()
-			require.NoError(t, err)
+			mock, db := testhelpers.CreateMockDB()
 			defer db.Close()
 
-			tc.mockSetup(mock)
+			var expected *models.Employee
+			// Para los casos exitosos usa el helper según id o card_id
+			if !tc.wantNil {
+				if tc.method == "FindByID" {
+					expected = testhelpers.CreateExpectedEmployee(tc.id)
+				} else {
+					expected = testhelpers.CreateExpectedEmployee(1) // o busca el id con el cardID
+					expected.CardNumberID = tc.cardID
+				}
+			}
+			tc.setup(mock, expected)
 			repo := repo.NewEmployeeRepository(db)
 			ctx := context.Background()
 
 			switch tc.method {
-			case "byID":
-				e, err := repo.FindByID(ctx, tc.id)
+			case "FindByID":
+				emp, err := repo.FindByID(ctx, tc.id)
 				if tc.expectErr {
 					require.Error(t, err)
 				} else {
 					require.NoError(t, err)
 					if tc.wantNil {
-						require.Nil(t, e)
+						require.Nil(t, emp)
 					} else {
-						require.NotNil(t, e)
+						require.Equal(t, expected.FirstName, emp.FirstName)
+						require.Equal(t, expected.CardNumberID, emp.CardNumberID)
 					}
 				}
-			case "byCardNumber":
-				e, err := repo.FindByCardNumberID(ctx, tc.cardID)
+			case "FindByCardNumberID":
+				emp, err := repo.FindByCardNumberID(ctx, tc.cardID)
 				if tc.expectErr {
 					require.Error(t, err)
 				} else {
 					require.NoError(t, err)
 					if tc.wantNil {
-						require.Nil(t, e)
+						require.Nil(t, emp)
 					} else {
-						require.NotNil(t, e)
+						require.Equal(t, expected.FirstName, emp.FirstName)
+						require.Equal(t, expected.CardNumberID, emp.CardNumberID)
 					}
 				}
 			}
@@ -139,20 +152,20 @@ func TestEmployeeRepository_FindByID_and_ByCardNumberID(t *testing.T) {
 		})
 	}
 }
-
 func TestEmployeeRepository_FindAll(t *testing.T) {
 	testCases := []struct {
 		name      string
-		mockSetup func(sqlmock.Sqlmock)
+		setup     func(sqlmock.Sqlmock, []models.Employee)
 		wantLen   int
 		expectErr bool
 	}{
 		{
 			name: "findall_ok",
-			mockSetup: func(mock sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name", "wareHouse_id"}).
-					AddRow(1, "A1", "Test", "AA", 1).
-					AddRow(2, "B2", "Test", "BB", 2)
+			setup: func(mock sqlmock.Sqlmock, expected []models.Employee) {
+				rows := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name", "wareHouse_id"})
+				for _, e := range expected {
+					rows.AddRow(e.ID, e.CardNumberID, e.FirstName, e.LastName, e.WarehouseID)
+				}
 				mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees").
 					WillReturnRows(rows)
 			},
@@ -161,7 +174,7 @@ func TestEmployeeRepository_FindAll(t *testing.T) {
 		},
 		{
 			name: "findall_error_query",
-			mockSetup: func(mock sqlmock.Sqlmock) {
+			setup: func(mock sqlmock.Sqlmock, _ []models.Employee) {
 				mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees").
 					WillReturnError(sql.ErrConnDone)
 			},
@@ -170,7 +183,7 @@ func TestEmployeeRepository_FindAll(t *testing.T) {
 		},
 		{
 			name: "findall_scan_error",
-			mockSetup: func(mock sqlmock.Sqlmock) {
+			setup: func(mock sqlmock.Sqlmock, _ []models.Employee) {
 				rows := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name", "wareHouse_id"}).
 					AddRow(nil, "B2", "Test", "BB", 2)
 				mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees").
@@ -181,10 +194,13 @@ func TestEmployeeRepository_FindAll(t *testing.T) {
 		},
 		{
 			name: "findall_row_iter_error",
-			mockSetup: func(mock sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name", "wareHouse_id"}).
-					AddRow(1, "X", "Y", "Z", 5).
-					RowError(0, sql.ErrConnDone)
+			setup: func(mock sqlmock.Sqlmock, expected []models.Employee) {
+				rows := sqlmock.NewRows([]string{"id", "id_card_number", "first_name", "last_name", "wareHouse_id"})
+				for _, e := range expected {
+					rows.AddRow(e.ID, e.CardNumberID, e.FirstName, e.LastName, e.WarehouseID)
+				}
+				// Aplica un error en la primera fila
+				rows.RowError(0, sql.ErrConnDone)
 				mock.ExpectQuery("SELECT id, id_card_number, first_name, last_name, wareHouse_id FROM employees").
 					WillReturnRows(rows)
 			},
@@ -195,11 +211,11 @@ func TestEmployeeRepository_FindAll(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			db, mock, err := sqlmock.New()
-			require.NoError(t, err)
+			mock, db := testhelpers.CreateMockDB()
 			defer db.Close()
 
-			tc.mockSetup(mock)
+			expectedEmployees := testhelpers.CreateTestEmployees() // Usa el helper para datos
+			tc.setup(mock, expectedEmployees)
 			repo := repo.NewEmployeeRepository(db)
 			ctx := context.Background()
 			list, err := repo.FindAll(ctx)
@@ -208,6 +224,9 @@ func TestEmployeeRepository_FindAll(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.Len(t, list, tc.wantLen)
+				if tc.wantLen > 0 {
+					require.Equal(t, expectedEmployees[0].FirstName, list[0].FirstName)
+				}
 			}
 			require.NoError(t, mock.ExpectationsWereMet())
 		})

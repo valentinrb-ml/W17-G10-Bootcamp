@@ -9,47 +9,59 @@ import (
 	"github.com/stretchr/testify/require"
 	repo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestEmployeeRepository_Create(t *testing.T) {
 	testCases := []struct {
 		name      string
 		input     *models.Employee
-		mockSetup func(mock sqlmock.Sqlmock)
+		mockSetup func(mock sqlmock.Sqlmock, in models.Employee)
 		expectErr bool
 	}{
 		{
 			name: "inserta_ok",
-			input: &models.Employee{
-				CardNumberID: "C01", FirstName: "Lucas", LastName: "Test", WarehouseID: 5,
-			},
-			mockSetup: func(mock sqlmock.Sqlmock) {
+			input: func() *models.Employee {
+				e := testhelpers.CreateTestEmployee() // struct
+				return &e
+			}(),
+			mockSetup: func(mock sqlmock.Sqlmock, in models.Employee) {
 				mock.ExpectExec("INSERT INTO employees").
-					WithArgs("C01", "Lucas", "Test", 5).
+					WithArgs(in.CardNumberID, in.FirstName, in.LastName, in.WarehouseID).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 			expectErr: false,
 		},
 		{
 			name: "error_db_exec",
-			input: &models.Employee{
-				CardNumberID: "ERR", FirstName: "Lucas", LastName: "Test", WarehouseID: 5,
-			},
-			mockSetup: func(mock sqlmock.Sqlmock) {
+			input: func() *models.Employee {
+				e := testhelpers.CreateTestEmployee()
+				e.CardNumberID = "ERR"
+				e.FirstName = "Lucas"
+				e.LastName = "Test"
+				e.WarehouseID = 5
+				return &e
+			}(),
+			mockSetup: func(mock sqlmock.Sqlmock, in models.Employee) {
 				mock.ExpectExec("INSERT INTO employees").
-					WithArgs("ERR", "Lucas", "Test", 5).
+					WithArgs(in.CardNumberID, in.FirstName, in.LastName, in.WarehouseID).
 					WillReturnError(sql.ErrConnDone)
 			},
 			expectErr: true,
 		},
 		{
 			name: "error_last_insert_id",
-			input: &models.Employee{
-				CardNumberID: "ID2", FirstName: "Mario", LastName: "Rojo", WarehouseID: 9,
-			},
-			mockSetup: func(mock sqlmock.Sqlmock) {
+			input: func() *models.Employee {
+				e := testhelpers.CreateTestEmployee()
+				e.CardNumberID = "ID2"
+				e.FirstName = "Mario"
+				e.LastName = "Rojo"
+				e.WarehouseID = 9
+				return &e
+			}(),
+			mockSetup: func(mock sqlmock.Sqlmock, in models.Employee) {
 				mock.ExpectExec("INSERT INTO employees").
-					WithArgs("ID2", "Mario", "Rojo", 9).
+					WithArgs(in.CardNumberID, in.FirstName, in.LastName, in.WarehouseID).
 					WillReturnResult(sqlmock.NewErrorResult(sql.ErrNoRows))
 			},
 			expectErr: true,
@@ -58,11 +70,12 @@ func TestEmployeeRepository_Create(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			db, mock, err := sqlmock.New()
-			require.NoError(t, err)
+			mock, db := testhelpers.CreateMockDB()
 			defer db.Close()
 
-			tc.mockSetup(mock)
+			in := *tc.input // struct para mock
+			tc.mockSetup(mock, in)
+
 			repo := repo.NewEmployeeRepository(db)
 			ctx := context.Background()
 			emp, err := repo.Create(ctx, tc.input)
@@ -73,7 +86,7 @@ func TestEmployeeRepository_Create(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.NotZero(t, emp.ID)
-				require.Equal(t, tc.input.FirstName, emp.FirstName)
+				require.Equal(t, in.FirstName, emp.FirstName)
 			}
 			require.NoError(t, mock.ExpectationsWereMet())
 		})

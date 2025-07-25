@@ -8,6 +8,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
 	repo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestEmployeeRepository_Delete(t *testing.T) {
@@ -61,14 +62,13 @@ func TestEmployeeRepository_Delete(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			db, mock, err := sqlmock.New()
-			require.NoError(t, err)
+			mock, db := testhelpers.CreateMockDB()
 			defer db.Close()
 
 			tc.mockSetup(mock)
 			repo := repo.NewEmployeeRepository(db)
 			ctx := context.Background()
-			err = repo.Delete(ctx, tc.inputID)
+			err := repo.Delete(ctx, tc.inputID)
 			if tc.expectErr {
 				require.Error(t, err)
 			} else {
