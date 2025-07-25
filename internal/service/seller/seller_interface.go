@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	geoRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	geographyRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/geography"
 	sellerRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/seller"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
@@ -34,15 +34,15 @@ type SellerService interface {
 
 // sellerService implements the SellerService interface.
 type sellerService struct {
-	sellerRepo sellerRepo.SellerRepository
-	geoRepo    geoRepo.GeographyRepository
+	sellerRepo    sellerRepo.SellerRepository
+	geographyRepo geographyRepo.GeographyRepository
 }
 
 // NewSellerService creates a new SellerService for managing sellers.
 // sellerRepo provides access to seller data; geoRepo provides access to geographical data.
-func NewSellerService(sellerRepo sellerRepo.SellerRepository, geoRepo geoRepo.GeographyRepository) SellerService {
+func NewSellerService(sellerRepo sellerRepo.SellerRepository, geographyRepo geographyRepo.GeographyRepository) SellerService {
 	return &sellerService{
-		sellerRepo: sellerRepo,
-		geoRepo:    geoRepo,
+		sellerRepo:    sellerRepo,
+		geographyRepo: geographyRepo,
 	}
 }

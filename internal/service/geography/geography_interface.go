@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/geography"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/geography"
 )
 

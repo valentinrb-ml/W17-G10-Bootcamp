@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/geography"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
