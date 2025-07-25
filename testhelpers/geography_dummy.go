@@ -27,3 +27,12 @@ var LocalitiesDummyMap = map[string]models.Locality{
 	"5501":     {Id: "5501", Name: "Godoy Cruz", ProvinceId: 4},
 	"13001970": {Id: "13001970", Name: "Campinas", ProvinceId: 5},
 }
+
+// CreateTestLocality creates a test locality
+func CreateTestLocality(id string) *models.Locality {
+    return &models.Locality{
+        Id:         id,
+        Name:       "Test Locality",
+        ProvinceId: 1,
+    }
+}
