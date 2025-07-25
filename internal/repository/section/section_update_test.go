@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"errors"
-	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -34,7 +34,7 @@ func TestSectionRepository_UpdateSection(t *testing.T) {
 		output  output
 	}
 
-	sec := mocks.DummySection(1)
+	sec := testhelpers.DummySection(1)
 
 	testCases := []testCase{
 		{

@@ -3,6 +3,7 @@ package server
 import (
 	"database/sql"
 	"fmt"
+	sectionHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/section"
 	"net/http"
 
 	secRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
@@ -102,7 +103,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// - handler
 	hdBuyer := buyerHandler.NewBuyerHandler(svcBuyer)
-	hdSection := handler.NewSectionHandler(svcSection)
+	hdSection := sectionHandler.NewSectionHandler(svcSection)
 	hdSeller := sellerHandler.NewSellerHandler(svcSeller)
 	hdCarry := handler.NewCarryHandler(svcCarry)
 	hdWarehouse := warehouseHandler.NewWarehouseHandler(svcWarehouse)

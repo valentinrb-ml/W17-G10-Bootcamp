@@ -6,6 +6,7 @@ import (
 	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/section"
 	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/section"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 	"testing"
 )
 
@@ -27,7 +28,7 @@ func TestSectionDefault_FindById(t *testing.T) {
 		output  output
 		input
 	}
-	sec := mocks.DummySection(1)
+	sec := testhelpers.DummySection(1)
 
 	testCases := []testCase{
 		{
@@ -36,7 +37,7 @@ func TestSectionDefault_FindById(t *testing.T) {
 				func() *mocks.SectionRepositoryMock {
 					return &mocks.SectionRepositoryMock{
 						FuncFindById: func(ctx context.Context, id int) (*models.Section, error) {
-							dummySec := mocks.DummySection(1)
+							dummySec := testhelpers.DummySection(1)
 							return &dummySec, nil
 						},
 					}

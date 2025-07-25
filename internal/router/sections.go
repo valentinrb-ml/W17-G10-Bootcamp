@@ -3,9 +3,10 @@ package router
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/section"
 )
 
-func MountSectionRoutes(api chi.Router, hd *handler.SectionDefault, hdPB *handler.ProductBatchesHandler) {
+func MountSectionRoutes(api chi.Router, hd *section.SectionDefault, hdPB *handler.ProductBatchesHandler) {
 	api.Route("/sections", func(r chi.Router) {
 		r.Get("/", hd.FindAllSections)
 		r.Post("/", hd.CreateSection)

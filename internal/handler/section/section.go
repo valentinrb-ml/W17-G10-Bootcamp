@@ -1,4 +1,4 @@
-package handler
+package section
 
 import (
 	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/section"
