@@ -24,14 +24,7 @@ func DummyRequestSeller() models.RequestSeller {
 }
 
 func DummyResponseSeller() models.ResponseSeller {
-	return models.ResponseSeller{
-		Id:          1,
-		Cid:         101,
-		CompanyName: "Frutas del Sur",
-		Address:     "Calle 1",
-		Telephone:   "221-111",
-		LocalityId:  "1900",
-	}
+	return models.ResponseSeller(SellersDummyMap[1])
 }
 
 var SellersDummyMap = map[int]models.Seller{
@@ -104,3 +97,6 @@ func FindAllSellersResponseDummy() []models.ResponseSeller {
 	ms := mappers.ToResponseSellerList(sellersList)
 	return ms
 }
+
+// Ptr helper for expected pointer struct
+func Ptr[T any](v T) *T { return &v }
