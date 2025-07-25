@@ -21,7 +21,7 @@ type SectionDefault struct {
 }
 
 // NewSectionServer creates a new SectionDefault service with the given SectionRepository.
-func NewSectionServer(rp repository.SectionRepository) *SectionDefault {
+func NewSectionService(rp repository.SectionRepository) *SectionDefault {
 	return &SectionDefault{
 		rp: rp,
 	}
