@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
+	buyerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/buyer"
 	empHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
 	inbHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/inbound_order"
 	productHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product"
@@ -13,7 +14,7 @@ import (
 )
 
 func NewAPIRouter(
-	hdBuyer *handler.BuyerHandler,
+	hdBuyer *buyerHandler.BuyerHandler,
 	hdSection *handler.SectionDefault,
 	hdSeller *sellerHandler.SellerHandler,
 	hdWarehouse *handler.WarehouseHandler,

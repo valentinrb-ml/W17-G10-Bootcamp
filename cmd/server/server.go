@@ -3,8 +3,9 @@ package server
 import (
 	"database/sql"
 	"fmt"
-	secRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
 	"net/http"
+
+	secRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
 
 	productHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product"
 	productRecordHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_record"
@@ -25,9 +26,14 @@ import (
 	wRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/router"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
+
+	buyerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/buyer"
+	buyerRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/buyer"
+	buyerService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/buyer"
 	empService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/employee"
 	inbService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/inbound_order"
 	sellerService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/seller"
+	wService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/warehouse"
 )
 
 type ConfigServerChi struct {
@@ -56,7 +62,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	repoSection := secRepo.NewSectionRepository(mysql)
 	repoSeller := sellerRepository.NewSellerRepository(mysql)
-	repoBuyer := repository.NewBuyerRepository(mysql)
+	repoBuyer := buyerRepository.NewBuyerRepository(mysql)
 	repoWarehouse := wRepo.NewWarehouseRepository(mysql)
 	repoProduct, err := productRepository.NewProductRepository(mysql)
 	if err != nil {
@@ -75,11 +81,11 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// - service
 	svcSeller := sellerService.NewSellerService(repoSeller, repoGeography)
-	svcBuyer := service.NewBuyerService(repoBuyer)
+	svcBuyer := buyerService.NewBuyerService(repoBuyer)
 	svcSection := service.NewSectionServer(repoSection)
 	svcProduct := productService.NewProductService(repoProduct)
-	svcWarehouse := service.NewWarehouseService(repoWarehouse)
 	svcEmployee := empService.NewEmployeeDefault(repoEmployee, repoWarehouse)
+	svcWarehouse := wService.NewWarehouseService(repoWarehouse)
 	svcProductBatches := service.NewProductBatchesService(repoProductBatches)
 	svcCarry := service.NewCarryService(repoCarry, repoGeography)
 	svcGeography := service.NewGeographyService(repoGeography)
@@ -88,7 +94,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	svcProductRecord := productRecordService.NewProductRecordService(repoProductRecord)
 
 	// - handler
-	hdBuyer := handler.NewBuyerHandler(svcBuyer)
+	hdBuyer := buyerHandler.NewBuyerHandler(svcBuyer)
 	hdSection := handler.NewSectionHandler(svcSection)
 	hdSeller := sellerHandler.NewSellerHandler(svcSeller)
 	hdCarry := handler.NewCarryHandler(svcCarry)
