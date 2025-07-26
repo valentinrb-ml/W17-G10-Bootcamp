@@ -3,9 +3,11 @@ package testhelpers
 import (
 	"database/sql"
 	"fmt"
+	"sort"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
 // BuyerBuilder permite construir buyers con valores personalizables
@@ -90,3 +92,70 @@ func CreateBuyerRows(mock sqlmock.Sqlmock, buyers []models.Buyer) *sqlmock.Rows 
 	}
 	return rows
 }
+
+func DummyRequestBuyer() models.RequestBuyer {
+	cardNumber := "CARD-001"
+	firstName := "John"
+	lastName := "Doe"
+
+	return models.RequestBuyer{
+		CardNumberId: &cardNumber,
+		FirstName:    &firstName,
+		LastName:     &lastName,
+	}
+}
+func DummyResponseBuyer() models.ResponseBuyer {
+	return models.ResponseBuyer(BuyersDummyMap[1])
+}
+
+var BuyersDummyMap = map[int]models.Buyer{
+	1: {
+		Id:           1,
+		CardNumberId: "CARD-001",
+		FirstName:    "John",
+		LastName:     "Doe",
+	},
+	2: {
+		Id:           2,
+		CardNumberId: "CARD-002",
+		FirstName:    "Jane",
+		LastName:     "Smith",
+	},
+	3: {
+		Id:           3,
+		CardNumberId: "CARD-003",
+		FirstName:    "Bob",
+		LastName:     "Johnson",
+	},
+}
+
+func FindAllBuyersDummy() []models.Buyer {
+	out := make([]models.Buyer, 0, len(BuyersDummyMap))
+	for i := 1; i <= len(BuyersDummyMap); i++ {
+		if buyer, ok := BuyersDummyMap[i]; ok {
+			out = append(out, buyer)
+		}
+	}
+
+	return out
+}
+
+func FindAllBuyersResponseDummy() []models.ResponseBuyer {
+	var keys []int
+	for k := range BuyersDummyMap {
+		keys = append(keys, k)
+	}
+
+	sort.Ints(keys)
+
+	var buyersList []models.Buyer
+	for _, k := range keys {
+		buyersList = append(buyersList, BuyersDummyMap[k])
+	}
+
+	mb := mappers.ToResponseBuyerList(buyersList)
+	return mb
+}
+
+// Ptr helper for expected pointer struct
+func PtrBuyer[T any](v T) *T { return &v }
