@@ -31,7 +31,10 @@ import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 
 	buyerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/buyer"
+	purchaseOrderHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/purchase_order"
 	buyerRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/buyer"
+	purchaseOrderService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/purchase_order"
+
 	purchaseOrderRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/purchase_order"
 	buyerService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/buyer"
 	carryService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/carry"
@@ -101,7 +104,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	svcCarry := carryService.NewCarryService(repoCarry, repoGeography)
 	svcGeography := geographyService.NewGeographyService(repoGeography)
 	svcInboundOrder := inbService.NewInboundOrderService(repoInboundOrder, repoEmployee, repoWarehouse)
-	svcPurchaseOrder := service.NewPurchaseOrderService(repoPurchaseOrder)
+	svcPurchaseOrder := purchaseOrderService.NewPurchaseOrderService(repoPurchaseOrder)
 	svcProductRecord := productRecordService.NewProductRecordService(repoProductRecord)
 
 	// - handler
@@ -115,7 +118,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdProductBatches := handler.NewProductBatchesHandler(svcProductBatches)
 	hdGeography := geographyHandler.NewGeographyHandler(svcGeography)
 	hdInboundOrder := inbHandler.NewInboundOrderHandler(svcInboundOrder)
-	hdPurchaseOrder := handler.NewPurchaseOrderHandler(svcPurchaseOrder)
+	hdPurchaseOrder := purchaseOrderHandler.NewPurchaseOrderHandler(svcPurchaseOrder)
 	hdProductRecord := productRecordHandler.NewProductRecordHandler(svcProductRecord)
 
 	// router
