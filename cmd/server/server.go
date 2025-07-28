@@ -16,14 +16,14 @@ import (
 	productRecordService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product_record"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
+	carryHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/carry"
 	empHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
 	inbHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/inbound_order"
 	sellerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/seller"
 	warehouseHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
-	empRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
-	carryHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/carry"
 	carryRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/carry"
+	empRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
 
 	inbRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/inbound_order"
 	sellerRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/seller"
@@ -33,13 +33,14 @@ import (
 
 	buyerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/buyer"
 	buyerRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/buyer"
+	purchaseOrderRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/purchase_order"
 	buyerService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/buyer"
+	carryService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/carry"
 	empService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/employee"
 	inbService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/inbound_order"
 	secService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/section"
 	sellerService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/seller"
 	wService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/warehouse"
-	carryService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/carry"
 
 	geographyHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/geography"
 	geographyRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/geography"
@@ -83,7 +84,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoCarry := carryRepository.NewCarryRepository(mysql)
 	repoGeography := geographyRepository.NewGeographyRepository(mysql)
 	repoInboundOrder := inbRepo.NewInboundOrderRepository(mysql)
-	repoPurchaseOrder := repository.NewPurchaseOrderRepository(mysql)
+	repoPurchaseOrder := purchaseOrderRepo.NewPurchaseOrderRepository(mysql)
 	repoProductRecord, err := productRecordRepository.NewProductRecordRepository(mysql)
 	if err != nil {
 		return err

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/purchase_order"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
