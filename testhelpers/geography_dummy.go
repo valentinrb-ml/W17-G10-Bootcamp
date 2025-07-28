@@ -59,3 +59,18 @@ func DummyResponseGeography() models.ResponseGeography {
 		LocalityName: "Villa General Belgrano",
 	}
 }
+
+func DummyResponseLocalitySellers() models.ResponseLocalitySellers {
+	return models.ResponseLocalitySellers{
+		LocalityId:   "2000",
+		LocalityName: "Rosario",
+		SellersCount: 3,
+	}
+}
+
+func DummySliceResponseLocalitySellers() []models.ResponseLocalitySellers {
+	return []models.ResponseLocalitySellers{
+		{LocalityId: "1900", LocalityName: "La Plata", SellersCount: 5},
+		{LocalityId: "2000", LocalityName: "Rosario", SellersCount: 3},
+	}
+}
