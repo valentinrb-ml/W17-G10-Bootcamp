@@ -1,4 +1,4 @@
-package repository
+package repository_test
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
+	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
@@ -135,7 +136,7 @@ func TestSectionRepository_CreateSection(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			require.NoError(t, err)
 			defer db.Close()
-			repo := NewSectionRepository(db)
+			repo := repository.NewSectionRepository(db)
 
 			tc.arrange.dbMock(mock)
 
