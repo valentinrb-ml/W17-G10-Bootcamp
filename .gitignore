@@ -2,5 +2,4 @@
 .DS_Store
 .vscode/
 .idea
-coverage.out
-cover.out
+*.out
