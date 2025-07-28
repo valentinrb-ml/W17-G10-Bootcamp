@@ -6,6 +6,7 @@ import (
 	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/section"
 	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/section"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 	"testing"
 )
 
@@ -23,7 +24,7 @@ func TestSectionDefault_FindAllSections(t *testing.T) {
 		arrange
 		output
 	}
-	sec := []models.Section{mocks.DummySection(1), mocks.DummySection(2)}
+	sec := []models.Section{testhelpers.DummySection(1), testhelpers.DummySection(2)}
 
 	testCases := []testCase{
 		{
@@ -32,7 +33,7 @@ func TestSectionDefault_FindAllSections(t *testing.T) {
 				func() *mocks.SectionRepositoryMock {
 					return &mocks.SectionRepositoryMock{
 						FuncFindAll: func(ctx context.Context) ([]models.Section, error) {
-							dummySec := []models.Section{mocks.DummySection(1), mocks.DummySection(2)}
+							dummySec := []models.Section{testhelpers.DummySection(1), testhelpers.DummySection(2)}
 							return dummySec, nil
 						},
 					}

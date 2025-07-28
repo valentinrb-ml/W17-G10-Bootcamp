@@ -10,6 +10,7 @@ import (
 	inbHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/inbound_order"
 	productHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product"
 	ProductRecordHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_record"
+	sectionHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/section"
 	sellerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/seller"
 	warehouseHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/warehouse"
 	carryHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/carry"
@@ -18,7 +19,7 @@ import (
 
 func NewAPIRouter(
 	hdBuyer *buyerHandler.BuyerHandler,
-	hdSection *handler.SectionDefault,
+	hdSection *sectionHandler.SectionDefault,
 	hdSeller *sellerHandler.SellerHandler,
 	hdWarehouse *warehouseHandler.WarehouseHandler,
 	hdEmployee *empHandler.EmployeeHandler,
