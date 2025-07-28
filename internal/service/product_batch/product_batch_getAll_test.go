@@ -13,7 +13,7 @@ import (
 
 func TestProductBatchesService_GetReportProduct(t *testing.T) {
 	type arrange struct {
-		repoMock func() *mocks.ProductBatchMock
+		repoMock func() *mocks.ProductBatchServiceMock
 	}
 	type output struct {
 		expected      []models.ReportProduct
@@ -32,8 +32,8 @@ func TestProductBatchesService_GetReportProduct(t *testing.T) {
 		{
 			name: "returns product batch report successfully",
 			arrange: arrange{
-				repoMock: func() *mocks.ProductBatchMock {
-					return &mocks.ProductBatchMock{
+				repoMock: func() *mocks.ProductBatchServiceMock {
+					return &mocks.ProductBatchServiceMock{
 						FuncGetReport: func(ctx context.Context) ([]models.ReportProduct, error) {
 							return expectedReport, nil
 						},

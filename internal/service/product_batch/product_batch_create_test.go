@@ -13,7 +13,7 @@ import (
 
 func TestProductBatchesService_CreateProductBatches(t *testing.T) {
 	type arrange struct {
-		repoMock func() *mocks.ProductBatchMock
+		repoMock func() *mocks.ProductBatchServiceMock
 	}
 	type output struct {
 		expected      *models.ProductBatches
@@ -36,8 +36,8 @@ func TestProductBatchesService_CreateProductBatches(t *testing.T) {
 		{
 			name: "returns new product batch on successful creation",
 			arrange: arrange{
-				repoMock: func() *mocks.ProductBatchMock {
-					return &mocks.ProductBatchMock{
+				repoMock: func() *mocks.ProductBatchServiceMock {
+					return &mocks.ProductBatchServiceMock{
 						FuncCreate: func(ctx context.Context, proBa models.ProductBatches) (*models.ProductBatches, error) {
 							dummy := testhelpers.DummyProductBatch(1)
 							return &dummy, nil

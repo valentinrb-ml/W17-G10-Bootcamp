@@ -13,7 +13,7 @@ import (
 
 func TestProductBatchesService_GetReportProductById(t *testing.T) {
 	type arrange struct {
-		repoMock func() *mocks.ProductBatchMock
+		repoMock func() *mocks.ProductBatchServiceMock
 	}
 	type output struct {
 		expected      *models.ReportProduct
@@ -36,8 +36,8 @@ func TestProductBatchesService_GetReportProductById(t *testing.T) {
 		{
 			name: "returns report product on success",
 			arrange: arrange{
-				repoMock: func() *mocks.ProductBatchMock {
-					return &mocks.ProductBatchMock{
+				repoMock: func() *mocks.ProductBatchServiceMock {
+					return &mocks.ProductBatchServiceMock{
 						FuncGetReportById: func(ctx context.Context, sectionNumber int) (*models.ReportProduct, error) {
 							dummy := testhelpers.DummyReportProduct()
 							return &dummy, nil
@@ -55,8 +55,8 @@ func TestProductBatchesService_GetReportProductById(t *testing.T) {
 		{
 			name: "returns error when repo fails",
 			arrange: arrange{
-				repoMock: func() *mocks.ProductBatchMock {
-					return &mocks.ProductBatchMock{
+				repoMock: func() *mocks.ProductBatchServiceMock {
+					return &mocks.ProductBatchServiceMock{
 						FuncGetReportById: func(ctx context.Context, sectionNumber int) (*models.ReportProduct, error) {
 							return nil, context.DeadlineExceeded
 						},

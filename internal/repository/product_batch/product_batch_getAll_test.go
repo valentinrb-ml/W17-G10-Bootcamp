@@ -30,7 +30,7 @@ func TestProductBatchesRepository_GetReportProduct(t *testing.T) {
 		output  output
 	}
 
-	expecteds := testhelpers.DummyReportProductsList()
+	expected := testhelpers.DummyReportProductsList()
 
 	const query = `SELECT s.id, s.section_number, SUM\(p.current_quantity\) FROM product_batches p INNER JOIN sections s on p.section_id = s.id\s+GROUP BY p.section_id`
 
@@ -42,13 +42,13 @@ func TestProductBatchesRepository_GetReportProduct(t *testing.T) {
 					rows := sqlmock.NewRows([]string{
 						"id", "section_number", "sum",
 					}).
-						AddRow(expecteds[0].SectionId, expecteds[0].SectionNumber, expecteds[0].ProductsCount).
-						AddRow(expecteds[1].SectionId, expecteds[1].SectionNumber, expecteds[1].ProductsCount)
+						AddRow(expected[0].SectionId, expected[0].SectionNumber, expected[0].ProductsCount).
+						AddRow(expected[1].SectionId, expected[1].SectionNumber, expected[1].ProductsCount)
 					m.ExpectQuery(query).WillReturnRows(rows)
 				},
 			},
 			output: output{
-				expected:      expecteds,
+				expected:      expected,
 				expectedError: false,
 				err:           nil,
 			},
@@ -101,7 +101,7 @@ func TestProductBatchesRepository_GetReportProduct(t *testing.T) {
 			arrange: arrange{
 				dbMock: func(m sqlmock.Sqlmock) {
 					rows := sqlmock.NewRows([]string{"id", "section_number", "sum"}).
-						AddRow(expecteds[0].SectionId, expecteds[0].SectionNumber, expecteds[0].ProductsCount)
+						AddRow(expected[0].SectionId, expected[0].SectionNumber, expected[0].ProductsCount)
 					rows.RowError(0, sql.ErrConnDone)
 					m.ExpectQuery(query).WillReturnRows(rows)
 				},
