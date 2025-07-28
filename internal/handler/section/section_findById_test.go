@@ -87,7 +87,6 @@ func TestSectionHandler_FindById(t *testing.T) {
 			require.NoError(t, err)
 			rec := httptest.NewRecorder()
 
-			// 🟢 Set chi path param
 			req = testhelpers.SetChiURLParam(req, "id", tt.inputID)
 
 			h := handler.NewSectionHandler(tt.mockService())

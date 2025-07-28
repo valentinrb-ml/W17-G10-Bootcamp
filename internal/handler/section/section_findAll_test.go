@@ -14,11 +14,10 @@ import (
 	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
-	testhelpers "github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestSectionHandler_FindAllSections(t *testing.T) {
-	// Helpers: dummies y salida esperada
 	sections := []models.Section{
 		testhelpers.DummySection(1),
 		testhelpers.DummySection(2),
@@ -71,7 +70,6 @@ func TestSectionHandler_FindAllSections(t *testing.T) {
 
 			h := handler.NewSectionHandler(tt.mockService())
 
-			// Llama al handler y verifica status
 			h.FindAllSections(rec, req)
 			require.Equal(t, tt.wantStatus, rec.Code)
 
