@@ -31,30 +31,3 @@ func (m *SectionRepositoryMock) CreateSection(ctx context.Context, sec models.Se
 func (m *SectionRepositoryMock) UpdateSection(ctx context.Context, id int, sec *models.Section) (*models.Section, error) {
 	return m.FuncUpdate(ctx, id, sec)
 }
-
-// Mover luego a helpers
-func DummySection(id int) models.Section {
-	return models.Section{
-		Id:                 id,
-		SectionNumber:      id*10 + 1,
-		CurrentCapacity:    20,
-		CurrentTemperature: 5,
-		MaximumCapacity:    100,
-		MinimumCapacity:    10,
-		MinimumTemperature: 5,
-		ProductTypeId:      2,
-		WarehouseId:        1,
-	}
-}
-func DummySectionPatch(section models.Section) models.PatchSection {
-	return models.PatchSection{
-		SectionNumber:      &section.SectionNumber,
-		CurrentCapacity:    &section.CurrentCapacity,
-		CurrentTemperature: &section.CurrentTemperature,
-		MaximumCapacity:    &section.MaximumCapacity,
-		MinimumCapacity:    &section.MinimumCapacity,
-		MinimumTemperature: &section.MinimumTemperature,
-		ProductTypeId:      &section.ProductTypeId,
-		WarehouseId:        &section.WarehouseId,
-	}
-}
