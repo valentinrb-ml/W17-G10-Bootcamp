@@ -36,13 +36,12 @@ cover-summary: cover
 # Runs tests and shows coverage for seller module (service, handler, repository)
 .PHONY: cover-seller
 cover-seller:
-	go test ./internal/service/seller/... ./internal/handler/seller/... ./internal/repository/seller/... -coverprofile=carry_coverage.out && \
-	go tool cover -func=carry_coverage.out
+	go test ./internal/service/seller/... ./internal/handler/seller/... ./internal/repository/seller/... -coverprofile=seller_coverage.out && \
+	go tool cover -func=seller_coverage.out
 
 # GEOGRAPHY MODULE COVERAGE
 # Runs tests and shows coverage for geography module (service, handler, repository)
 .PHONY: cover-geography
 cover-geography:
-	go test ./internal/service/geography/... ./internal/handler/geography/... ./internal/repository/geography/... -coverprofile=warehouse_coverage.out && \
-	go tool cover -func=warehouse_coverage.out
-	
+	go test ./internal/service/geography/... ./internal/handler/geography/... ./internal/repository/geography/... -coverprofile=geography_coverage.out && \
+	go tool cover -func=geography_coverage.out
