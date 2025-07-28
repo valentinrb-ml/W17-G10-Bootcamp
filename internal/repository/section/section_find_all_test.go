@@ -7,9 +7,9 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
-	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 	"testing"
 )
 
@@ -27,7 +27,7 @@ func TestSectionRepository_FindAllSections(t *testing.T) {
 		arrange arrange
 		output  output
 	}
-	expSec := mocks.DummySection(1)
+	expSec := testhelpers.DummySection(1)
 	testCases := []testCase{
 		{
 			name: "returns all sections on success",

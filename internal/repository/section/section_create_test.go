@@ -7,9 +7,9 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
-	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 	"testing"
 )
 
@@ -33,9 +33,9 @@ func TestSectionRepository_CreateSection(t *testing.T) {
 		output  output
 	}
 
-	inputSec := mocks.DummySection(1)
+	inputSec := testhelpers.DummySection(1)
 
-	expSec := mocks.DummySection(1)
+	expSec := testhelpers.DummySection(1)
 
 	testCases := []testCase{
 		{

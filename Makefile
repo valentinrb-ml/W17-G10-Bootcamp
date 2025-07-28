@@ -31,3 +31,45 @@ cover-html: cover
 .PHONY: cover-summary
 cover-summary: cover
 	go tool cover -func=coverage.out
+
+# CARRY MODULE COVERAGE
+# Runs tests and shows coverage for carry module (service, handler, repository)
+.PHONY: cover-carry
+cover-carry:
+	go test ./internal/service/carry/... ./internal/handler/carry/... ./internal/repository/carry/... -coverprofile=carry_coverage.out && \
+	go tool cover -func=carry_coverage.out
+
+# WAREHOUSE MODULE COVERAGE
+# Runs tests and shows coverage for warehouse module (service, handler, repository)
+.PHONY: cover-warehouse
+cover-warehouse:
+	go test ./internal/service/warehouse/... ./internal/handler/warehouse/... ./internal/repository/warehouse/... -coverprofile=warehouse_coverage.out && \
+	go tool cover -func=warehouse_coverage.out
+
+# SELLER MODULE COVERAGE
+# Runs tests and shows coverage for seller module (service, handler, repository)
+.PHONY: cover-seller
+cover-seller:
+	go test ./internal/service/seller/... ./internal/handler/seller/... ./internal/repository/seller/... -coverprofile=seller_coverage.out && \
+	go tool cover -func=seller_coverage.out
+
+# GEOGRAPHY MODULE COVERAGE
+# Runs tests and shows coverage for geography module (service, handler, repository)
+.PHONY: cover-geography
+cover-geography:
+	go test ./internal/service/geography/... ./internal/handler/geography/... ./internal/repository/geography/... -coverprofile=geography_coverage.out && \
+	go tool cover -func=geography_coverage.out
+
+# EMPLOYEE MODULE COVERAGE
+# Runs tests and shows coverage for employee module (service, handler, repository)
+.PHONY: cover-employee
+cover-employee:
+	go test ./internal/service/employee/... ./internal/handler/employee/... ./internal/repository/employee/... -coverprofile=employee_coverage.out && \
+	go tool cover -func=employee_coverage.out
+
+# INBOUND_ORDER MODULE COVERAGE
+# Runs tests and shows coverage for inbound_order module (service, handler, repository)
+.PHONY: cover-inbound_order
+cover-inbound_order:
+	go test ./internal/service/inbound_order/... ./internal/handler/inbound_order/... ./internal/repository/inbound_order/... -coverprofile=inbound_order_coverage.out && \
+	go tool cover -func=inbound_order_coverage.out

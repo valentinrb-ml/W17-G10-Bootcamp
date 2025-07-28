@@ -16,7 +16,7 @@ const (
 	queryProvinceFindById    = `SELECT id, name, country_id FROM provinces WHERE LOWER(name) = LOWER(?) AND country_id = ?`
 	queryLocalityCreate      = `INSERT INTO localities (id, name, province_id) VALUES (?, ?, ?)`
 	queryLocalityFindById    = `SELECT id, name, province_id FROM localities WHERE id = ?`
-	queryLocalityWithSellers = `SELECT l.id , l.name, COUNT(s.id) FROM localities l
+	queryLocalityWithSellers = `SELECT l.id, l.name, COUNT(s.id) FROM localities l
 								LEFT JOIN sellers s ON l.id = s.locality_id
 								WHERE l.id = ?
 								GROUP BY l.id, l.name`

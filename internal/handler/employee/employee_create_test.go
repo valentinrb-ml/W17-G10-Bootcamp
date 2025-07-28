@@ -13,8 +13,10 @@ import (
 	employeeMocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/employee"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/employee"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
+// Test del handler Create para Employee usando helpers de employee genérico.
 func TestEmployeeHandler_Create(t *testing.T) {
 	testCases := []struct {
 		name         string
@@ -25,32 +27,42 @@ func TestEmployeeHandler_Create(t *testing.T) {
 	}{
 		{
 			name: "create_ok",
-			payload: map[string]interface{}{
-				"card_number_id": "E001",
-				"first_name":     "Paola",
-				"last_name":      "Lopez",
-				"warehouse_id":   1,
-			},
+			// Armamos el payload (json esperado) usando un empleado dummy del helper
+			payload: func() map[string]interface{} {
+				emp := testhelpers.CreateTestEmployee()
+				return map[string]interface{}{
+					"card_number_id": emp.CardNumberID,
+					"first_name":     emp.FirstName,
+					"last_name":      emp.LastName,
+					"warehouse_id":   emp.WarehouseID,
+				}
+			}(),
+			// En el mock, devolvemos un empleado esperado (con ID) usando helper
 			mockCreateFn: func(ctx context.Context, e *models.Employee) (*models.Employee, error) {
-				return &models.Employee{
-					ID:           123,
-					CardNumberID: e.CardNumberID,
-					FirstName:    e.FirstName,
-					LastName:     e.LastName,
-					WarehouseID:  e.WarehouseID,
-				}, nil
+				emp := testhelpers.CreateExpectedEmployee(123)
+				emp.CardNumberID = e.CardNumberID
+				emp.FirstName = e.FirstName
+				emp.LastName = e.LastName
+				emp.WarehouseID = e.WarehouseID
+				return emp, nil
 			},
 			wantStatus:  http.StatusCreated,
-			wantContent: `"card_number_id":"E001"`,
+			wantContent: `"card_number_id":"EMP001"`,
 		},
 		{
 			name: "create_fail",
-			payload: map[string]interface{}{
-				"card_number_id": "E002",
-				"first_name":     "FailSinLastname",
-				// last_name y warehouse_id faltantes
-			},
+			// Faltan campos (last_name y warehouse_id) a propósito,
+			// pero otros se toman del empleado helper (consistencia de test)
+			payload: func() map[string]interface{} {
+				emp := testhelpers.CreateTestEmployee()
+				return map[string]interface{}{
+					"card_number_id": emp.CardNumberID,
+					"first_name":     emp.FirstName,
+					// Falta last_name y warehouse_id
+				}
+			}(),
 			mockCreateFn: func(ctx context.Context, e *models.Employee) (*models.Employee, error) {
+				// El service devuelve error de validación (omitimos el empleado aquí)
 				return nil, apperrors.NewAppError(apperrors.CodeValidationError, "last_name cannot be empty")
 			},
 			wantStatus:  http.StatusUnprocessableEntity,
@@ -58,12 +70,16 @@ func TestEmployeeHandler_Create(t *testing.T) {
 		},
 		{
 			name: "create_conflict",
-			payload: map[string]interface{}{
-				"card_number_id": "E003",
-				"first_name":     "Lucas",
-				"last_name":      "Martinez",
-				"warehouse_id":   1,
-			},
+			// Usamos helper para la mayoría de los campos, sólo sobrescribimos card_number_id
+			payload: func() map[string]interface{} {
+				emp := testhelpers.CreateTestEmployee()
+				return map[string]interface{}{
+					"card_number_id": "E003",
+					"first_name":     emp.FirstName,
+					"last_name":      emp.LastName,
+					"warehouse_id":   emp.WarehouseID,
+				}
+			}(),
 			mockCreateFn: func(ctx context.Context, e *models.Employee) (*models.Employee, error) {
 				return nil, apperrors.NewAppError(apperrors.CodeConflict, "card_number_id already exists")
 			},
@@ -74,6 +90,7 @@ func TestEmployeeHandler_Create(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			// Mock del service usando el método Create simulado por test case
 			mockSvc := &employeeMocks.EmployeeServiceMock{MockCreate: tc.mockCreateFn}
 			h := handler.NewEmployeeHandler(mockSvc)
 
@@ -82,10 +99,12 @@ func TestEmployeeHandler_Create(t *testing.T) {
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
 
+			// Ejecutar el handler
 			h.Create(w, req)
 			res := w.Result()
 			defer res.Body.Close()
 
+			// Chequear código de respuesta y contenido esperado
 			require.Equal(t, tc.wantStatus, res.StatusCode)
 			require.Contains(t, w.Body.String(), tc.wantContent)
 		})
