@@ -3,10 +3,11 @@ package server
 import (
 	"database/sql"
 	"fmt"
-	sectionHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/section"
 	"net/http"
 
-	secRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
+	sectionHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/section"
+	sectionRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
+	sectionService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/section"
 
 	productHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product"
 	productRecordHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_record"
@@ -15,15 +16,19 @@ import (
 	productService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product"
 	productRecordService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product_record"
 
+	productBatchHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_batch"
+	productBatchRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/product_batch"
+	productBatchService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product_batch"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
+	carryHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/carry"
 	empHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
 	inbHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/inbound_order"
 	sellerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/seller"
 	warehouseHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
-	empRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
-	carryHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/carry"
 	carryRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/carry"
+	empRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
 
 	inbRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/inbound_order"
 	sellerRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/seller"
@@ -34,12 +39,11 @@ import (
 	buyerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/buyer"
 	buyerRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/buyer"
 	buyerService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/buyer"
+	carryService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/carry"
 	empService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/employee"
 	inbService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/inbound_order"
-	secService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/section"
 	sellerService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/seller"
 	wService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/warehouse"
-	carryService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/carry"
 
 	geographyHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/geography"
 	geographyRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/geography"
@@ -70,7 +74,7 @@ type ServerChi struct {
 func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	// - repository
 
-	repoSection := secRepo.NewSectionRepository(mysql)
+	repoSection := sectionRepository.NewSectionRepository(mysql)
 	repoSeller := sellerRepository.NewSellerRepository(mysql)
 	repoBuyer := buyerRepository.NewBuyerRepository(mysql)
 	repoWarehouse := wRepo.NewWarehouseRepository(mysql)
@@ -79,7 +83,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 		return err
 	}
 	repoEmployee := empRepo.NewEmployeeRepository(mysql)
-	repoProductBatches := repository.NewProductBatchesRepository(mysql)
+	repoProductBatches := productBatchRepository.NewProductBatchesRepository(mysql)
 	repoCarry := carryRepository.NewCarryRepository(mysql)
 	repoGeography := geographyRepository.NewGeographyRepository(mysql)
 	repoInboundOrder := inbRepo.NewInboundOrderRepository(mysql)
@@ -92,12 +96,12 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	// - service
 	svcSeller := sellerService.NewSellerService(repoSeller, repoGeography)
 
-	svcSection := secService.NewSectionService(repoSection)
+	svcSection := sectionService.NewSectionService(repoSection)
 	svcBuyer := buyerService.NewBuyerService(repoBuyer)
 	svcProduct := productService.NewProductService(repoProduct)
 	svcEmployee := empService.NewEmployeeDefault(repoEmployee, repoWarehouse)
 	svcWarehouse := wService.NewWarehouseService(repoWarehouse)
-	svcProductBatches := service.NewProductBatchesService(repoProductBatches)
+	svcProductBatches := productBatchService.NewProductBatchesService(repoProductBatches)
 	svcCarry := carryService.NewCarryService(repoCarry, repoGeography)
 	svcGeography := geographyService.NewGeographyService(repoGeography)
 	svcInboundOrder := inbService.NewInboundOrderService(repoInboundOrder, repoEmployee, repoWarehouse)
@@ -112,7 +116,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdWarehouse := warehouseHandler.NewWarehouseHandler(svcWarehouse)
 	hdEmployee := empHandler.NewEmployeeHandler(svcEmployee)
 	hdProduct := productHandler.NewProductHandler(svcProduct)
-	hdProductBatches := handler.NewProductBatchesHandler(svcProductBatches)
+	hdProductBatches := productBatchHandler.NewProductBatchesHandler(svcProductBatches)
 	hdGeography := geographyHandler.NewGeographyHandler(svcGeography)
 	hdInboundOrder := inbHandler.NewInboundOrderHandler(svcInboundOrder)
 	hdPurchaseOrder := handler.NewPurchaseOrderHandler(svcPurchaseOrder)
