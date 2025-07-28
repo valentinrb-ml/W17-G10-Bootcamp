@@ -30,9 +30,47 @@ var LocalitiesDummyMap = map[string]models.Locality{
 
 // CreateTestLocality creates a test locality
 func CreateTestLocality(id string) *models.Locality {
-    return &models.Locality{
-        Id:         id,
-        Name:       "Test Locality",
-        ProvinceId: 1,
-    }
+	return &models.Locality{
+		Id:         id,
+		Name:       "Test Locality",
+		ProvinceId: 1,
+	}
+}
+
+func DummyRequestGeography() models.RequestGeography {
+	id := "5194"
+	country_name := "Argentina"
+	province_name := "Cordoba"
+	locality_name := "Villa General Belgrano"
+
+	return models.RequestGeography{
+		Id:           &id,
+		CountryName:  &country_name,
+		ProvinceName: &province_name,
+		LocalityName: &locality_name,
+	}
+}
+
+func DummyResponseGeography() models.ResponseGeography {
+	return models.ResponseGeography{
+		LocalityId:   "5194",
+		CountryName:  "Argentina",
+		ProvinceName: "Cordoba",
+		LocalityName: "Villa General Belgrano",
+	}
+}
+
+func DummyResponseLocalitySellers() models.ResponseLocalitySellers {
+	return models.ResponseLocalitySellers{
+		LocalityId:   "2000",
+		LocalityName: "Rosario",
+		SellersCount: 3,
+	}
+}
+
+func DummySliceResponseLocalitySellers() []models.ResponseLocalitySellers {
+	return []models.ResponseLocalitySellers{
+		{LocalityId: "1900", LocalityName: "La Plata", SellersCount: 5},
+		{LocalityId: "2000", LocalityName: "Rosario", SellersCount: 3},
+	}
 }

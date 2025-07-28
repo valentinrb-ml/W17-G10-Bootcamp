@@ -45,3 +45,17 @@ cover-carry:
 cover-warehouse:
 	go test ./internal/service/warehouse/... ./internal/handler/warehouse/... ./internal/repository/warehouse/... -coverprofile=warehouse_coverage.out && \
 	go tool cover -func=warehouse_coverage.out
+
+# SELLER MODULE COVERAGE
+# Runs tests and shows coverage for seller module (service, handler, repository)
+.PHONY: cover-seller
+cover-seller:
+	go test ./internal/service/seller/... ./internal/handler/seller/... ./internal/repository/seller/... -coverprofile=seller_coverage.out && \
+	go tool cover -func=seller_coverage.out
+
+# GEOGRAPHY MODULE COVERAGE
+# Runs tests and shows coverage for geography module (service, handler, repository)
+.PHONY: cover-geography
+cover-geography:
+	go test ./internal/service/geography/... ./internal/handler/geography/... ./internal/repository/geography/... -coverprofile=geography_coverage.out && \
+	go tool cover -func=geography_coverage.out
