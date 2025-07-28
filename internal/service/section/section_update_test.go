@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/stretchr/testify/require"
 	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/section"
@@ -31,7 +32,7 @@ func TestSectionDefault_UpdateSection(t *testing.T) {
 		input
 	}
 	sec := testhelpers.DummySection(1)
-	dumSec := testhelpers.DummySectionPatch(sec)
+	dumSec := testhelpers.DummySectionPatch(1)
 
 	testCases := []testCase{
 		{
@@ -55,6 +56,47 @@ func TestSectionDefault_UpdateSection(t *testing.T) {
 				expected:      &sec,
 				expectedError: false,
 				err:           nil,
+			},
+		},
+		{
+			name: "error: not found on FindById",
+			arrange: arrange{
+				repoMock: func() *mocks.SectionRepositoryMock {
+					return &mocks.SectionRepositoryMock{
+						FuncFindById: func(ctx context.Context, id int) (*models.Section, error) {
+							return nil, errors.New("section not found")
+						},
+						FuncUpdate: nil,
+					}
+				},
+			},
+			input: input{sec: dumSec, id: 2},
+			output: output{
+				expected:      nil,
+				expectedError: true,
+				err:           errors.New("section not found"),
+			},
+		},
+		{
+			name: "error: update fails",
+			arrange: arrange{
+				repoMock: func() *mocks.SectionRepositoryMock {
+					return &mocks.SectionRepositoryMock{
+						FuncFindById: func(ctx context.Context, id int) (*models.Section, error) {
+							dummySec := testhelpers.DummySection(1)
+							return &dummySec, nil
+						},
+						FuncUpdate: func(ctx context.Context, id int, sec *models.Section) (*models.Section, error) {
+							return nil, errors.New("update error")
+						},
+					}
+				},
+			},
+			input: input{sec: dumSec, id: 1},
+			output: output{
+				expected:      nil,
+				expectedError: true,
+				err:           errors.New("update error"),
 			},
 		},
 	}
