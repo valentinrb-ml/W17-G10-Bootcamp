@@ -55,7 +55,6 @@ func (r *purchaseOrderRepository) Create(ctx context.Context, po models.Purchase
 	if !r.recordExists(ctx, queryCheckProductRecordExists, po.ProductRecordID) {
 		return nil, apperrors.NewAppError(apperrors.CodeNotFound, fmt.Sprintf("product record with id %d does not exist", po.ProductRecordID))
 	}
-
 	if r.ExistsOrderNumber(ctx, po.OrderNumber) {
 		return nil, apperrors.NewAppError(apperrors.CodeConflict, "order_number already exists")
 	}
@@ -83,18 +82,6 @@ func (r *purchaseOrderRepository) Create(ctx context.Context, po models.Purchase
 
 	po.ID = int(id)
 	return &po, nil
-}
-
-func (r *purchaseOrderRepository) validateRelations(ctx context.Context, po models.PurchaseOrder) error {
-	if !r.recordExists(ctx, queryCheckBuyerExists, po.BuyerID) {
-		return apperrors.NewAppError(apperrors.CodeNotFound, fmt.Sprintf("buyer with id %d does not exist", po.BuyerID))
-	}
-
-	if !r.recordExists(ctx, queryCheckProductRecordExists, po.ProductRecordID) {
-		return apperrors.NewAppError(apperrors.CodeNotFound, fmt.Sprintf("product record with id %d does not exist", po.ProductRecordID))
-	}
-
-	return nil
 }
 
 func (r *purchaseOrderRepository) recordExists(ctx context.Context, query string, id int) bool {
