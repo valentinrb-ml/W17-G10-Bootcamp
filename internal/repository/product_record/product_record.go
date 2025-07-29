@@ -13,6 +13,12 @@ import (
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_record"
 )
 
+var (
+	ErrPrepareInsert          = errors.New("repository: prepare insert stmt")
+	ErrPrepareReportAll       = errors.New("repository: prepare report-all stmt")
+	ErrPrepareReportByProduct = errors.New("repository: prepare report-by-product stmt")
+)
+
 const (
 	productRecordQueryTimeout = 5 * time.Second
 	insertProductRecord       = `
@@ -50,17 +56,17 @@ func NewProductRecordRepository(db *sql.DB) (ProductRecordRepository, error) {
 
 	insert, err := xdb.Preparex(insertProductRecord)
 	if err != nil {
-		return nil, fmt.Errorf("failed to prepare insert statement: %w", err)
+		return nil, fmt.Errorf("%w: %v", ErrPrepareInsert, err)
 	}
 
 	reportAll, err := xdb.Preparex(selectAllProductsReport)
 	if err != nil {
-		return nil, fmt.Errorf("failed to prepare report all statement: %w", err)
+		return nil, fmt.Errorf("%w: %v", ErrPrepareReportAll, err)
 	}
 
 	reportByProduct, err := xdb.Preparex(selectProductReportByID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to prepare report by product statement: %w", err)
+		return nil, fmt.Errorf("%w: %v", ErrPrepareReportByProduct, err)
 	}
 
 	return &productRecordMySQLRepository{
