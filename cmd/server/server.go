@@ -20,13 +20,11 @@ import (
 	productBatchRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/product_batch"
 	productBatchService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product_batch"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
 	carryHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/carry"
 	empHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
 	inbHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/inbound_order"
 	sellerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/seller"
 	warehouseHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/warehouse"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
 	carryRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/carry"
 	empRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/employee"
 
@@ -34,7 +32,6 @@ import (
 	sellerRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/seller"
 	wRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/router"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 
 	buyerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/buyer"
 	purchaseOrderHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/purchase_order"
@@ -77,7 +74,6 @@ type ServerChi struct {
 // Run is a method that runs the server
 func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	// - repository
-
 	repoSection := sectionRepository.NewSectionRepository(mysql)
 	repoSeller := sellerRepository.NewSellerRepository(mysql)
 	repoBuyer := buyerRepository.NewBuyerRepository(mysql)

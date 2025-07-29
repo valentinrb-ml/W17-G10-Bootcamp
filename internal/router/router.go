@@ -3,7 +3,6 @@ package router
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
 	buyerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/buyer"
 	carryHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/carry"
 	empHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
