@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/go-sql-driver/mysql"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
+
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_batches"
 )
 
@@ -66,7 +67,7 @@ func (r *productBatchesRepository) GetReportProduct(ctx context.Context) ([]mode
 	}
 	defer rows.Close()
 
-	var productReport []models.ReportProduct
+	productReport := make([]models.ReportProduct, 0)
 
 	for rows.Next() {
 		var rp models.ReportProduct

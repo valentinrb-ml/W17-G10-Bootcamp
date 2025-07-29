@@ -60,6 +60,22 @@ cover-geography:
 	go test ./internal/service/geography/... ./internal/handler/geography/... ./internal/repository/geography/... -coverprofile=geography_coverage.out && \
 	go tool cover -func=geography_coverage.out
 
+# SECTION MODULE COVERAGE
+# Runs tests and shows coverage for section module (service, handler, repository)
+.PHONY: cover-section
+cover-section:
+	go test ./internal/service/section/... ./internal/handler/section/... ./internal/repository/section/... -coverprofile=section_coverage.out && \
+	go tool cover -func=section_coverage.out
+	go tool cover -html=section_coverage.out
+
+# PRODUCT BATCH MODULE COVERAGE
+# Runs tests and shows coverage for product batch module (service, handler, repository)
+.PHONY: cover-product-batch
+cover-product-batch:
+	go test ./internal/service/product_batch/... ./internal/handler/product_batch/... ./internal/repository/product_batch/... -coverprofile=product_batch_coverage.out && \
+	go tool cover -func=product_batch_coverage.out
+	go tool cover -html=product_batch_coverage.out
+
 # EMPLOYEE MODULE COVERAGE
 # Runs tests and shows coverage for employee module (service, handler, repository)
 .PHONY: cover-employee
@@ -73,3 +89,4 @@ cover-employee:
 cover-inbound_order:
 	go test ./internal/service/inbound_order/... ./internal/handler/inbound_order/... ./internal/repository/inbound_order/... -coverprofile=inbound_order_coverage.out && \
 	go tool cover -func=inbound_order_coverage.out
+
