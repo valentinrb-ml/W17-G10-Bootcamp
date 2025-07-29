@@ -12,6 +12,7 @@ import (
 	productHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product"
 	productBatchHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_batch"
 	ProductRecordHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_record"
+	purchaseOrderHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/purchase_order"
 	sectionHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/section"
 	sellerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/seller"
 	warehouseHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/warehouse"
@@ -26,7 +27,7 @@ func NewAPIRouter(
 	hdEmployee *empHandler.EmployeeHandler,
 	hdProduct *productHandler.ProductHandler,
 	hdProductBatches *productBatchHandler.ProductBatchesHandler,
-	hdPurchaseOrder *handler.PurchaseOrderHandler,
+	hdPurchaseOrder *purchaseOrderHandler.PurchaseOrderHandler,
 	hdGeography *geographyHandler.GeographyHandler,
 	hdInboundOrder *inbHandler.InboundOrderHandler,
 	hdCarry *carryHandler.CarryHandler,

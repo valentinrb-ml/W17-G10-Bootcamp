@@ -75,3 +75,18 @@ cover-product-batch:
 	go test ./internal/service/product_batch/... ./internal/handler/product_batch/... ./internal/repository/product_batch/... -coverprofile=product_batch_coverage.out && \
 	go tool cover -func=product_batch_coverage.out
 	go tool cover -html=product_batch_coverage.out
+
+# EMPLOYEE MODULE COVERAGE
+# Runs tests and shows coverage for employee module (service, handler, repository)
+.PHONY: cover-employee
+cover-employee:
+	go test ./internal/service/employee/... ./internal/handler/employee/... ./internal/repository/employee/... -coverprofile=employee_coverage.out && \
+	go tool cover -func=employee_coverage.out
+
+# INBOUND_ORDER MODULE COVERAGE
+# Runs tests and shows coverage for inbound_order module (service, handler, repository)
+.PHONY: cover-inbound_order
+cover-inbound_order:
+	go test ./internal/service/inbound_order/... ./internal/handler/inbound_order/... ./internal/repository/inbound_order/... -coverprofile=inbound_order_coverage.out && \
+	go tool cover -func=inbound_order_coverage.out
+
