@@ -31,7 +31,7 @@ type ResponsePurchaseOrder struct {
 
 type BuyerWithPurchaseCount struct {
 	ID                  int    `json:"id"`
-	CardNumberID        string `json:"card_number_id"`
+	CardNumberID        string `json:"id_card_number"`
 	FirstName           string `json:"first_name"`
 	LastName            string `json:"last_name"`
 	PurchaseOrdersCount int    `json:"purchase_orders_count"`

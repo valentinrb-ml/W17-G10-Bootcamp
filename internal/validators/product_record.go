@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/productrecord"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_record"
 )
 
-func ValidateProductRecordCreateRequest(req productrecord.ProductRecordRequest) error {
+func ValidateProductRecordCreateRequest(req models.ProductRecordRequest) error {
 	if req.Data.LastUpdateDate.IsZero() {
 		return apperrors.NewAppError(apperrors.CodeValidationError, "last_update_date is required")
 	}
@@ -19,7 +19,7 @@ func ValidateProductRecordCreateRequest(req productrecord.ProductRecordRequest) 
 	return nil
 }
 
-func ValidateProductRecordBusinessRules(record productrecord.ProductRecord) error {
+func ValidateProductRecordBusinessRules(record models.ProductRecord) error {
 	if record.PurchasePrice < 0 {
 		return apperrors.NewAppError(apperrors.CodeBadRequest, "purchase_price must be greater than or equal to 0")
 	}

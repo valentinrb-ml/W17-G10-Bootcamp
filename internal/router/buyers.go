@@ -2,10 +2,10 @@ package router
 
 import (
 	"github.com/go-chi/chi/v5"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
+	buyerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/buyer"
 )
 
-func MountBuyerRoutes(api chi.Router, hd *handler.BuyerHandler) {
+func MountBuyerRoutes(api chi.Router, hd *buyerHandler.BuyerHandler) {
 	api.Route("/buyers", func(r chi.Router) {
 		r.Get("/", hd.FindAll)
 		r.Get("/{id}", hd.FindById)

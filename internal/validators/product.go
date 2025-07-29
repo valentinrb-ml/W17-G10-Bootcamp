@@ -2,7 +2,7 @@ package validators
 
 import (
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
 )
 
 type ProductValidator struct {
@@ -89,7 +89,7 @@ func (v *ProductValidator) validateNetWeight(weight float64, required bool) {
 }
 
 // Validators
-func ValidateCreateRequest(req product.ProductRequest) error {
+func ValidateCreateRequest(req models.ProductRequest) error {
 	validator := NewProductValidator()
 
 	validator.validateProductCode(req.ProductCode, true)
@@ -102,7 +102,7 @@ func ValidateCreateRequest(req product.ProductRequest) error {
 	return validator.Error()
 }
 
-func ValidatePatchRequest(req product.ProductPatchRequest) error {
+func ValidatePatchRequest(req models.ProductPatchRequest) error {
 	if !hasAnyPatchField(req) {
 		return apperrors.NewAppError(apperrors.CodeBadRequest, "at least one field must be provided for update")
 	}
@@ -131,7 +131,7 @@ func ValidatePatchRequest(req product.ProductPatchRequest) error {
 	return validator.Error()
 }
 
-func ValidateProductBusinessRules(p product.Product) error {
+func ValidateProductBusinessRules(p models.Product) error {
 	validator := NewProductValidator()
 
 	if p.Dimensions.Width <= 0 || p.Dimensions.Height <= 0 || p.Dimensions.Length <= 0 {
@@ -145,7 +145,7 @@ func ValidateProductBusinessRules(p product.Product) error {
 	return validator.Error()
 }
 
-func hasAnyPatchField(req product.ProductPatchRequest) bool {
+func hasAnyPatchField(req models.ProductPatchRequest) bool {
 	return req.ProductCode != nil || req.Description != nil || req.Width != nil ||
 		req.Height != nil || req.Length != nil || req.NetWeight != nil ||
 		req.ExpirationRate != nil || req.FreezingRate != nil ||
