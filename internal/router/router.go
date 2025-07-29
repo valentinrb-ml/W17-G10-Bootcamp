@@ -4,23 +4,31 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
+	buyerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/buyer"
+	empHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
+	geographyHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/geography"
+	inbHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/inbound_order"
 	productHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product"
 	ProductRecordHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_record"
+	sectionHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/section"
+	sellerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/seller"
+	warehouseHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/warehouse"
+	carryHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/carry"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 )
 
 func NewAPIRouter(
-	hdBuyer *handler.BuyerHandler,
-	hdSection *handler.SectionDefault,
-	hdSeller *handler.SellerHandler,
-	hdWarehouse *handler.WarehouseHandler,
+	hdBuyer *buyerHandler.BuyerHandler,
+	hdSection *sectionHandler.SectionDefault,
+	hdSeller *sellerHandler.SellerHandler,
+	hdWarehouse *warehouseHandler.WarehouseHandler,
+	hdEmployee *empHandler.EmployeeHandler,
 	hdProduct *productHandler.ProductHandler,
-	hdEmployee *handler.EmployeeHandler,
 	hdProductBatches *handler.ProductBatchesHandler,
 	hdPurchaseOrder *handler.PurchaseOrderHandler,
-	hdGeography *handler.GeographyHandler,
-	hdInboundOrder *handler.InboundOrderHandler,
-	hdCarry *handler.CarryHandler,
+	hdGeography *geographyHandler.GeographyHandler,
+	hdInboundOrder *inbHandler.InboundOrderHandler,
+	hdCarry *carryHandler.CarryHandler,
 	hdProductRecord *ProductRecordHandler.ProductRecordHandler,
 ) *chi.Mux {
 	root := chi.NewRouter()
