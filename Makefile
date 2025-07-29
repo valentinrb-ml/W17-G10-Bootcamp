@@ -60,6 +60,22 @@ cover-geography:
 	go test ./internal/service/geography/... ./internal/handler/geography/... ./internal/repository/geography/... -coverprofile=geography_coverage.out && \
 	go tool cover -func=geography_coverage.out
 
+# SECTION MODULE COVERAGE
+# Runs tests and shows coverage for section module (service, handler, repository)
+.PHONY: cover-section
+cover-section:
+	go test ./internal/service/section/... ./internal/handler/section/... ./internal/repository/section/... -coverprofile=section_coverage.out && \
+	go tool cover -func=section_coverage.out
+	go tool cover -html=section_coverage.out
+
+# PRODUCT BATCH MODULE COVERAGE
+# Runs tests and shows coverage for product batch module (service, handler, repository)
+.PHONY: cover-product-batch
+cover-product-batch:
+	go test ./internal/service/product_batch/... ./internal/handler/product_batch/... ./internal/repository/product_batch/... -coverprofile=product_batch_coverage.out && \
+	go tool cover -func=product_batch_coverage.out
+	go tool cover -html=product_batch_coverage.out
+
 # EMPLOYEE MODULE COVERAGE
 # Runs tests and shows coverage for employee module (service, handler, repository)
 .PHONY: cover-employee
@@ -73,3 +89,17 @@ cover-employee:
 cover-inbound_order:
 	go test ./internal/service/inbound_order/... ./internal/handler/inbound_order/... ./internal/repository/inbound_order/... -coverprofile=inbound_order_coverage.out && \
 	go tool cover -func=inbound_order_coverage.out
+
+# BUYER MODULE COVERAGE
+# Runs tests and shows coverage for buyuer module (service, handler, repository)
+.PHONY: cover-buyer
+cover-buyer:
+	go test ./internal/service/buyer/... ./internal/handler/buyer/... ./internal/repository/buyer/... -coverprofile=buyer_coverage.out && \
+	go tool cover -func=buyer_coverage.out
+
+# PURCHASE_ORDER MODULE COVERAGE
+# Runs tests and shows coverage for purchase_order module (service, handler, repository)
+.PHONY: cover-purchase-order
+cover-purchase_order:
+	go test ./internal/service/purchase_order/... ./internal/handler/purchase_order/... ./internal/repository/purchase_order/... -coverprofile=purchase_order_coverage.out && \
+	go tool cover -func=purchase_order_coverage.out

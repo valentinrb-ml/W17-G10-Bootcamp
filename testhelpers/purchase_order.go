@@ -3,6 +3,8 @@ package testhelpers
 import (
 	"time"
 
+	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/purchase_order"
+	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/purchase_order"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
@@ -77,4 +79,39 @@ func DummyBuyerWithPurchaseCount() models.BuyerWithPurchaseCount {
 		LastName:            "Buyer",
 		PurchaseOrdersCount: 10,
 	}
+}
+
+type RequestPurchaseOrder struct {
+	OrderNumber     string `json:"order_number"`
+	OrderDate       string `json:"order_date"` // o time.Time, según tu json mapping
+	TrackingCode    string `json:"tracking_code"`
+	BuyerID         int    `json:"buyer_id"`
+	ProductRecordID int    `json:"product_record_id"`
+}
+
+type ResponsePurchaseOrder struct {
+	ID              int    `json:"id"`
+	OrderNumber     string `json:"order_number"`
+	OrderDate       string `json:"order_date"`
+	TrackingCode    string `json:"tracking_code"`
+	BuyerID         int    `json:"buyer_id"`
+	ProductRecordID int    `json:"product_record_id"`
+}
+
+func DummyResponsePurchaseOrder() models.ResponsePurchaseOrder {
+	return models.ResponsePurchaseOrder{
+		ID:              1,
+		OrderNumber:     "PO-001",
+		OrderDate:       "2023-01-01T00:00:00Z",
+		TrackingCode:    "TRACK001",
+		BuyerID:         101,
+		ProductRecordID: 201,
+	}
+}
+
+// NewPurchaseOrderServiceMock returns a repository mock and the service using that mock
+func NewPurchaseOrderServiceMock() (*mocks.PurchaseOrderRepositoryMock, service.PurchaseOrderService) {
+	repoMock := &mocks.PurchaseOrderRepositoryMock{}
+	svc := service.NewPurchaseOrderService(repoMock)
+	return repoMock, svc
 }

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
+	purchaseOrderService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/purchase_order"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
@@ -13,10 +13,10 @@ import (
 )
 
 type PurchaseOrderHandler struct {
-	service service.PurchaseOrderService
+	service purchaseOrderService.PurchaseOrderService
 }
 
-func NewPurchaseOrderHandler(s service.PurchaseOrderService) *PurchaseOrderHandler {
+func NewPurchaseOrderHandler(s purchaseOrderService.PurchaseOrderService) *PurchaseOrderHandler {
 	return &PurchaseOrderHandler{service: s}
 }
 

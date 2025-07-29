@@ -5,15 +5,17 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
 	buyerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/buyer"
+	carryHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/carry"
 	empHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
 	geographyHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/geography"
 	inbHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/inbound_order"
 	productHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product"
+	productBatchHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_batch"
 	ProductRecordHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_record"
+	purchaseOrderHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/purchase_order"
 	sectionHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/section"
 	sellerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/seller"
 	warehouseHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/warehouse"
-	carryHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/carry"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 )
 
@@ -24,8 +26,8 @@ func NewAPIRouter(
 	hdWarehouse *warehouseHandler.WarehouseHandler,
 	hdEmployee *empHandler.EmployeeHandler,
 	hdProduct *productHandler.ProductHandler,
-	hdProductBatches *handler.ProductBatchesHandler,
-	hdPurchaseOrder *handler.PurchaseOrderHandler,
+	hdProductBatches *productBatchHandler.ProductBatchesHandler,
+	hdPurchaseOrder *purchaseOrderHandler.PurchaseOrderHandler,
 	hdGeography *geographyHandler.GeographyHandler,
 	hdInboundOrder *inbHandler.InboundOrderHandler,
 	hdCarry *carryHandler.CarryHandler,
