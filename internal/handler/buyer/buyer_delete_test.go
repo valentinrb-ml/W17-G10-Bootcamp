@@ -44,7 +44,7 @@ func TestBuyerHandler_Delete(t *testing.T) {
 			},
 			wantStatus:   http.StatusBadRequest,
 			errorCode:    apperrors.CodeBadRequest,
-			errorMessage: "Invalid ID parameter", // Changed to match your handler
+			errorMessage: "Invalid ID parameter",
 		},
 		{
 			name:    "error - not found",
