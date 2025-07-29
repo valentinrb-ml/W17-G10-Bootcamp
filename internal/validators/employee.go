@@ -56,5 +56,8 @@ func ValidateEmployeePatch(e *models.EmployeePatch) error {
 		}
 		return apperrors.NewAppError(apperrors.CodeValidationError, "warehouse_id must be positive")
 	}
+	if e.CardNumberID == nil && e.FirstName == nil && e.LastName == nil && e.WarehouseID == nil {
+		return apperrors.NewAppError(apperrors.CodeValidationError, "at least one field must be provided for update")
+	}
 	return nil
 }

@@ -3,24 +3,33 @@ package router
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler"
+	buyerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/buyer"
+	carryHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/carry"
+	empHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/employee"
+	geographyHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/geography"
+	inbHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/inbound_order"
 	productHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product"
+	productBatchHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_batch"
 	ProductRecordHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/product_record"
+	purchaseOrderHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/purchase_order"
+	sectionHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/section"
+	sellerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/seller"
+	warehouseHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 )
 
 func NewAPIRouter(
-	hdBuyer *handler.BuyerHandler,
-	hdSection *handler.SectionDefault,
-	hdSeller *handler.SellerHandler,
-	hdWarehouse *handler.WarehouseHandler,
+	hdBuyer *buyerHandler.BuyerHandler,
+	hdSection *sectionHandler.SectionDefault,
+	hdSeller *sellerHandler.SellerHandler,
+	hdWarehouse *warehouseHandler.WarehouseHandler,
+	hdEmployee *empHandler.EmployeeHandler,
 	hdProduct *productHandler.ProductHandler,
-	hdEmployee *handler.EmployeeHandler,
-	hdProductBatches *handler.ProductBatchesHandler,
-	hdPurchaseOrder *handler.PurchaseOrderHandler,
-	hdGeography *handler.GeographyHandler,
-	hdInboundOrder *handler.InboundOrderHandler,
-	hdCarry *handler.CarryHandler,
+	hdProductBatches *productBatchHandler.ProductBatchesHandler,
+	hdPurchaseOrder *purchaseOrderHandler.PurchaseOrderHandler,
+	hdGeography *geographyHandler.GeographyHandler,
+	hdInboundOrder *inbHandler.InboundOrderHandler,
+	hdCarry *carryHandler.CarryHandler,
 	hdProductRecord *ProductRecordHandler.ProductRecordHandler,
 ) *chi.Mux {
 	root := chi.NewRouter()

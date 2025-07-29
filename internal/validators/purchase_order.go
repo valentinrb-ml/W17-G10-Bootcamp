@@ -1,6 +1,8 @@
 package validators
 
 import (
+	"time"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
@@ -12,6 +14,10 @@ func ValidatePurchaseOrderPost(po models.RequestPurchaseOrder) error {
 
 	if po.OrderDate == "" {
 		return apperrors.NewAppError(apperrors.CodeValidationError, "order_date is required")
+	}
+
+	if _, err := time.Parse(time.RFC3339, po.OrderDate); err != nil {
+		return apperrors.NewAppError(apperrors.CodeBadRequest, "Invalid request body")
 	}
 
 	if po.TrackingCode == "" {
