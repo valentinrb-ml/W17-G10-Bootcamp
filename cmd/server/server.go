@@ -99,7 +99,6 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// - service
 	svcSeller := sellerService.NewSellerService(repoSeller, repoGeography)
-
 	svcSection := sectionService.NewSectionService(repoSection)
 	svcBuyer := buyerService.NewBuyerService(repoBuyer)
 	svcProduct := productService.NewProductService(repoProduct)
