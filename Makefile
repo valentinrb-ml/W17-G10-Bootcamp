@@ -92,14 +92,14 @@ cover-inbound_order:
 
 # BUYER MODULE COVERAGE
 # Runs tests and shows coverage for buyuer module (service, handler, repository)
-.PHONY: cover-carry
-cover-carry:
+.PHONY: cover-buyer
+cover-buyer:
 	go test ./internal/service/buyer/... ./internal/handler/buyer/... ./internal/repository/buyer/... -coverprofile=buyer_coverage.out && \
 	go tool cover -func=buyer_coverage.out
 
 # PURCHASE_ORDER MODULE COVERAGE
 # Runs tests and shows coverage for purchase_order module (service, handler, repository)
-.PHONY: cover-warehouse
-cover-warehouse:
+.PHONY: cover-purchase-order
+cover-purchase_order:
 	go test ./internal/service/purchase_order/... ./internal/handler/purchase_order/... ./internal/repository/purchase_order/... -coverprofile=purchase_order_coverage.out && \
 	go tool cover -func=purchase_order_coverage.out
