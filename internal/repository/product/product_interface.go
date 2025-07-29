@@ -12,7 +12,4 @@ type ProductRepository interface {
 	Save(ctx context.Context, p models.Product) (models.Product, error)
 	Delete(ctx context.Context, id int) error
 	Patch(ctx context.Context, id int, req models.ProductPatchRequest) (models.Product, error)
-	create(ctx context.Context, p models.Product) (models.Product, error)
-	update(ctx context.Context, p models.Product) (models.Product, error)
-	handleDBError(err error, msg string) error
 }
