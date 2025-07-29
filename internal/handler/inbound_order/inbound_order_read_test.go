@@ -54,6 +54,16 @@ func TestInboundOrderHandler_Report(t *testing.T) {
 			wantStatus:  http.StatusNotFound,
 			wantContent: `"not found"`,
 		},
+		{
+			name:    "report_all_no_id",
+			queryID: nil, // Sin parámetro id
+			mockReport: func(ctx context.Context, id *int) (interface{}, error) {
+				// Simula que devuelve varios reportes al no pasar id
+				return testhelpers.CreateInboundOrderReports(), nil
+			},
+			wantStatus:  http.StatusOK,
+			wantContent: `"inbound_orders_count":5`, // cualquier campo representativo de los datos
+		},
 	}
 
 	for _, tc := range testCases {
