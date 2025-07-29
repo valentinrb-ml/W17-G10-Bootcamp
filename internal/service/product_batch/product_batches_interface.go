@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository"
+	productBatchRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/product_batch"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_batches"
 )
 
@@ -15,11 +15,11 @@ type ProductBatchesService interface {
 
 // productBatchesService implements ProductBatchesService using a repository.
 type productBatchesService struct {
-	r repository.ProductBatchesRepository
+	r productBatchRepository.ProductBatchesRepository
 }
 
 // NewProductBatchesService creates a new ProductBatchesService using the provided repository.
-func NewProductBatchesService(repo repository.ProductBatchesRepository) ProductBatchesService {
+func NewProductBatchesService(repo productBatchRepository.ProductBatchesRepository) ProductBatchesService {
 	return &productBatchesService{
 		repo,
 	}

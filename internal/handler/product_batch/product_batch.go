@@ -1,11 +1,11 @@
 package handler
 
 import (
+	svsProductBatch "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product_batch"
 	"net/http"
 	"strconv"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
@@ -15,11 +15,11 @@ import (
 
 // ProductBatchesHandler handles HTTP requests for product batches endpoints.
 type ProductBatchesHandler struct {
-	sv service.ProductBatchesService
+	sv svsProductBatch.ProductBatchesService
 }
 
 // NewProductBatchesHandler creates a new ProductBatchesHandler with provided service.
-func NewProductBatchesHandler(sv service.ProductBatchesService) *ProductBatchesHandler {
+func NewProductBatchesHandler(sv svsProductBatch.ProductBatchesService) *ProductBatchesHandler {
 	return &ProductBatchesHandler{
 		sv,
 	}
