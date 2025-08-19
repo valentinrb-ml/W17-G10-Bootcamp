@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
 )
 
@@ -16,9 +17,15 @@ type WarehouseRepository interface {
 }
 
 type WarehouseMySQL struct {
-	db *sql.DB
+	db     *sql.DB
+	logger logger.Logger
 }
 
 func NewWarehouseRepository(db *sql.DB) *WarehouseMySQL {
-	return &WarehouseMySQL{db}
+	return &WarehouseMySQL{db: db}
+}
+
+// SetLogger allows you to inject the logger after creation
+func (r *WarehouseMySQL) SetLogger(l logger.Logger) {
+	r.logger = l
 }

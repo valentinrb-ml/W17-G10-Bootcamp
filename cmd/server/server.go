@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -49,6 +50,8 @@ import (
 	geographyHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/geography"
 	geographyRepository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/geography"
 	geographyService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/geography"
+
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 )
 
 type ConfigServerChi struct {
@@ -73,6 +76,15 @@ type ServerChi struct {
 
 // Run is a method that runs the server
 func (s *ServerChi) Run(mysql *sql.DB) (err error) {
+	// Initialize logger
+	appLogger := logger.NewDatabaseLogger(mysql)
+	ctx := context.Background()
+
+	// Application startup log
+	appLogger.Info(ctx, "server", "Starting application server", map[string]interface{}{
+		"address": s.serverAddress,
+	})
+
 	// - repository
 	repoSection := sectionRepository.NewSectionRepository(mysql)
 	repoSeller := sellerRepository.NewSellerRepository(mysql)
@@ -80,6 +92,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoWarehouse := wRepo.NewWarehouseRepository(mysql)
 	repoProduct, err := productRepository.NewProductRepository(mysql)
 	if err != nil {
+		appLogger.Error(ctx, "server", "Failed to initialize product repository", err)
 		return err
 	}
 	repoEmployee := empRepo.NewEmployeeRepository(mysql)
@@ -90,8 +103,11 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoPurchaseOrder := purchaseOrderRepo.NewPurchaseOrderRepository(mysql)
 	repoProductRecord, err := productRecordRepository.NewProductRecordRepository(mysql)
 	if err != nil {
+		appLogger.Error(ctx, "server", "Failed to initialize product record repository", err)
 		return err
 	}
+
+	appLogger.Info(ctx, "server", "All repositories initialized successfully")
 
 	// - service
 	svcSeller := sellerService.NewSellerService(repoSeller, repoGeography)
@@ -107,6 +123,12 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	svcPurchaseOrder := purchaseOrderService.NewPurchaseOrderService(repoPurchaseOrder)
 	svcProductRecord := productRecordService.NewProductRecordService(repoProductRecord)
 
+	// Inject logger into warehouse components
+	repoWarehouse.SetLogger(appLogger)
+	svcWarehouse.SetLogger(appLogger)
+
+	appLogger.Info(ctx, "server", "All services initialized successfully")
+
 	// - handler
 	hdBuyer := buyerHandler.NewBuyerHandler(svcBuyer)
 	hdSection := sectionHandler.NewSectionHandler(svcSection)
@@ -121,16 +143,29 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdPurchaseOrder := purchaseOrderHandler.NewPurchaseOrderHandler(svcPurchaseOrder)
 	hdProductRecord := productRecordHandler.NewProductRecordHandler(svcProductRecord)
 
+	// Inject logger into warehouse handler
+	hdWarehouse.SetLogger(appLogger)
+
+	appLogger.Info(ctx, "server", "All handlers initialized successfully")
+
 	// router
 	rt := router.NewAPIRouter(
 		hdBuyer, hdSection, hdSeller, hdWarehouse, hdEmployee,
 		hdProduct, hdProductBatches, hdPurchaseOrder,
 		hdGeography, hdInboundOrder, hdCarry, hdProductRecord,
+		appLogger,
 	)
 
 	fmt.Printf("Server running at http://localhost%s\n", s.serverAddress)
 
 	// run server
+	appLogger.Info(ctx, "server", "HTTP server starting", map[string]interface{}{
+		"port": s.serverAddress,
+	})
+
 	err = http.ListenAndServe(s.serverAddress, rt)
+	if err != nil {
+		appLogger.Fatal(ctx, "server", "Failed to start HTTP server", err)
+	}
 	return err
 }
