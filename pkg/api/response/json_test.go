@@ -16,7 +16,7 @@ func TestJSON(t *testing.T) {
 		input         any
 		wantStatus    int
 		wantData      any
-		skipTypeCheck bool // para tipo no comparable, ej: map
+		skipTypeCheck bool
 	}{
 		{
 			name:       "returns json with data object",
@@ -30,7 +30,7 @@ func TestJSON(t *testing.T) {
 			code:       http.StatusCreated,
 			input:      []string{"a", "b", "c"},
 			wantStatus: http.StatusCreated,
-			wantData:   []any{"a", "b", "c"}, // por tipo JSON decode es []any, no []string
+			wantData:   []any{"a", "b", "c"},
 		},
 		{
 			name:       "returns only status if body is nil",
@@ -48,21 +48,18 @@ func TestJSON(t *testing.T) {
 			require.Equal(t, tc.wantStatus, rec.Code)
 
 			if tc.input == nil {
-				// No JSON, no Content-Type
 				require.Empty(t, rec.Body.String())
 				return
 			}
 
 			require.Equal(t, "application/json", rec.Header().Get("Content-Type"))
 
-			// Desempaqueta envelope y compara Data
 			var resp struct {
 				Data any `json:"data"`
 			}
 			err := json.Unmarshal(rec.Body.Bytes(), &resp)
 			require.NoError(t, err)
 
-			// Si es slice/map, compara con ElementsMatch o omite tipo
 			if m, ok := tc.wantData.([]any); ok {
 				require.ElementsMatch(t, m, resp.Data.([]any))
 			} else if mp, ok := tc.wantData.(map[string]any); ok {

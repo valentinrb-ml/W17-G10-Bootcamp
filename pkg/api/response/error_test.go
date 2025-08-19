@@ -25,7 +25,7 @@ func TestError(t *testing.T) {
 		wantAppCode string
 		wantMsgSub  string
 		wantDetails map[string]interface{}
-		wantRaw     string // Solo para casos de encoder fallback (si lo quieres explorar)
+		wantRaw     string
 	}{
 		{
 			name:        "nil error gives internal server error",
