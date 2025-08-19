@@ -10,7 +10,7 @@ func ValidateCarryCreateRequest(req carry.CarryRequest) error {
 		return apperrors.NewAppError(apperrors.CodeValidationError, "invalid request body")
 	}
 
-	if !isValidPhone(req.Telephone) {
+	if !IsValidPhone(req.Telephone) {
 		return apperrors.NewAppError(apperrors.CodeValidationError, "invalid phone number")
 	}
 	return nil
