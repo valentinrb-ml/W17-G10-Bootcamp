@@ -12,13 +12,13 @@ func ValidateWarehouseCreateRequest(req warehouse.WarehouseRequest) error {
 		return apperrors.NewAppError(apperrors.CodeValidationError, "invalid request body")
 	}
 
-	if !isValidPhone(req.Telephone) {
+	if !IsValidPhone(req.Telephone) {
 		return apperrors.NewAppError(apperrors.CodeValidationError, "invalid phone number")
 	}
 	return nil
 }
 
-func isValidPhone(phone string) bool {
+func IsValidPhone(phone string) bool {
     re := regexp.MustCompile(`^\+?\d{8,15}$`)
     return re.MatchString(phone)
 }
