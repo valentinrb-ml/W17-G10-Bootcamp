@@ -9,7 +9,6 @@ import (
 	"time"
 )
 
-func intPtr(v int) *int             { return &v }
 func float64Ptr(v float64) *float64 { return &v }
 
 func validPostProductBatch() models.PostProductBatches {
