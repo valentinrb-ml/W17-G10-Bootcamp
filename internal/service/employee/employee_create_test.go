@@ -113,3 +113,80 @@ func TestEmployeeService_Create(t *testing.T) {
 		})
 	}
 }
+
+// Tests de error y trayectorias no triviales en Employee Service para coverage alto
+func TestEmployeeService_Create_allErrors(t *testing.T) {
+	ctx := context.Background()
+	whRepo := &warehouseMocks.WarehouseRepositoryMock{}
+
+	t.Run("validation error (Empty last name)", func(t *testing.T) {
+		repo := &employeeMocks.EmployeeRepositoryMock{}
+		svc := service.NewEmployeeDefault(repo, whRepo)
+		in := &models.Employee{CardNumberID: "C", FirstName: "X", LastName: "", WarehouseID: 1}
+		res, err := svc.Create(ctx, in)
+		require.Error(t, err)
+		require.Nil(t, res)
+	})
+
+	t.Run("warehouse FindById returns not found", func(t *testing.T) {
+		repo := &employeeMocks.EmployeeRepositoryMock{}
+		whRepo := &warehouseMocks.WarehouseRepositoryMock{
+			FuncFindById: func(ctx context.Context, id int) (*wmodels.Warehouse, error) {
+				return nil, apperrors.NewAppError(apperrors.CodeNotFound, "no wh")
+			},
+		}
+		svc := service.NewEmployeeDefault(repo, whRepo)
+		e := testhelpers.CreateTestEmployee()
+		res, err := svc.Create(ctx, &e)
+		require.Error(t, err)
+		require.Nil(t, res)
+		require.Contains(t, err.Error(), "warehouse_id does not exist")
+	})
+
+	t.Run("warehouse FindById returns other error", func(t *testing.T) {
+		repo := &employeeMocks.EmployeeRepositoryMock{}
+		whRepo := &warehouseMocks.WarehouseRepositoryMock{
+			FuncFindById: func(ctx context.Context, id int) (*wmodels.Warehouse, error) {
+				return nil, context.DeadlineExceeded
+			},
+		}
+		svc := service.NewEmployeeDefault(repo, whRepo)
+		e := testhelpers.CreateTestEmployee()
+		res, err := svc.Create(ctx, &e)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "failed getting warehouse by id")
+		require.Nil(t, res)
+	})
+
+	t.Run("warehouse FindById returns nil, no error", func(t *testing.T) {
+		repo := &employeeMocks.EmployeeRepositoryMock{}
+		whRepo := &warehouseMocks.WarehouseRepositoryMock{
+			FuncFindById: func(ctx context.Context, id int) (*wmodels.Warehouse, error) {
+				return nil, nil
+			},
+		}
+		svc := service.NewEmployeeDefault(repo, whRepo)
+		e := testhelpers.CreateTestEmployee()
+		res, err := svc.Create(ctx, &e)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "warehouse_id does not exist")
+		require.Nil(t, res)
+	})
+
+	t.Run("repo.FindByCardNumberID returns error", func(t *testing.T) {
+		repo := &employeeMocks.EmployeeRepositoryMock{
+			MockFindByCardNumberID: func(ctx context.Context, cardNumberID string) (*models.Employee, error) {
+				return nil, context.DeadlineExceeded
+			},
+		}
+		whRepo := &warehouseMocks.WarehouseRepositoryMock{
+			FuncFindById: func(ctx context.Context, id int) (*wmodels.Warehouse, error) { return &wmodels.Warehouse{Id: 1}, nil },
+		}
+		svc := service.NewEmployeeDefault(repo, whRepo)
+		e := testhelpers.CreateTestEmployee()
+		res, err := svc.Create(ctx, &e)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "failed checking card_number_id uniqueness")
+		require.Nil(t, res)
+	})
+}

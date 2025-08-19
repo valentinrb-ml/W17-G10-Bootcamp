@@ -107,3 +107,51 @@ func TestEmployeeService_Read(t *testing.T) {
 		})
 	}
 }
+func TestEmployeeService_FindAll_error(t *testing.T) {
+	repo := &employeeMocks.EmployeeRepositoryMock{
+		MockFindAll: func(ctx context.Context) ([]*models.Employee, error) {
+			return nil, context.DeadlineExceeded
+		},
+	}
+	whRepo := &warehouseMocks.WarehouseRepositoryMock{}
+	svc := service.NewEmployeeDefault(repo, whRepo)
+	res, err := svc.FindAll(context.Background())
+	require.Error(t, err)
+	require.Nil(t, res)
+	require.Contains(t, err.Error(), "failed fetching all employees")
+}
+func TestEmployeeService_FindByID_errors(t *testing.T) {
+	repo := &employeeMocks.EmployeeRepositoryMock{}
+	whRepo := &warehouseMocks.WarehouseRepositoryMock{}
+	svc := service.NewEmployeeDefault(repo, whRepo)
+
+	// ID inválido (<=0)
+	res, err := svc.FindByID(context.Background(), 0)
+	require.Error(t, err)
+	require.Nil(t, res)
+	require.Contains(t, err.Error(), "id must be positive")
+
+	// repo.FindByID devuelve error
+	repo2 := &employeeMocks.EmployeeRepositoryMock{
+		MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
+			return nil, context.DeadlineExceeded
+		},
+	}
+	svc2 := service.NewEmployeeDefault(repo2, whRepo)
+	res, err = svc2.FindByID(context.Background(), 1)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed fetching employee by id")
+	require.Nil(t, res)
+
+	// repo.FindByID no encuentra (nil,nil)
+	repo3 := &employeeMocks.EmployeeRepositoryMock{
+		MockFindByID: func(ctx context.Context, id int) (*models.Employee, error) {
+			return nil, nil
+		},
+	}
+	svc3 := service.NewEmployeeDefault(repo3, whRepo)
+	res, err = svc3.FindByID(context.Background(), 9)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "employee not found")
+	require.Nil(t, res)
+}
