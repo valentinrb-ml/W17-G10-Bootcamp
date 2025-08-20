@@ -133,6 +133,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// Inject logger into inbound_order components
 	repoInboundOrder.SetLogger(appLogger)
+	svcInboundOrder.SetLogger(appLogger)
 
 	appLogger.Info(ctx, "server", "All services initialized successfully")
 
