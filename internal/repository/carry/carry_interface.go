@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/carry"
 )
 
@@ -15,8 +16,14 @@ type CarryRepository interface {
 
 type CarryMySQL struct {
 	db *sql.DB
+	logger logger.Logger
 }
 
 func NewCarryRepository(db *sql.DB) *CarryMySQL {
-	return &CarryMySQL{db}
+	return &CarryMySQL{db : db}
+}
+
+// SetLogger allows you to inject the logger after creation
+func (r *CarryMySQL) SetLogger(l logger.Logger) {
+	r.logger = l
 }
