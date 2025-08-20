@@ -10,6 +10,8 @@ import (
 	"github.com/google/uuid"
 )
 
+
+
 // LoggingMiddleware creates a complete middleware for HTTP request logging
 func LoggingMiddleware(logger Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -33,9 +35,6 @@ func LoggingMiddleware(logger Logger) func(next http.Handler) http.Handler {
 			ctx = context.WithValue(ctx, "method", method)
 			ctx = context.WithValue(ctx, "user_agent", userAgent)
 			ctx = context.WithValue(ctx, "ip_address", ipAddress)
-			if userID != nil {
-				ctx = context.WithValue(ctx, "user_id", *userID)
-			}
 			r = r.WithContext(ctx)
 
 			// Log request start using the new LogRequest method
