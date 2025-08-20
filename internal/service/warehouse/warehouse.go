@@ -11,7 +11,12 @@ import (
 // Create creates a new warehouse by delegating to the repository layer
 // Returns the created warehouse or an error if the operation fails
 func (s *WarehouseDefault) Create(ctx context.Context, w warehouse.Warehouse) (*warehouse.Warehouse, error) {
-	return s.rp.Create(ctx, w)
+	result, err := s.rp.Create(ctx, w)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // FindAll retrieves all warehouses from the repository and sorts them by ID
@@ -31,6 +36,12 @@ func (s *WarehouseDefault) FindById(ctx context.Context, id int) (*warehouse.War
 // applies the patch, and then updates the warehouse in the repository
 // Returns the updated warehouse or an error if validation fails or operation fails
 func (s *WarehouseDefault) Update(ctx context.Context, id int, patch warehouse.WarehousePatchDTO) (*warehouse.Warehouse, error) {
+	if s.logger != nil {
+		s.logger.Info(ctx, "warehouse-service", "Updating warehouse", map[string]interface{}{
+			"warehouse_id": id,
+		})
+	}
+
 	existing, err := s.rp.FindById(ctx, id)
 	if err != nil {
 		return nil, err
@@ -38,6 +49,13 @@ func (s *WarehouseDefault) Update(ctx context.Context, id int, patch warehouse.W
 
 	if patch.MinimumCapacity != nil {
 		if err := validators.ValidateMinimumCapacity(*patch.MinimumCapacity); err != nil {
+			if s.logger != nil {
+				s.logger.Warning(ctx, "warehouse-service", "Invalid minimum capacity", map[string]interface{}{
+					"warehouse_id":     id,
+					"minimum_capacity": *patch.MinimumCapacity,
+					"validation_error": err.Error(),
+				})
+			}
 			return nil, err
 		}
 	}
@@ -46,8 +64,21 @@ func (s *WarehouseDefault) Update(ctx context.Context, id int, patch warehouse.W
 
 	updated, errRepo := s.rp.Update(ctx, id, *existing)
 	if errRepo != nil {
+		if s.logger != nil {
+			s.logger.Error(ctx, "warehouse-service", "Failed to update warehouse", errRepo, map[string]interface{}{
+				"warehouse_id": id,
+			})
+		}
 		return nil, errRepo
 	}
+
+	if s.logger != nil {
+		s.logger.Info(ctx, "warehouse-service", "Warehouse updated successfully", map[string]interface{}{
+			"warehouse_id":   updated.Id,
+			"warehouse_code": updated.WarehouseCode,
+		})
+	}
+
 	return updated, nil
 }
 
@@ -55,5 +86,9 @@ func (s *WarehouseDefault) Update(ctx context.Context, id int, patch warehouse.W
 // First verifies the warehouse exists, then deletes it from the repository
 // Returns an error if the warehouse doesn't exist or operation fails
 func (s *WarehouseDefault) Delete(ctx context.Context, id int) error {
-	return s.rp.Delete(ctx, id)
+	err := s.rp.Delete(ctx, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

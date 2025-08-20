@@ -249,3 +249,28 @@ ADD CONSTRAINT warehouse_code_UNIQUE UNIQUE (warehouse_code);
 -- cid carriers
 ALTER TABLE carriers
 ADD CONSTRAINT cid_UNIQUE UNIQUE (cid);
+
+-- Tabla: logs
+CREATE TABLE logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    level ENUM('DEBUG', 'INFO', 'WARNING', 'ERROR', 'FATAL') NOT NULL,
+    service VARCHAR(100) NOT NULL,
+    endpoint VARCHAR(255),
+    method VARCHAR(10),
+    user_id INT,
+    request_id VARCHAR(100),
+    message TEXT NOT NULL,
+    metadata JSON,
+    execution_time_ms INT,
+    status_code INT,
+    error_details TEXT,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_timestamp (timestamp),
+    INDEX idx_level (level),
+    INDEX idx_service (service),
+    INDEX idx_request_id (request_id),
+    INDEX idx_endpoint (endpoint)
+);

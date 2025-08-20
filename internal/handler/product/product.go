@@ -1,9 +1,10 @@
 package handler
 
 import (
+	"net/http"
+
 	productMappers "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers/product"
 	productService "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product"
-	"net/http"
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"

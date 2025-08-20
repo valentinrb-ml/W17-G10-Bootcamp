@@ -16,6 +16,7 @@ import (
 	sellerHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/seller"
 	warehouseHandler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 )
 
 func NewAPIRouter(
@@ -31,9 +32,14 @@ func NewAPIRouter(
 	hdInboundOrder *inbHandler.InboundOrderHandler,
 	hdCarry *carryHandler.CarryHandler,
 	hdProductRecord *ProductRecordHandler.ProductRecordHandler,
+	appLogger logger.Logger,
 ) *chi.Mux {
 	root := chi.NewRouter()
-	root.Use(middleware.Logger, middleware.Recoverer)
+
+	// Basic middleware with logging
+	root.Use(middleware.RequestID)
+	root.Use(logger.LoggingMiddleware(appLogger))
+	root.Use(middleware.Recoverer)
 
 	root.MethodNotAllowed(httputil.MethodNotAllowedHandler)
 	root.NotFound(httputil.NotFoundHandler)
