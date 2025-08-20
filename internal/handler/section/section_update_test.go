@@ -120,7 +120,7 @@ func TestSectionHandler_UpdateSection(t *testing.T) {
 			h := handler.NewSectionHandler(tt.mockService())
 
 			req = testhelpers.SetChiURLParam(req, "id", tt.inputID)
-
+			h.SetLogger(testhelpers.NewTestLogger())
 			h.UpdateSection(rec, req)
 
 			require.Equal(t, tt.wantStatus, rec.Code)

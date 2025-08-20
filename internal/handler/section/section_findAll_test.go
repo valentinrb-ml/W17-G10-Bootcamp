@@ -69,7 +69,7 @@ func TestSectionHandler_FindAllSections(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			h := handler.NewSectionHandler(tt.mockService())
-
+			h.SetLogger(testhelpers.NewTestLogger())
 			h.FindAllSections(rec, req)
 			require.Equal(t, tt.wantStatus, rec.Code)
 

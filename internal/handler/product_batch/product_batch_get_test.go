@@ -103,6 +103,8 @@ func TestProductBatchesHandler_GetReportProduct(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			h := handler.NewProductBatchesHandler(tt.mockService())
+			// inject test logger to cover logger != nil branches
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			h.GetReportProduct(rec, req)
 

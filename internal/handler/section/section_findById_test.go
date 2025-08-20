@@ -90,6 +90,7 @@ func TestSectionHandler_FindById(t *testing.T) {
 			req = testhelpers.SetChiURLParam(req, "id", tt.inputID)
 
 			h := handler.NewSectionHandler(tt.mockService())
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			h.FindById(rec, req)
 

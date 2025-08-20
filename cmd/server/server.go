@@ -125,29 +125,28 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// Inject logger into warehouse components
 	repoWarehouse.SetLogger(appLogger)
-  svcWarehouse.SetLogger(appLogger)
-  
-  // Inject logger into seller components
+	svcWarehouse.SetLogger(appLogger)
+
+	// Inject logger into seller components
 	repoSeller.SetLogger(appLogger)
-  svcSeller.SetLogger(appLogger)
-  
-  // Inject logger into geography components
+	svcSeller.SetLogger(appLogger)
+
+	// Inject logger into geography components
 	repoGeography.SetLogger(appLogger)
 	svcWarehouse.SetLogger(appLogger)
-	svcWarehouse.SetLogger(appLogger)
-  
+
 	svcSeller.SetLogger(appLogger)
 	svcGeography.SetLogger(appLogger)
-  
-  // Inject logger into carry components
+
+	// Inject logger into carry components
 	repoCarry.SetLogger(appLogger)
 	svcCarry.SetLogger(appLogger)
 
-  // Inject logger into buyer components
+	// Inject logger into buyer components
 	repoBuyer.SetLogger(appLogger)
 	svcBuyer.SetLogger(appLogger)
 
-  // Inject logger into purchase order components
+	// Inject logger into purchase order components
 	repoPurchaseOrder.SetLogger(appLogger)
 	svcPurchaseOrder.SetLogger(appLogger)
 
@@ -185,16 +184,15 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// Inject logger into handler
 	hdWarehouse.SetLogger(appLogger)
-  hdSection.SetLogger(appLogger)
+	hdSection.SetLogger(appLogger)
 	hdProductBatches.SetLogger(appLogger)
 	hdSeller.SetLogger(appLogger)
 	hdGeography.SetLogger(appLogger)
 	hdCarry.SetLogger(appLogger)
 	hdBuyer.SetLogger(appLogger)
 	hdPurchaseOrder.SetLogger(appLogger)
-  hdEmployee.SetLogger(appLogger)
-  hdInboundOrder.SetLogger(appLogger)
-
+	hdEmployee.SetLogger(appLogger)
+	hdInboundOrder.SetLogger(appLogger)
 
 	appLogger.Info(ctx, "server", "All handlers initialized successfully")
 

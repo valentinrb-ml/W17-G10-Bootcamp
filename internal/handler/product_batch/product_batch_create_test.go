@@ -105,6 +105,7 @@ func TestProductBatchHandler_CreateProductBatches(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			h := handler.NewProductBatchesHandler(tt.mockService())
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			h.CreateProductBatches(rec, req)
 
