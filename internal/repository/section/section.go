@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
+
 	"github.com/go-sql-driver/mysql"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
@@ -21,9 +21,14 @@ const (
 // FindAllSections retrieves all Section records from the database.
 // Returns a slice of Section or an error if the query fails.
 func (r *sectionRepository) FindAllSections(ctx context.Context) ([]models.Section, error) {
+	if r.logger != nil {
+		r.logger.Info(ctx, "section-repository", "Retrieving all sections")
+	}
 	rows, err := r.mysql.QueryContext(ctx, querySectionGetAll)
 	if err != nil {
-		fmt.Println(err)
+		if r.logger != nil {
+			r.logger.Error(ctx, "section-repository", "Failed to retrieve all sections", err)
+		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the sections.")
 	}
 	defer rows.Close()
@@ -33,12 +38,18 @@ func (r *sectionRepository) FindAllSections(ctx context.Context) ([]models.Secti
 	for rows.Next() {
 		var s models.Section
 		if err := rows.Scan(&s.Id, &s.SectionNumber, &s.CurrentCapacity, &s.CurrentTemperature, &s.MaximumCapacity, &s.MinimumCapacity, &s.MinimumTemperature, &s.ProductTypeId, &s.WarehouseId); err != nil {
+			if r.logger != nil {
+				r.logger.Error(ctx, "section-repository", "Failed to scan section", err)
+			}
 			return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the section.")
 		}
 		sections = append(sections, s)
 	}
 
 	if err := rows.Err(); err != nil {
+		if r.logger != nil {
+			r.logger.Error(ctx, "section-repository", "Failed to retrieve all sections", err)
+		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the section.")
 	}
 	return sections, nil
@@ -47,6 +58,11 @@ func (r *sectionRepository) FindAllSections(ctx context.Context) ([]models.Secti
 // FindById retrieves a Section by its id.
 // Returns a pointer to Section or error if not found.
 func (r *sectionRepository) FindById(ctx context.Context, id int) (*models.Section, error) {
+	if r.logger != nil {
+		r.logger.Info(ctx, "section-repository", "Retrieving section by id", map[string]interface{}{
+			"id": id,
+		})
+	}
 	var s models.Section
 	err := r.mysql.QueryRowContext(ctx, querySectionGetOne, id).Scan(&s.Id, &s.SectionNumber, &s.CurrentCapacity, &s.CurrentTemperature, &s.MaximumCapacity, &s.MinimumCapacity, &s.MinimumTemperature, &s.ProductTypeId, &s.WarehouseId)
 
@@ -54,7 +70,9 @@ func (r *sectionRepository) FindById(ctx context.Context, id int) (*models.Secti
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "The section you are looking for does not exist.")
 		}
-		fmt.Print(err)
+		if r.logger != nil {
+			r.logger.Error(ctx, "section-repository", "Failed to retrieve section by id", err)
+		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the section.")
 	}
 
@@ -70,10 +88,16 @@ func (r *sectionRepository) DeleteSection(ctx context.Context, id int) error {
 		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1451 {
 			return apperrors.NewAppError(apperrors.CodeConflict, "Cannot delete section: there are products batches associated with this section.")
 		}
+		if r.logger != nil {
+			r.logger.Error(ctx, "section-repository", "Failed to delete section", err)
+		}
 		return apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while deleting the section.")
 	}
 	rows, err := result.RowsAffected()
 	if err != nil {
+		if r.logger != nil {
+			r.logger.Error(ctx, "section-repository", "Failed to delete section", err)
+		}
 		return apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while deleting the section.")
 	}
 	if rows == 0 {
@@ -85,22 +109,39 @@ func (r *sectionRepository) DeleteSection(ctx context.Context, id int) error {
 // CreateSection inserts a new Section into the database, setting its Id.
 // Returns pointer to the created Section or error if validation fails.
 func (r *sectionRepository) CreateSection(ctx context.Context, sec models.Section) (*models.Section, error) {
+	if r.logger != nil {
+		r.logger.Info(ctx, "section-repository", "Creating section", map[string]interface{}{
+			"section": sec,
+		})
+	}
 	result, err := r.mysql.ExecContext(ctx, querySectionCreate,
 		sec.SectionNumber, sec.CurrentCapacity, sec.CurrentTemperature, sec.MaximumCapacity, sec.MinimumCapacity, sec.MinimumTemperature, sec.ProductTypeId, sec.WarehouseId)
 
 	if err != nil {
 		var mysqlErr *mysql.MySQLError
 		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			if r.logger != nil {
+				r.logger.Error(ctx, "section-repository", "Failed to create section", err)
+			}
 			return nil, apperrors.NewAppError(apperrors.CodeConflict, "Section number already exists.")
 		}
 		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1452 {
+			if r.logger != nil {
+				r.logger.Error(ctx, "section-repository", "Failed to create section", err)
+			}
 			return nil, apperrors.NewAppError(apperrors.CodeBadRequest, "Warehouse id or product type id does not exist.")
+		}
+		if r.logger != nil {
+			r.logger.Error(ctx, "section-repository", "Failed to create section", err)
 		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while creating the section.")
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
+		if r.logger != nil {
+			r.logger.Error(ctx, "section-repository", "Failed to get last insert id", err)
+		}
 		return nil, err
 	}
 
@@ -112,6 +153,11 @@ func (r *sectionRepository) CreateSection(ctx context.Context, sec models.Sectio
 // UpdateSection updates an existing Section by id with new data in sec.
 // Returns pointer to updated Section or error if the section does not exist or constraints fail.
 func (r *sectionRepository) UpdateSection(ctx context.Context, id int, sec *models.Section) (*models.Section, error) {
+	if r.logger != nil {
+		r.logger.Info(ctx, "section-repository", "Updating section", map[string]interface{}{
+			"section": sec,
+		})
+	}
 	result, err := r.mysql.ExecContext(ctx, querySectionUpdate,
 		sec.SectionNumber, sec.CurrentCapacity, sec.CurrentTemperature,
 		sec.MaximumCapacity, sec.MinimumCapacity, sec.MinimumTemperature,
@@ -120,17 +166,29 @@ func (r *sectionRepository) UpdateSection(ctx context.Context, id int, sec *mode
 		//constraint UNIQUE
 		var mysqlErr *mysql.MySQLError
 		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			if r.logger != nil {
+				r.logger.Error(ctx, "section-repository", "Failed to update section", err)
+			}
 			return nil, apperrors.NewAppError(apperrors.CodeConflict, "Section number already exists.")
 		}
 		// constraint FOREIGN KEY
 		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1452 {
+			if r.logger != nil {
+				r.logger.Error(ctx, "section-repository", "Failed to update section", err)
+			}
 			return nil, apperrors.NewAppError(apperrors.CodeBadRequest, "Warehouse id or product type id does not exist.")
+		}
+		if r.logger != nil {
+			r.logger.Error(ctx, "section-repository", "Failed to update section", err)
 		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while updating the section.")
 	}
 
 	rows, err := result.RowsAffected()
 	if err != nil {
+		if r.logger != nil {
+			r.logger.Error(ctx, "section-repository", "Failed to update section", err)
+		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while updating the section.")
 	}
 	if rows == 0 {

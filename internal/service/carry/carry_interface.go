@@ -6,6 +6,7 @@ import (
 	carryRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/carry"
 	geographyRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/geography"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/carry"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 )
 
 type CarryService interface {
@@ -16,6 +17,7 @@ type CarryService interface {
 type CarryDefault struct {
 	rp    carryRepo.CarryRepository
 	rpGeo geographyRepo.GeographyRepository
+	logger logger.Logger
 }
 
 func NewCarryService(rp carryRepo.CarryRepository, rpGeo geographyRepo.GeographyRepository) *CarryDefault {
@@ -23,4 +25,9 @@ func NewCarryService(rp carryRepo.CarryRepository, rpGeo geographyRepo.Geography
 		rp:    rp,
 		rpGeo: rpGeo,
 	}
+}
+
+// SetLogger allows you to inject the logger after creation
+func (s *CarryDefault) SetLogger(l logger.Logger) {
+	s.logger = l
 }

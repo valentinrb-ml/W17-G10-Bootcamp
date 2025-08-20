@@ -5,6 +5,7 @@ import (
 
 	geographyRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/geography"
 	sellerRepo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/seller"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
 
@@ -30,12 +31,16 @@ type SellerService interface {
 	// FindById retrieves a seller by their unique id.
 	// Returns the seller response or an error if not found.
 	FindById(ctx context.Context, id int) (*models.ResponseSeller, error)
+
+	// SetLogger allows injecting the logger after creation
+	SetLogger(l logger.Logger)
 }
 
 // sellerService implements the SellerService interface.
 type sellerService struct {
 	sellerRepo    sellerRepo.SellerRepository
 	geographyRepo geographyRepo.GeographyRepository
+	logger        logger.Logger
 }
 
 // NewSellerService creates a new SellerService for managing sellers.
@@ -45,4 +50,9 @@ func NewSellerService(sellerRepo sellerRepo.SellerRepository, geographyRepo geog
 		sellerRepo:    sellerRepo,
 		geographyRepo: geographyRepo,
 	}
+}
+
+// SetLogger allows you to inject the logger after creation
+func (s *sellerService) SetLogger(l logger.Logger) {
+	s.logger = l
 }
