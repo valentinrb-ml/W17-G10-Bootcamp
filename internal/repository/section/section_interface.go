@@ -3,7 +3,9 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
+
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
 
 // SectionRepository is an interface that represents a section repository
@@ -17,10 +19,16 @@ type SectionRepository interface {
 
 // sectionRepository implements SectionRepository using MySQL as the data source.
 type sectionRepository struct {
-	mysql *sql.DB
+	mysql  *sql.DB
+	logger logger.Logger
+}
+
+// SetLogger allows you to inject the logger after creation
+func (s *sectionRepository) SetLogger(l logger.Logger) {
+	s.logger = l
 }
 
 // NewSectionMap is a function that returns a new instance of SectionMap
 func NewSectionRepository(db *sql.DB) SectionRepository {
-	return &sectionRepository{db}
+	return &sectionRepository{mysql: db}
 }
