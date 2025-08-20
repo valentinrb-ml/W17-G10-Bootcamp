@@ -3,6 +3,7 @@ package mocks
 import (
 	"context"
 
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
@@ -14,6 +15,7 @@ type PurchaseOrderRepositoryMock struct {
 	FuncExistsOrderNumber       func(ctx context.Context, orderNumber string) bool
 	FuncGetCountByBuyer         func(ctx context.Context, buyerID int) ([]models.BuyerWithPurchaseCount, error)
 	FuncGetAllWithPurchaseCount func(ctx context.Context) ([]models.BuyerWithPurchaseCount, error)
+	FuncSetLogger               func(l logger.Logger)
 }
 
 func (m *PurchaseOrderRepositoryMock) Create(ctx context.Context, po models.PurchaseOrder) (*models.PurchaseOrder, error) {
@@ -56,4 +58,10 @@ func (m *PurchaseOrderRepositoryMock) GetAllWithPurchaseCount(ctx context.Contex
 		return m.FuncGetAllWithPurchaseCount(ctx)
 	}
 	return nil, nil
+}
+
+func (m *PurchaseOrderRepositoryMock) SetLogger(l logger.Logger) {
+	if m.FuncSetLogger != nil {
+		m.FuncSetLogger(l)
+	}
 }

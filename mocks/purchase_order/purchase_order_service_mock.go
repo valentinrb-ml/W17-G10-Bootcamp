@@ -3,6 +3,7 @@ package mocks
 import (
 	"context"
 
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
@@ -12,6 +13,7 @@ type PurchaseOrderServiceMock struct {
 	GetAllFn           func(ctx context.Context) ([]models.ResponsePurchaseOrder, error)
 	GetByIDFn          func(ctx context.Context, id int) (*models.ResponsePurchaseOrder, error)
 	GetReportByBuyerFn func(ctx context.Context, buyerID *int) ([]models.BuyerWithPurchaseCount, error)
+	SetLoggerFn        func(l logger.Logger)
 }
 
 func (m *PurchaseOrderServiceMock) Create(ctx context.Context, req models.RequestPurchaseOrder) (*models.ResponsePurchaseOrder, error) {
@@ -28,4 +30,10 @@ func (m *PurchaseOrderServiceMock) GetByID(ctx context.Context, id int) (*models
 
 func (m *PurchaseOrderServiceMock) GetReportByBuyer(ctx context.Context, buyerID *int) ([]models.BuyerWithPurchaseCount, error) {
 	return m.GetReportByBuyerFn(ctx, buyerID)
+}
+
+func (m *PurchaseOrderServiceMock) SetLogger(l logger.Logger) {
+	if m.SetLoggerFn != nil {
+		m.SetLoggerFn(l)
+	}
 }

@@ -3,6 +3,7 @@ package mocks
 import (
 	"context"
 
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
@@ -15,6 +16,7 @@ type BuyerRepositoryMocks struct {
 	MockUpdate           func(ctx context.Context, id int, b models.Buyer) error
 	MockDelete           func(ctx context.Context, id int) error
 	MockCardNumberExists func(ctx context.Context, cardNumber string, id int) bool
+	MockSetLogger        func(l logger.Logger)
 }
 
 func (m *BuyerRepositoryMocks) Create(ctx context.Context, b models.Buyer) (*models.Buyer, error) {
@@ -47,4 +49,10 @@ func (m *BuyerRepositoryMocks) Delete(ctx context.Context, id int) error {
 
 func (m *BuyerRepositoryMocks) CardNumberExists(ctx context.Context, cardNumber string, id int) bool {
 	return m.MockCardNumberExists(ctx, cardNumber, id)
+}
+
+func (m *BuyerRepositoryMocks) SetLogger(l logger.Logger) {
+	if m.MockSetLogger != nil {
+		m.MockSetLogger(l)
+	}
 }
