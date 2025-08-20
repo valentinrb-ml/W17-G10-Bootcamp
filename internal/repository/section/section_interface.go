@@ -15,6 +15,7 @@ type SectionRepository interface {
 	DeleteSection(ctx context.Context, id int) error
 	CreateSection(ctx context.Context, sec models.Section) (*models.Section, error)
 	UpdateSection(ctx context.Context, id int, sec *models.Section) (*models.Section, error)
+	SetLogger(logger logger.Logger)
 }
 
 // sectionRepository implements SectionRepository using MySQL as the data source.
@@ -23,12 +24,12 @@ type sectionRepository struct {
 	logger logger.Logger
 }
 
-// SetLogger allows you to inject the logger after creation
-func (s *sectionRepository) SetLogger(l logger.Logger) {
-	s.logger = l
-}
-
 // NewSectionMap is a function that returns a new instance of SectionMap
 func NewSectionRepository(db *sql.DB) SectionRepository {
 	return &sectionRepository{mysql: db}
+}
+
+// SetLogger allows you to inject the logger after creation
+func (s *sectionRepository) SetLogger(l logger.Logger) {
+	s.logger = l
 }

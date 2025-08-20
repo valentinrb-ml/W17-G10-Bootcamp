@@ -13,6 +13,7 @@ type ProductBatchesRepository interface {
 	CreateProductBatches(ctx context.Context, proBa models.ProductBatches) (*models.ProductBatches, error)
 	GetReportProductById(ctx context.Context, id int) (*models.ReportProduct, error)
 	GetReportProduct(ctx context.Context) ([]models.ReportProduct, error)
+	SetLogger(logger logger.Logger)
 }
 
 // productBatchesRepository is the implementation of ProductBatchesRepository using MySQL.

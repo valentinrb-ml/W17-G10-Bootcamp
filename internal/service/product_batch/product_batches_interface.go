@@ -13,6 +13,7 @@ type ProductBatchesService interface {
 	CreateProductBatches(ctx context.Context, proBa models.ProductBatches) (*models.ProductBatches, error)
 	GetReportProductById(ctx context.Context, sectionNumber int) (*models.ReportProduct, error)
 	GetReportProduct(ctx context.Context) ([]models.ReportProduct, error)
+	SetLogger(l logger.Logger)
 }
 
 // productBatchesService implements ProductBatchesService using a repository.
