@@ -133,9 +133,6 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// Inject logger into geography components
 	repoGeography.SetLogger(appLogger)
-	svcWarehouse.SetLogger(appLogger)
-
-	svcSeller.SetLogger(appLogger)
 	svcGeography.SetLogger(appLogger)
 
 	// Inject logger into carry components
@@ -165,6 +162,14 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	// Inject logger into inbound_order components
 	repoInboundOrder.SetLogger(appLogger)
 	svcInboundOrder.SetLogger(appLogger)
+  
+  // Inject logger into product components
+  repoProduct.SetLogger(appLogger)
+  svcProduct.SetLogger(appLogger)
+  
+  // Inject logger into product record components
+  repoProductRecord.SetLogger(appLogger)
+	svcProductRecord.SetLogger(appLogger)
 
 	appLogger.Info(ctx, "server", "All services initialized successfully")
 
@@ -189,6 +194,8 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdSeller.SetLogger(appLogger)
 	hdGeography.SetLogger(appLogger)
 	hdCarry.SetLogger(appLogger)
+	hdProduct.SetLogger(appLogger)
+	hdProductRecord.SetLogger(appLogger)
 	hdBuyer.SetLogger(appLogger)
 	hdPurchaseOrder.SetLogger(appLogger)
 	hdEmployee.SetLogger(appLogger)
