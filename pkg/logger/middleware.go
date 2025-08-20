@@ -2,12 +2,12 @@ package logger
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/google/uuid"
 )
 
 // LoggingMiddleware creates a complete middleware for HTTP request logging
@@ -16,13 +16,8 @@ func LoggingMiddleware(logger Logger) func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 
-			// Generate a unique request ID
-			requestID := middleware.GetReqID(r.Context())
-			if requestID == "" {
-				requestID = fmt.Sprintf("%d", time.Now().UnixNano())
-			}
-
-			// Extract request information
+			// Generate a unique request ID using UUID v4
+			requestID := uuid.New().String() // Extract request information
 			method := r.Method
 			endpoint := r.URL.Path
 			service := getServiceFromEndpoint(endpoint)
@@ -48,6 +43,9 @@ func LoggingMiddleware(logger Logger) func(next http.Handler) http.Handler {
 
 			// Create wrapper to capture status code
 			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
+
+			// Add Request ID to response header
+			ww.Header().Set("X-Request-ID", requestID)
 
 			// Execute the handler
 			next.ServeHTTP(ww, r)

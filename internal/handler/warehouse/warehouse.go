@@ -41,7 +41,7 @@ func (h *WarehouseHandler) Create(w http.ResponseWriter, r *http.Request) {
 				"error": err.Error(),
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -52,7 +52,7 @@ func (h *WarehouseHandler) Create(w http.ResponseWriter, r *http.Request) {
 				"validation_error": err.Error(),
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -65,7 +65,7 @@ func (h *WarehouseHandler) Create(w http.ResponseWriter, r *http.Request) {
 				"warehouse_code": req.WarehouseCode,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -76,13 +76,22 @@ func (h *WarehouseHandler) Create(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	response.JSON(w, http.StatusCreated, mappers.WarehouseToDoc(newW))
+	// Get request ID from context to include in response
+	requestID, _ := r.Context().Value("request_id").(string)
+
+	responseData := mappers.WarehouseToDoc(newW)
+	if requestID != "" {
+		// You could add request_id to the response if needed
+		// responseData["request_id"] = requestID
+	}
+
+	response.JSON(w, http.StatusCreated, responseData)
 }
 
 func (h *WarehouseHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 	whs, err := h.sv.FindAll(r.Context())
 	if err != nil {
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -94,13 +103,13 @@ func (h *WarehouseHandler) FindById(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		err := apperrors.NewAppError(apperrors.CodeBadRequest, "Invalid id")
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
 	wh, er := h.sv.FindById(r.Context(), id)
 	if er != nil {
-		response.Error(w, er)
+		response.ErrorWithRequest(w, r, er)
 		return
 	}
 
@@ -113,19 +122,19 @@ func (h *WarehouseHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		err := apperrors.NewAppError(apperrors.CodeBadRequest, "Invalid id")
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
 	var req warehouse.WarehousePatchDTO
 	if err := request.JSON(r, &req); err != nil {
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
 	updated, serviceErr := h.sv.Update(r.Context(), id, req)
 	if serviceErr != nil {
-		response.Error(w, serviceErr)
+		response.ErrorWithRequest(w, r, serviceErr)
 		return
 	}
 
@@ -142,7 +151,7 @@ func (h *WarehouseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 		err := apperrors.NewAppError(apperrors.CodeBadRequest, "Invalid id")
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -159,7 +168,7 @@ func (h *WarehouseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 				"warehouse_id": id,
 			})
 		}
-		response.Error(w, serviceErr)
+		response.ErrorWithRequest(w, r, serviceErr)
 		return
 	}
 
