@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/seller"
 )
 
@@ -29,11 +30,15 @@ type SellerRepository interface {
 	// FindById fetches a seller record by its unique id.
 	// Returns the seller model or an error if the seller is not found.
 	FindById(ctx context.Context, id int) (*models.Seller, error)
+
+	// SetLogger allows injecting the logger after creation
+	SetLogger(l logger.Logger)
 }
 
 // sellerRepository implements the SellerRepository interface using a MySQL backend.
 type sellerRepository struct {
-	mysql *sql.DB
+	mysql  *sql.DB
+	logger logger.Logger
 }
 
 // NewSellerRepository creates a new SellerRepository backed by MySQL.
@@ -41,4 +46,9 @@ func NewSellerRepository(mysql *sql.DB) SellerRepository {
 	return &sellerRepository{
 		mysql: mysql,
 	}
+}
+
+// SetLogger allows you to inject the logger after creation
+func (s *sellerRepository) SetLogger(l logger.Logger) {
+	s.logger = l
 }
