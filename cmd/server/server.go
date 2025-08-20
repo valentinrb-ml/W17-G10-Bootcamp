@@ -155,6 +155,8 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdWarehouse.SetLogger(appLogger)
 	// Inject logger into employee handler
 	hdEmployee.SetLogger(appLogger)
+	// Inject logger into inbound_order handler
+	hdInboundOrder.SetLogger(appLogger)
 
 	appLogger.Info(ctx, "server", "All handlers initialized successfully")
 
