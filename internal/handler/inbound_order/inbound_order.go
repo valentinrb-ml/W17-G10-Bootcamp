@@ -38,7 +38,7 @@ func (h *InboundOrderHandler) Create(w http.ResponseWriter, r *http.Request) {
 				"error": err.Error(),
 			})
 		}
-		response.Error(w, apperrors.NewAppError(apperrors.CodeValidationError, "invalid JSON format"))
+		response.ErrorWithRequest(w, r, apperrors.NewAppError(apperrors.CodeValidationError, "invalid JSON format"))
 		return
 	}
 	created, err := h.service.Create(r.Context(), &payload.Data)
@@ -46,7 +46,7 @@ func (h *InboundOrderHandler) Create(w http.ResponseWriter, r *http.Request) {
 		if h.logger != nil {
 			h.logger.Error(r.Context(), "inboundorder-handler", "Failed to create inbound order", err)
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 	if h.logger != nil {
@@ -71,7 +71,7 @@ func (h *InboundOrderHandler) Report(w http.ResponseWriter, r *http.Request) {
 					"id_param": idStr,
 				})
 			}
-			response.Error(w, apperrors.NewAppError(apperrors.CodeBadRequest, "id must be int"))
+			response.ErrorWithRequest(w, r, apperrors.NewAppError(apperrors.CodeBadRequest, "id must be int"))
 			return
 		}
 		idPtr = &id
@@ -82,7 +82,7 @@ func (h *InboundOrderHandler) Report(w http.ResponseWriter, r *http.Request) {
 			h.logger.Error(r.Context(), "inboundorder-handler", "Failed to generate inbound order report", err)
 		}
 
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 	if h.logger != nil {

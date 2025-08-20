@@ -40,7 +40,7 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 				"error": err.Error(),
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 	// Construye el objeto empleado a partir de la request
@@ -62,7 +62,7 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 				"card_number_id": emp.CardNumberID,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 	if h.logger != nil {
@@ -86,7 +86,7 @@ func (h *EmployeeHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		if h.logger != nil {
 			h.logger.Error(r.Context(), "employee-handler", "Failed to fetch all employees", err)
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 	if h.logger != nil {
@@ -121,7 +121,7 @@ func (h *EmployeeHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 				"id_param": idParam,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 	emp, err := h.service.FindByID(r.Context(), id)
@@ -131,7 +131,7 @@ func (h *EmployeeHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 				"employee_id": id,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 	if h.logger != nil {
@@ -158,7 +158,7 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request) {
 				"id_param": idParam,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 	var patch models.EmployeePatch
@@ -171,7 +171,7 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request) {
 				"employee_id": id,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 	updated, err := h.service.Update(r.Context(), id, &patch)
@@ -181,7 +181,7 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request) {
 				"employee_id": id,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 	if h.logger != nil {
@@ -208,7 +208,7 @@ func (h *EmployeeHandler) Delete(w http.ResponseWriter, r *http.Request) {
 				"id_param": idParam,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 	if err := h.service.Delete(r.Context(), id); err != nil {
@@ -217,7 +217,7 @@ func (h *EmployeeHandler) Delete(w http.ResponseWriter, r *http.Request) {
 				"employee_id": id,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 	if h.logger != nil {
