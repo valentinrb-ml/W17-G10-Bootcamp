@@ -68,6 +68,7 @@ func TestPurchaseOrderRepository_GetCountByBuyer(t *testing.T) {
 
 			tt.setup(mock)
 			repo := repository.NewPurchaseOrderRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			got, err := repo.GetCountByBuyer(context.Background(), tt.argBuyerID)
 

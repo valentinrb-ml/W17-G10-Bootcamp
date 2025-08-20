@@ -177,6 +177,7 @@ func TestProductBatchesRepository_CreateProductBatches(t *testing.T) {
 			require.NoError(t, err)
 			defer db.Close()
 			repo := repository.NewProductBatchesRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			tc.arrange.dbMock(mock)
 

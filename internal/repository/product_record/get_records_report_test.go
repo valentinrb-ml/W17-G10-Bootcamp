@@ -60,6 +60,7 @@ func TestProductRecordRepository_GetRecordsReport(t *testing.T) {
 
 			tc.mockSetup(mock)
 
+			repo.SetLogger(testhelpers.NewTestLogger())
 			reports, err := repo.GetRecordsReport(context.Background(), tc.productID)
 
 			if tc.wantApp != "" {

@@ -71,6 +71,7 @@ func TestProductHandler_GetByID(t *testing.T) {
 			tc.mockSetup(svc)
 
 			h := handler.NewProductHandler(svc)
+			h.SetLogger(testhelpers.NewTestLogger())
 			req := testhelpers.NewRequest(t, http.MethodGet, "/products/"+tc.param, nil)
 			req = withIDParam(req, tc.param)
 

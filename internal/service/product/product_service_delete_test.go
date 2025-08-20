@@ -10,6 +10,7 @@ import (
 	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/product"
 	productmock "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/product"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestProductService_Delete(t *testing.T) {
@@ -45,6 +46,8 @@ func TestProductService_Delete(t *testing.T) {
 			tc.mockFn(repo)
 
 			svc := service.NewProductService(repo)
+			svc.SetLogger(testhelpers.NewTestLogger())
+
 			err := svc.Delete(context.Background(), 8)
 
 			if tc.wantErr {

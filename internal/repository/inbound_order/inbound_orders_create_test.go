@@ -92,6 +92,7 @@ func TestInboundOrderRepository_Create(t *testing.T) {
 			// Configura el mock según el caso
 			tc.mockSetup(mock)
 			repository := repo.NewInboundOrderRepository(db)
+			repository.SetLogger(testhelpers.NewTestLogger())
 			ctx := context.Background()
 			// Ejecuta el método Create
 			res, err := repository.Create(ctx, tc.input)

@@ -7,10 +7,10 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
+	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestWarehouseMySQL_FindAll(t *testing.T) {
@@ -167,6 +167,7 @@ func TestWarehouseMySQL_FindAll(t *testing.T) {
 			mock, db := tc.arrange.dbMock()
 			defer db.Close()
 			repo := repository.NewWarehouseRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			// act
 			result, err := repo.FindAll(tc.input.context)

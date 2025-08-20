@@ -76,6 +76,7 @@ func TestInboundOrderService_Report(t *testing.T) {
 			empRepo := &employeeMocks.EmployeeRepositoryMock{}
 			whRepo := &warehouseMocks.WarehouseRepositoryMock{}
 			svc := service.NewInboundOrderService(repo, empRepo, whRepo)
+			svc.SetLogger(testhelpers.NewTestLogger())
 
 			// Ejecuta el método Report
 			result, err := svc.Report(context.Background(), tc.employeeID)

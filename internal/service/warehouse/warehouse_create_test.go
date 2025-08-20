@@ -6,10 +6,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/warehouse"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/warehouse"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
+	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/warehouse"
+	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestWarehouseDefault_Create(t *testing.T) {
@@ -63,6 +63,7 @@ func TestWarehouseDefault_Create(t *testing.T) {
 			// arrange
 			mockRepo := tc.arrange.mockRepo()
 			srv := service.NewWarehouseService(mockRepo)
+			srv.SetLogger(testhelpers.NewTestLogger())
 
 			// act
 			result, err := srv.Create(tc.input.context, tc.input.warehouse)

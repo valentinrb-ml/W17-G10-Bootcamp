@@ -65,6 +65,7 @@ func TestProductRepository_GetByID(t *testing.T) {
 			tc.setup(mock, prepSel)
 
 			repo, _ := NewProductRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 			_, err := repo.GetByID(context.Background(), tc.id)
 
 			if tc.wantErr {

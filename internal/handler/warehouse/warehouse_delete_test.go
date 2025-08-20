@@ -12,6 +12,7 @@ import (
 	handler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/warehouse"
 	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestWarehouseHandler_Delete(t *testing.T) {
@@ -152,6 +153,7 @@ func TestWarehouseHandler_Delete(t *testing.T) {
 			// arrange
 			mockService := tc.arrange.mockService()
 			handler := handler.NewWarehouseHandler(mockService)
+			handler.SetLogger(testhelpers.NewTestLogger())
 
 			// Configure router with ID parameter
 			router := chi.NewRouter()

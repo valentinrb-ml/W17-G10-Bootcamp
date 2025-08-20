@@ -137,6 +137,7 @@ func TestCarryHandler_ReportCarries(t *testing.T) {
 			// arrange
 			mockService := tc.arrange.mockService()
 			handler := handler.NewCarryHandler(mockService)
+			handler.SetLogger(testhelpers.NewTestLogger())
 
 			// Configure router
 			router := chi.NewRouter()

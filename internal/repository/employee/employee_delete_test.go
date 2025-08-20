@@ -73,6 +73,7 @@ func TestEmployeeRepository_Delete(t *testing.T) {
 			// Configura el escenario de query esperado para el caso
 			tc.mockSetup(mock)
 			repo := repo.NewEmployeeRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 			ctx := context.Background()
 			// Ejecuta el método Delete
 			err := repo.Delete(ctx, tc.inputID)

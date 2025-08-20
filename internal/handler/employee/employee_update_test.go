@@ -66,6 +66,7 @@ func TestEmployeeHandler_Update(t *testing.T) {
 				MockUpdate: tc.mockUpdateFn,
 			}
 			h := handler.NewEmployeeHandler(mockSvc)
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			// Genera el body del PATCH como JSON usando lo que se va a actualizar
 			patchBody, _ := json.Marshal(tc.patch)

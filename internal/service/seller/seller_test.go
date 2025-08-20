@@ -22,6 +22,7 @@ func TestSellerService_Create_Success(t *testing.T) {
 	svc := service.NewSellerService(mockRepo, nil)
 
 	req := testhelpers.DummyRequestSeller()
+	svc.SetLogger(testhelpers.NewTestLogger())
 	expected := testhelpers.DummyResponseSeller()
 
 	resp, err := svc.Create(context.Background(), req)
@@ -40,6 +41,7 @@ func TestSellerService_Update_Success(t *testing.T) {
 		},
 	}
 	svc := service.NewSellerService(mockRepo, nil)
+	svc.SetLogger(testhelpers.NewTestLogger())
 
 	req := testhelpers.DummyRequestSeller()
 	expected := testhelpers.DummyResponseSeller()
@@ -56,6 +58,7 @@ func TestSellerService_Delete_Success(t *testing.T) {
 		},
 	}
 	svc := service.NewSellerService(mockRepo, nil)
+	svc.SetLogger(testhelpers.NewTestLogger())
 
 	err := svc.Delete(context.Background(), 1)
 	require.NoError(t, err)
@@ -68,6 +71,7 @@ func TestSellerService_FindAll_Success(t *testing.T) {
 		},
 	}
 	svc := service.NewSellerService(mockRepo, nil)
+	svc.SetLogger(testhelpers.NewTestLogger())
 
 	expected := []models.ResponseSeller{testhelpers.DummyResponseSeller()}
 
@@ -84,6 +88,7 @@ func TestSellerService_FindById_Success(t *testing.T) {
 		},
 	}
 	svc := service.NewSellerService(mockRepo, nil)
+	svc.SetLogger(testhelpers.NewTestLogger())
 
 	expected := testhelpers.DummyResponseSeller()
 	resp, err := svc.FindById(context.Background(), 1)

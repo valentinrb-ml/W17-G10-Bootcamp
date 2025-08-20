@@ -106,6 +106,7 @@ func TestSellerHandler_Create(t *testing.T) {
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 			h := handler.NewSellerHandler(tt.mockService())
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			// Call handler
 			h.Create(rec, req)

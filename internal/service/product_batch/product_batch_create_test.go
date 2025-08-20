@@ -57,6 +57,7 @@ func TestProductBatchesService_CreateProductBatches(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			svc := service.NewProductBatchesService(tc.arrange.repoMock())
+			svc.SetLogger(testhelpers.NewTestLogger())
 
 			result, err := svc.CreateProductBatches(context.Background(), tc.input.batch)
 

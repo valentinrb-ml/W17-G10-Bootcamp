@@ -84,6 +84,7 @@ func TestBuyerHandler_FindAll(t *testing.T) {
 			require.NoError(t, err)
 			rec := httptest.NewRecorder()
 			h := handler.NewBuyerHandler(tt.mockService())
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			h.FindAll(rec, req)
 

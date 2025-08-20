@@ -62,6 +62,7 @@ func TestPurchaseOrderService_GetAll(t *testing.T) {
 			},
 		}
 		service := service.NewPurchaseOrderService(repoMock)
+		service.SetLogger(testhelpers.NewTestLogger())
 
 		// Execute
 		_, err := service.GetAll(context.Background())

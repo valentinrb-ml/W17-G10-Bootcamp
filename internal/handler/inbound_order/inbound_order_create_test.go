@@ -65,6 +65,7 @@ func TestInboundOrderHandler_Create(t *testing.T) {
 			// Inyectamos el mock del servicio en el handler
 			mockSvc := &inboundOrderMocks.InboundOrderServiceMock{MockCreate: tc.mockCreateFn}
 			h := handler.NewInboundOrderHandler(mockSvc)
+			h.SetLogger(testhelpers.NewTestLogger())
 			// Marshal el payload en el formato recibido por el handler
 			body, _ := json.Marshal(map[string]interface{}{"data": tc.payload})
 			req := httptest.NewRequest("POST", "/api/v1/inboundOrders", bytes.NewReader(body))

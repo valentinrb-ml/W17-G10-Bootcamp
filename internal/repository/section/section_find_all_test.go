@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"testing"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
+	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
-	"testing"
 )
 
 func TestSectionRepository_FindAllSections(t *testing.T) {
@@ -122,6 +123,7 @@ func TestSectionRepository_FindAllSections(t *testing.T) {
 			require.NoError(t, err)
 			defer db.Close()
 			repo := repository.NewSectionRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			tc.arrange.dbMock(mock)
 

@@ -19,6 +19,7 @@ func TestBuyerService_FindById(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 1
 		expectedBuyer := testhelpers.CreateTestBuyerWithID(buyerID)
@@ -46,6 +47,7 @@ func TestBuyerService_FindById(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 999
 		expectedError := errors.New("buyer not found")
@@ -69,6 +71,7 @@ func TestBuyerService_FindById(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 1
 		expectedError := errors.New("database connection failed")
@@ -92,6 +95,7 @@ func TestBuyerService_FindById(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 0
 		expectedError := errors.New("invalid ID")
@@ -115,6 +119,7 @@ func TestBuyerService_FindById(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := -1
 		expectedError := errors.New("invalid ID")
@@ -138,6 +143,7 @@ func TestBuyerService_FindById(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 123
 		expectedBuyer := &models.Buyer{
@@ -169,6 +175,7 @@ func TestBuyerService_FindById(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 1
 
@@ -189,6 +196,7 @@ func TestBuyerService_FindById(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		testCases := []struct {
 			id           int

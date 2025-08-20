@@ -11,6 +11,7 @@ import (
 	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/purchase_order"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestPurchaseOrderService_Create(t *testing.T) {
@@ -101,6 +102,7 @@ func TestPurchaseOrderService_Create(t *testing.T) {
 		// Setup
 		repoMock := &mocks.PurchaseOrderRepositoryMock{}
 		service := service.NewPurchaseOrderService(repoMock)
+		service.SetLogger(testhelpers.NewTestLogger())
 
 		futureDate := time.Now().AddDate(0, 0, 1).Format("2006-01-02")
 		req := models.RequestPurchaseOrder{

@@ -12,7 +12,7 @@ import (
 
 	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/geography"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/geography"
-	testhelpers "github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 const (
@@ -299,6 +299,7 @@ func TestGeographyRepository_CountSellersGroupedByLocality(t *testing.T) {
 
 			tt.setup(mock)
 			repo := repository.NewGeographyRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 			got, err := repo.CountSellersGroupedByLocality(context.Background())
 			if tt.wantErr {
 				require.Error(t, err)

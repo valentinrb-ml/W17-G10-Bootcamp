@@ -106,6 +106,7 @@ func TestGeographyHandler_Create(t *testing.T) {
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 			h := handler.NewGeographyHandler(tt.mockService())
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			h.Create(rec, req)
 			require.Equal(t, tt.wantStatus, rec.Code)

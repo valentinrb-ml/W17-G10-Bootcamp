@@ -107,6 +107,7 @@ func TestGeographyHandler_CountSellersByLocality(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/localities/reportSellers"+tt.query, nil)
 			rec := httptest.NewRecorder()
 			h := handler.NewGeographyHandler(tt.mockService())
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			h.CountSellersByLocality(rec, req)
 			require.Equal(t, tt.wantStatus, rec.Code)

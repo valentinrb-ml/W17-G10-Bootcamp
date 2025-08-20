@@ -130,6 +130,7 @@ func TestBuyerRepository_Create(t *testing.T) {
 			mock, db := tc.arrange.dbMock(tc.input.buyer)
 			defer db.Close()
 			repo := repository.NewBuyerRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			// Act
 			result, err := repo.Create(tc.input.ctx, tc.input.buyer)

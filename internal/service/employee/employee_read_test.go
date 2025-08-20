@@ -124,6 +124,7 @@ func TestEmployeeService_FindByID_errors(t *testing.T) {
 	repo := &employeeMocks.EmployeeRepositoryMock{}
 	whRepo := &warehouseMocks.WarehouseRepositoryMock{}
 	svc := service.NewEmployeeDefault(repo, whRepo)
+	svc.SetLogger(testhelpers.NewTestLogger())
 
 	// ID inválido (<=0)
 	res, err := svc.FindByID(context.Background(), 0)

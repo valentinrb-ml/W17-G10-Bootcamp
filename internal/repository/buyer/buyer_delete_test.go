@@ -126,6 +126,7 @@ func TestBuyerRepository_Delete(t *testing.T) {
 			mock, db := tc.arrange.dbMock(tc.input.id)
 			defer db.Close()
 			repo := repository.NewBuyerRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			// Act
 			err := repo.Delete(tc.input.ctx, tc.input.id)

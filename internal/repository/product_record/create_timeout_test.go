@@ -16,6 +16,7 @@ func TestCreate_ContextTimeout(t *testing.T) {
 	t.Parallel()
 
 	repo, _, cleanup := testhelpers.NewProductRecordRepoMock(t)
+	repo.SetLogger(testhelpers.NewTestLogger())
 	defer cleanup()
 
 	// ctx expires instantly

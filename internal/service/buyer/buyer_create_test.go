@@ -25,6 +25,7 @@ func TestBuyerService_Create(t *testing.T) {
 			},
 		}
 		service := service.NewBuyerService(mockRepo)
+		service.SetLogger(testhelpers.NewTestLogger())
 		//service := NewBuyerService(mockRepo)
 
 		req := testhelpers.DummyRequestBuyer()
@@ -63,6 +64,7 @@ func TestBuyerService_Create(t *testing.T) {
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		//service := NewBuyerService(mockRepo)
 		service := service.NewBuyerService(mockRepo)
+		service.SetLogger(testhelpers.NewTestLogger())
 
 		req := testhelpers.DummyRequestBuyer()
 
@@ -98,6 +100,7 @@ func TestBuyerService_Create(t *testing.T) {
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		//service := NewBuyerService(mockRepo)}
 		service := service.NewBuyerService(mockRepo)
+		service.SetLogger(testhelpers.NewTestLogger())
 
 		req := testhelpers.DummyRequestBuyer()
 		expectedError := errors.New("database connection failed")
@@ -125,6 +128,7 @@ func TestBuyerService_Create(t *testing.T) {
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		//service := NewBuyerService(mockRepo)
 		service := service.NewBuyerService(mockRepo)
+		service.SetLogger(testhelpers.NewTestLogger())
 
 		// Create request with nil CardNumberId (this should cause issues)
 		req := models.RequestBuyer{
@@ -147,6 +151,7 @@ func TestBuyerService_Create(t *testing.T) {
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		//service := NewBuyerService(mockRepo)
 		service := service.NewBuyerService(mockRepo)
+		service.SetLogger(testhelpers.NewTestLogger())
 
 		cardNumber := "CARD-999"
 		firstName := "Alice"

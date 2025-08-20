@@ -84,6 +84,7 @@ func TestSellerRepository_FindAll(t *testing.T) {
 			defer db.Close()
 			tt.mock(mock)
 			repo := repository.NewSellerRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			got, err := repo.FindAll(context.Background())
 

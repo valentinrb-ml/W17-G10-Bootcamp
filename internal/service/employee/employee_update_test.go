@@ -291,6 +291,7 @@ func TestEmployeeService_Update_extraCases(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			svc := service.NewEmployeeDefault(tc.repoMock(), tc.whMock())
+			svc.SetLogger(testhelpers.NewTestLogger())
 			res, err := svc.Update(context.Background(), tc.id, tc.patch)
 			if tc.wantErrCode != "" {
 				require.Error(t, err)

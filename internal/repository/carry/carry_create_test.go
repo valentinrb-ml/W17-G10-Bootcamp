@@ -155,8 +155,8 @@ func TestCarryRepository_Create(t *testing.T) {
 			// arrange
 			mock, db := tc.arrange.dbMock()
 			defer db.Close()
-
 			repo := repository.NewCarryRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			// act
 			result, err := repo.Create(tc.input.context, tc.input.carry)

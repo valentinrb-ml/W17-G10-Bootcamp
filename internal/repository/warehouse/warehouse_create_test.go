@@ -8,10 +8,10 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
+	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestWarehouseMySQL_Create(t *testing.T) {
@@ -48,11 +48,11 @@ func TestWarehouseMySQL_Create(t *testing.T) {
 			},
 			input: input{
 				warehouse: testhelpers.CreateTestWarehouse(),
-				context: context.Background(),
+				context:   context.Background(),
 			},
 			output: output{
 				warehouse: testhelpers.CreateExpectedWarehouse(1),
-				err: nil,
+				err:       nil,
 			},
 		},
 		{
@@ -74,7 +74,7 @@ func TestWarehouseMySQL_Create(t *testing.T) {
 			},
 			input: input{
 				warehouse: testhelpers.CreateTestWarehouse(),
-				context: context.Background(),
+				context:   context.Background(),
 			},
 			output: output{
 				warehouse: nil,
@@ -86,7 +86,7 @@ func TestWarehouseMySQL_Create(t *testing.T) {
 			arrange: arrange{
 				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
 					mock, db := testhelpers.CreateMockDB()
-					
+
 					mock.ExpectExec("INSERT INTO warehouse").
 						WithArgs("WH001", "123 Main St", 10.5, 1000, "5551234567", "LOC001").
 						WillReturnError(sql.ErrConnDone)
@@ -95,7 +95,7 @@ func TestWarehouseMySQL_Create(t *testing.T) {
 			},
 			input: input{
 				warehouse: testhelpers.CreateTestWarehouse(),
-				context: context.Background(),
+				context:   context.Background(),
 			},
 			output: output{
 				warehouse: nil,
@@ -119,7 +119,7 @@ func TestWarehouseMySQL_Create(t *testing.T) {
 			},
 			input: input{
 				warehouse: testhelpers.CreateTestWarehouse(),
-				context: context.Background(),
+				context:   context.Background(),
 			},
 			output: output{
 				warehouse: nil,
@@ -135,6 +135,7 @@ func TestWarehouseMySQL_Create(t *testing.T) {
 			mock, db := tc.arrange.dbMock()
 			defer db.Close()
 			repo := repository.NewWarehouseRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			// act
 			result, err := repo.Create(tc.input.context, tc.input.warehouse)

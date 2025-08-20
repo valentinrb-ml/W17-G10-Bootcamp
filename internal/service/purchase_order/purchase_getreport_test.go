@@ -105,6 +105,7 @@ func TestPurchaseOrderService_GetReportByBuyer(t *testing.T) {
 			},
 		}
 		service := service.NewPurchaseOrderService(repoMock)
+		service.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 999
 

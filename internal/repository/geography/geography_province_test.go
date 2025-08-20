@@ -148,6 +148,7 @@ func TestGeographyRepository_FindProvinceByName(t *testing.T) {
 
 			tt.setup(mock)
 			repo := repository.NewGeographyRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			got, err := repo.FindProvinceByName(context.Background(), tt.argName, tt.argCountryId)
 			if !tt.wantErr {

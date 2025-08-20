@@ -95,6 +95,7 @@ func TestBuyerRepository_FindById(t *testing.T) {
 			mock, db := tc.arrange.dbMock(tc.arrange.id)
 			defer db.Close()
 			repo := repository.NewBuyerRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			// Act
 			buyer, err := repo.FindById(context.Background(), tc.arrange.id)

@@ -77,8 +77,8 @@ func TestProductRecordService_Create(t *testing.T) {
 
 			repoMock := &productrecordmock.MockProductRecordRepository{}
 			tc.mockSetup(repoMock)
-
 			svc := service.NewProductRecordService(repoMock)
+			svc.SetLogger(testhelpers.NewTestLogger())
 
 			got, err := svc.Create(context.Background(), tc.input)
 

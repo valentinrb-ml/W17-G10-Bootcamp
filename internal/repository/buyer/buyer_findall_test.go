@@ -124,6 +124,7 @@ func TestBuyerRepository_FindAll(t *testing.T) {
 			mock, db := tc.arrange.dbMock(testBuyers)
 			defer db.Close()
 			repo := repository.NewBuyerRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			// Act
 			buyers, err := repo.FindAll(context.Background())

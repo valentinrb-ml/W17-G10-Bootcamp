@@ -66,6 +66,7 @@ func TestPurchaseOrderRepository_GetAll(t *testing.T) {
 
 			tt.setup(mock)
 			repo := repository.NewPurchaseOrderRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			got, err := repo.GetAll(context.Background())
 

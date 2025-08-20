@@ -113,6 +113,7 @@ func TestCarryRepository_GetCarriesCountByLocalityID(t *testing.T) {
 			defer db.Close()
 
 			repo := repository.NewCarryRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			// act
 			result, err := repo.GetCarriesCountByLocalityID(tc.input.context, tc.input.localityID)

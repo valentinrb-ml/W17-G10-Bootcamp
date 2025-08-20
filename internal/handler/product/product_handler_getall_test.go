@@ -53,6 +53,7 @@ func TestProductHandler_GetAll(t *testing.T) {
 			tc.mockSetup(svc)
 
 			h := handler.NewProductHandler(svc)
+			h.SetLogger(testhelpers.NewTestLogger())
 			rec := testhelpers.DoRequest(t, http.MethodGet, "/products", nil,
 				h.GetAll)
 

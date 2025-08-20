@@ -13,6 +13,7 @@ import (
 	handler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/seller"
 	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/seller"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
+	testhelpers "github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestSellerHandler_Delete(t *testing.T) {
@@ -110,6 +111,7 @@ func TestSellerHandler_Delete(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 			h := handler.NewSellerHandler(tt.mockService())
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			h.Delete(rec, req)
 

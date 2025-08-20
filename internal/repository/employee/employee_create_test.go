@@ -85,6 +85,7 @@ func TestEmployeeRepository_Create(t *testing.T) {
 			tc.mockSetup(mock, in)
 
 			repo := repo.NewEmployeeRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 			ctx := context.Background()
 			emp, err := repo.Create(ctx, tc.input)
 

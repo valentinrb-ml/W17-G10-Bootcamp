@@ -50,6 +50,8 @@ func TestProductService_Patch(t *testing.T) {
 			tc.mockFn(repo)
 
 			svc := service.NewProductService(repo)
+			svc.SetLogger(testhelpers.NewTestLogger())
+
 			_, err := svc.Patch(context.Background(), 21, req)
 
 			if tc.wantErr {

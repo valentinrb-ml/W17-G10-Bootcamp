@@ -93,6 +93,7 @@ func TestEmployeeHandler_Create(t *testing.T) {
 			// Mock del service usando el método Create simulado por test case
 			mockSvc := &employeeMocks.EmployeeServiceMock{MockCreate: tc.mockCreateFn}
 			h := handler.NewEmployeeHandler(mockSvc)
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			body, _ := json.Marshal(tc.payload)
 			req := httptest.NewRequest("POST", "/employees", bytes.NewReader(body))

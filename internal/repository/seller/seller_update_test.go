@@ -117,6 +117,7 @@ func TestSellerRepository_Update(t *testing.T) {
 			defer db.Close()
 			tt.mock(mock, tt.args.id, tt.args.seller)
 			repo := repository.NewSellerRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			err = repo.Update(context.Background(), tt.args.id, tt.args.seller)
 

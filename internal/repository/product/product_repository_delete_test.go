@@ -46,6 +46,7 @@ func TestProductRepository_Delete(t *testing.T) {
 			}
 
 			repo, _ := NewProductRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 			err := repo.Delete(context.Background(), 10)
 
 			if tc.wantErr {
