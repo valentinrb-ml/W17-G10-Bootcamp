@@ -129,7 +129,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// Inject logger into employee components
 	repoEmployee.SetLogger(appLogger)
-	// svcWarehouse.SetLogger(appLogger)
+	svcEmployee.SetLogger(appLogger)
 
 	appLogger.Info(ctx, "server", "All services initialized successfully")
 
