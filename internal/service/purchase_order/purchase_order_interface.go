@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
@@ -20,4 +21,7 @@ type PurchaseOrderService interface {
 	// GetReportByBuyer genera el reporte de Purchase Orders por Buyer
 	// Si buyerID es nil, devuelve el reporte para todos los buyers
 	GetReportByBuyer(ctx context.Context, buyerID *int) ([]models.BuyerWithPurchaseCount, error)
+
+	// SetLogger allows injecting the logger after creation
+	SetLogger(l logger.Logger)
 }
