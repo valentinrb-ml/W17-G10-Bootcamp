@@ -130,6 +130,9 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	repoCarry.SetLogger(appLogger)
 	svcCarry.SetLogger(appLogger)
 
+	repoBuyer.SetLogger(appLogger)
+	svcBuyer.SetLogger(appLogger)
+
 	appLogger.Info(ctx, "server", "All services initialized successfully")
 
 	// - handler
@@ -149,6 +152,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	// Inject logger into warehouse handler
 	hdWarehouse.SetLogger(appLogger)
 	hdCarry.SetLogger(appLogger)
+	hdBuyer.SetLogger(appLogger)
 
 	appLogger.Info(ctx, "server", "All handlers initialized successfully")
 
