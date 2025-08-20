@@ -60,7 +60,7 @@ func TestProductBatchesHandler_GetReportProduct(t *testing.T) {
 			},
 			wantStatus:      http.StatusBadRequest,
 			wantErrorCode:   apperrors.CodeBadRequest,
-			wantErrorSubMsg: "valid integer",
+			wantErrorSubMsg: "invalid integer",
 		},
 		{
 			name:  "error - service error when fetching all",
@@ -110,7 +110,6 @@ func TestProductBatchesHandler_GetReportProduct(t *testing.T) {
 
 			if tt.wantStatus == http.StatusOK {
 				if tt.query == "" {
-					// 🟢 Usamos el envelope correcto:
 					var envelope struct {
 						Data []models.ReportProduct `json:"data"`
 					}

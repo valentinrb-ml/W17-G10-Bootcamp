@@ -2,15 +2,18 @@ package mocks
 
 import (
 	"context"
+
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
 
 type SectionRepositoryMock struct {
-	FuncFindAll  func(ctx context.Context) ([]models.Section, error)
-	FuncFindById func(ctx context.Context, id int) (*models.Section, error)
-	FuncDelete   func(ctx context.Context, id int) error
-	FuncCreate   func(ctx context.Context, sec models.Section) (*models.Section, error)
-	FuncUpdate   func(ctx context.Context, id int, sec *models.Section) (*models.Section, error)
+	FuncFindAll   func(ctx context.Context) ([]models.Section, error)
+	FuncFindById  func(ctx context.Context, id int) (*models.Section, error)
+	FuncDelete    func(ctx context.Context, id int) error
+	FuncCreate    func(ctx context.Context, sec models.Section) (*models.Section, error)
+	FuncUpdate    func(ctx context.Context, id int, sec *models.Section) (*models.Section, error)
+	FuncSetLogger func(l logger.Logger)
 }
 
 func (m *SectionRepositoryMock) FindAllSections(ctx context.Context) ([]models.Section, error) {
@@ -30,4 +33,7 @@ func (m *SectionRepositoryMock) CreateSection(ctx context.Context, sec models.Se
 }
 func (m *SectionRepositoryMock) UpdateSection(ctx context.Context, id int, sec *models.Section) (*models.Section, error) {
 	return m.FuncUpdate(ctx, id, sec)
+}
+func (m *SectionRepositoryMock) SetLogger(l logger.Logger) {
+	m.FuncSetLogger(l)
 }

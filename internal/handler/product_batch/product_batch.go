@@ -8,6 +8,7 @@ import (
 
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/validators"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/httputil"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/response"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
@@ -94,7 +95,7 @@ func (h *ProductBatchesHandler) GetReportProduct(w http.ResponseWriter, r *http.
 		if h.logger != nil {
 			h.logger.Error(ctx, "product-batches-handler", "Failed to parse id parameter", err)
 		}
-		response.ErrorWithRequest(w, r, err)
+		response.ErrorWithRequest(w, r, apperrors.NewAppError(apperrors.CodeBadRequest, "invalid integer"))
 		return
 	}
 	report, err := h.sv.GetReportProductById(ctx, idInt)
