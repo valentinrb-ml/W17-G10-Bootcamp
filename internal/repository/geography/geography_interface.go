@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/geography"
 )
 
@@ -50,8 +51,8 @@ type GeographyRepository interface {
 	// RollbackTx aborts the provided transaction.
 	RollbackTx(tx *sql.Tx) error
 
-	// GetDB returns the underlying *sql.DB instance.
-	GetDB() *sql.DB
+	// SetLogger allows injecting the logger after creation
+	SetLogger(l logger.Logger)
 }
 
 // Executor wraps types that can execute SQL commands or queries within a context.
@@ -63,7 +64,8 @@ type Executor interface {
 
 // geographyRepository implements the GeographyRepository interface using MySQL as the backend.
 type geographyRepository struct {
-	mysql *sql.DB
+	mysql  *sql.DB
+	logger logger.Logger
 }
 
 // NewGeographyRepository creates a new GeographyRepository backed by a MySQL database.
@@ -71,4 +73,9 @@ func NewGeographyRepository(mysql *sql.DB) GeographyRepository {
 	return &geographyRepository{
 		mysql: mysql,
 	}
+}
+
+// SetLogger allows you to inject the logger after creation
+func (s *geographyRepository) SetLogger(l logger.Logger) {
+	s.logger = l
 }

@@ -125,7 +125,13 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// Inject logger into warehouse components
 	repoWarehouse.SetLogger(appLogger)
+	repoSeller.SetLogger(appLogger)
+	repoGeography.SetLogger(appLogger)
+
 	svcWarehouse.SetLogger(appLogger)
+	svcWarehouse.SetLogger(appLogger)
+	svcSeller.SetLogger(appLogger)
+	svcGeography.SetLogger(appLogger)
 
 	repoCarry.SetLogger(appLogger)
 	svcCarry.SetLogger(appLogger)
@@ -148,6 +154,8 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// Inject logger into warehouse handler
 	hdWarehouse.SetLogger(appLogger)
+	hdSeller.SetLogger(appLogger)
+	hdGeography.SetLogger(appLogger)
 	hdCarry.SetLogger(appLogger)
 
 	appLogger.Info(ctx, "server", "All handlers initialized successfully")
