@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/warehouse"
 	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/warehouse"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
+	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestWarehouseDefault_Update(t *testing.T) {
@@ -201,4 +201,87 @@ func TestWarehouseDefault_Update(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestWarehouseDefault_Update_WithLogger(t *testing.T) {
+	// arrange
+	mockRepo := &mocks.WarehouseRepositoryMock{}
+	existing := testhelpers.CreateExpectedWarehouse(1)
+	updated := testhelpers.CreateExpectedWarehouse(1)
+	updated.MinimumCapacity = 200
+
+	mockRepo.FuncFindById = func(ctx context.Context, id int) (*warehouse.Warehouse, error) {
+		return existing, nil
+	}
+	mockRepo.FuncUpdate = func(ctx context.Context, id int, w warehouse.Warehouse) (*warehouse.Warehouse, error) {
+		return updated, nil
+	}
+
+	srv := service.NewWarehouseService(mockRepo)
+	srv.SetLogger(&SimpleTestLogger{})
+
+	capacity := 200
+	patch := warehouse.WarehousePatchDTO{
+		MinimumCapacity: &capacity,
+	}
+
+	// act
+	result, err := srv.Update(context.Background(), 1, patch)
+
+	// assert
+	require.NoError(t, err)
+	require.Equal(t, updated, result)
+}
+
+func TestWarehouseDefault_Update_RepositoryError_WithLogger(t *testing.T) {
+	// arrange
+	mockRepo := &mocks.WarehouseRepositoryMock{}
+	existing := testhelpers.CreateExpectedWarehouse(1)
+
+	mockRepo.FuncFindById = func(ctx context.Context, id int) (*warehouse.Warehouse, error) {
+		return existing, nil
+	}
+	mockRepo.FuncUpdate = func(ctx context.Context, id int, w warehouse.Warehouse) (*warehouse.Warehouse, error) {
+		return nil, apperrors.NewAppError(apperrors.CodeInternal, "repository error")
+	}
+
+	srv := service.NewWarehouseService(mockRepo)
+	srv.SetLogger(&SimpleTestLogger{})
+
+	capacity := 200
+	patch := warehouse.WarehousePatchDTO{
+		MinimumCapacity: &capacity,
+	}
+
+	// act
+	result, err := srv.Update(context.Background(), 1, patch)
+
+	// assert
+	require.Error(t, err)
+	require.Nil(t, result)
+}
+
+func TestWarehouseDefault_Update_ValidationError_WithLogger(t *testing.T) {
+	// arrange
+	mockRepo := &mocks.WarehouseRepositoryMock{}
+	existing := testhelpers.CreateExpectedWarehouse(1)
+
+	mockRepo.FuncFindById = func(ctx context.Context, id int) (*warehouse.Warehouse, error) {
+		return existing, nil
+	}
+
+	srv := service.NewWarehouseService(mockRepo)
+	srv.SetLogger(&SimpleTestLogger{})
+
+	capacity := -1 // Invalid capacity to trigger validation error
+	patch := warehouse.WarehousePatchDTO{
+		MinimumCapacity: &capacity,
+	}
+
+	// act
+	result, err := srv.Update(context.Background(), 1, patch)
+
+	// assert
+	require.Error(t, err)
+	require.Nil(t, result)
 }

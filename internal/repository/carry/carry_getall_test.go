@@ -192,3 +192,103 @@ func TestCarryRepository_GetCarriesCountByAllLocalities(t *testing.T) {
 		})
 	}
 }
+
+func TestCarryRepository_GetCarriesCountByAllLocalities_Success_WithLogger(t *testing.T) {
+	// arrange - success case with logger
+	mock, db := testhelpers.CreateMockDB()
+	defer db.Close()
+
+	rows := sqlmock.NewRows([]string{"locality_id", "name", "carries_count"}).
+		AddRow("1", "Buenos Aires", 5).
+		AddRow("2", "Córdoba", 3)
+
+	mock.ExpectQuery(`SELECT c\.locality_id, l\.name, COUNT\(\*\) as carries_count FROM carriers c INNER JOIN localities l ON c\.locality_id = l\.id GROUP BY c\.locality_id`).
+		WillReturnRows(rows)
+
+	repo := repository.NewCarryRepository(db)
+	repo.SetLogger(&SimpleTestLogger{})
+
+	// act
+	result, err := repo.GetCarriesCountByAllLocalities(context.Background())
+
+	// assert
+	require.NoError(t, err)
+	require.Len(t, result, 2)
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestCarryRepository_GetCarriesCountByAllLocalities_QueryError_WithLogger(t *testing.T) {
+	// arrange - database query error with logger
+	mock, db := testhelpers.CreateMockDB()
+	defer db.Close()
+
+	mock.ExpectQuery(`SELECT c\.locality_id, l\.name, COUNT\(\*\) as carries_count FROM carriers c INNER JOIN localities l ON c\.locality_id = l\.id GROUP BY c\.locality_id`).
+		WillReturnError(sql.ErrConnDone)
+
+	repo := repository.NewCarryRepository(db)
+	repo.SetLogger(&SimpleTestLogger{})
+
+	// act
+	result, err := repo.GetCarriesCountByAllLocalities(context.Background())
+
+	// assert
+	require.Error(t, err)
+	require.Nil(t, result)
+	require.Equal(t, sql.ErrConnDone, err) // Direct error return, not wrapped
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestCarryRepository_GetCarriesCountByAllLocalities_ScanError_WithLogger(t *testing.T) {
+	// arrange - rows iteration error with logger
+	mock, db := testhelpers.CreateMockDB()
+	defer db.Close()
+
+	rows := sqlmock.NewRows([]string{"locality_id", "name", "carries_count"}).
+		AddRow("1", "Buenos Aires", 5).
+		AddRow("2", "Córdoba", 3).
+		RowError(1, sql.ErrConnDone) // Error on second row iteration
+
+	mock.ExpectQuery(`SELECT c\.locality_id, l\.name, COUNT\(\*\) as carries_count FROM carriers c INNER JOIN localities l ON c\.locality_id = l\.id GROUP BY c\.locality_id`).
+		WillReturnRows(rows)
+
+	repo := repository.NewCarryRepository(db)
+	repo.SetLogger(&SimpleTestLogger{})
+
+	// act
+	result, err := repo.GetCarriesCountByAllLocalities(context.Background())
+
+	// assert
+	require.Error(t, err)
+	require.Nil(t, result)
+	require.Contains(t, err.Error(), "error getting carries count by all localities")
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestCarryRepository_GetCarriesCountByAllLocalities_ScanErrorContinue_WithLogger(t *testing.T) {
+	// arrange - individual scan error that gets continued, then successful results
+	mock, db := testhelpers.CreateMockDB()
+	defer db.Close()
+
+	// Create rows where one has scan error but others succeed
+	rows := sqlmock.NewRows([]string{"locality_id", "name", "carries_count"}).
+		AddRow(nil, "Invalid", 5). // This will cause scan error and continue
+		AddRow("1", "Buenos Aires", 5).
+		AddRow("2", "Córdoba", 3)
+
+	mock.ExpectQuery(`SELECT c\.locality_id, l\.name, COUNT\(\*\) as carries_count FROM carriers c INNER JOIN localities l ON c\.locality_id = l\.id GROUP BY c\.locality_id`).
+		WillReturnRows(rows)
+
+	repo := repository.NewCarryRepository(db)
+	repo.SetLogger(&SimpleTestLogger{})
+
+	// act
+	result, err := repo.GetCarriesCountByAllLocalities(context.Background())
+
+	// assert
+	require.NoError(t, err)
+	require.Len(t, result, 2) // Should have 2 valid results (skipped the invalid one)
+	require.Equal(t, "1", result[0].LocalityID)
+	require.Equal(t, "Buenos Aires", result[0].LocalityName)
+	require.Equal(t, 5, result[0].CarriesCount)
+	require.NoError(t, mock.ExpectationsWereMet())
+}

@@ -239,3 +239,173 @@ func TestWarehouseHandler_Create(t *testing.T) {
 		})
 	}
 }
+
+func TestWarehouseHandler_Create_WithNilLogger(t *testing.T) {
+	// arrange
+	mock := &mocks.WarehouseServiceMock{}
+	expectedWarehouse := testhelpers.CreateExpectedWarehouse(1)
+
+	mock.FuncCreate = func(ctx context.Context, w warehouseModel.Warehouse) (*warehouseModel.Warehouse, error) {
+		return expectedWarehouse, nil
+	}
+
+	handler := handler.NewWarehouseHandler(mock)
+	// Don't set logger, so it remains nil
+
+	// Configure router
+	router := chi.NewRouter()
+	router.Post("/warehouses", handler.Create)
+
+	// Create request
+	warehouseReq := testhelpers.CreateTestWarehouseRequest()
+	jsonData, _ := json.Marshal(warehouseReq)
+	req := httptest.NewRequest(http.MethodPost, "/warehouses", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusCreated, recorder.Code)
+}
+
+func TestWarehouseHandler_Create_WithRequestID(t *testing.T) {
+	// arrange
+	mock := &mocks.WarehouseServiceMock{}
+	expectedWarehouse := testhelpers.CreateExpectedWarehouse(1)
+
+	mock.FuncCreate = func(ctx context.Context, w warehouseModel.Warehouse) (*warehouseModel.Warehouse, error) {
+		return expectedWarehouse, nil
+	}
+
+	warehouseHandler := handler.NewWarehouseHandler(mock)
+	warehouseHandler.SetLogger(&SimpleTestLogger{})
+
+	// Configure router
+	router := chi.NewRouter()
+	router.Post("/warehouses", warehouseHandler.Create)
+
+	// Create request with request_id in context
+	warehouseReq := testhelpers.CreateTestWarehouseRequest()
+	jsonData, _ := json.Marshal(warehouseReq)
+	req := httptest.NewRequest(http.MethodPost, "/warehouses", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+
+	// Add request_id to context
+	ctx := context.WithValue(req.Context(), "request_id", "test-request-123")
+	req = req.WithContext(ctx)
+
+	recorder := httptest.NewRecorder()
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusCreated, recorder.Code)
+}
+
+func TestWarehouseHandler_Create_Success_WithLogger(t *testing.T) {
+	// arrange - success case with logger
+	mockService := &mocks.WarehouseServiceMock{}
+	expectedWarehouse := testhelpers.CreateExpectedWarehouse(1)
+
+	mockService.FuncCreate = func(ctx context.Context, w warehouseModel.Warehouse) (*warehouseModel.Warehouse, error) {
+		return expectedWarehouse, nil
+	}
+
+	h := handler.NewWarehouseHandler(mockService)
+	h.SetLogger(&SimpleTestLogger{})
+
+	validRequest := testhelpers.CreateTestWarehouseRequest()
+	requestBody, _ := json.Marshal(validRequest)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/warehouses", bytes.NewBuffer(requestBody))
+	req.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+
+	router := chi.NewRouter()
+	router.Post("/api/v1/warehouses", h.Create)
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusCreated, recorder.Code)
+}
+
+func TestWarehouseHandler_Create_InvalidJSON_WithLogger(t *testing.T) {
+	// arrange - invalid JSON with logger
+	mockService := &mocks.WarehouseServiceMock{}
+
+	h := handler.NewWarehouseHandler(mockService)
+	h.SetLogger(&SimpleTestLogger{})
+
+	invalidJSON := `{"invalid": json`
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/warehouses", bytes.NewBufferString(invalidJSON))
+	req.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+
+	router := chi.NewRouter()
+	router.Post("/api/v1/warehouses", h.Create)
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusInternalServerError, recorder.Code)
+}
+
+func TestWarehouseHandler_Create_ValidationError_WithLogger(t *testing.T) {
+	// arrange - validation error with logger
+	mockService := &mocks.WarehouseServiceMock{}
+
+	h := handler.NewWarehouseHandler(mockService)
+	h.SetLogger(&SimpleTestLogger{})
+
+	invalidRequest := warehouseModel.WarehouseRequest{
+		WarehouseCode: "", // Empty warehouse code should fail validation
+	}
+	requestBody, _ := json.Marshal(invalidRequest)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/warehouses", bytes.NewBuffer(requestBody))
+	req.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+
+	router := chi.NewRouter()
+	router.Post("/api/v1/warehouses", h.Create)
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
+}
+
+func TestWarehouseHandler_Create_ServiceError_WithLogger(t *testing.T) {
+	// arrange - service error with logger
+	mockService := &mocks.WarehouseServiceMock{}
+
+	mockService.FuncCreate = func(ctx context.Context, w warehouseModel.Warehouse) (*warehouseModel.Warehouse, error) {
+		return nil, apperrors.NewAppError(apperrors.CodeConflict, "warehouse_code already exists")
+	}
+
+	h := handler.NewWarehouseHandler(mockService)
+	h.SetLogger(&SimpleTestLogger{})
+
+	validRequest := testhelpers.CreateTestWarehouseRequest()
+	requestBody, _ := json.Marshal(validRequest)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/warehouses", bytes.NewBuffer(requestBody))
+	req.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+
+	router := chi.NewRouter()
+	router.Post("/api/v1/warehouses", h.Create)
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusConflict, recorder.Code)
+}

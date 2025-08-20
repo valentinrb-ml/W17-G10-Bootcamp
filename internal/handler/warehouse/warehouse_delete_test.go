@@ -190,3 +190,98 @@ func TestWarehouseHandler_Delete(t *testing.T) {
 		})
 	}
 }
+
+func TestWarehouseHandler_Delete_WithNilLogger(t *testing.T) {
+	// arrange
+	mock := &mocks.WarehouseServiceMock{}
+
+	mock.FuncDelete = func(ctx context.Context, id int) error {
+		return nil
+	}
+
+	handler := handler.NewWarehouseHandler(mock)
+	// Don't set logger, so it remains nil
+
+	// Configure router
+	router := chi.NewRouter()
+	router.Delete("/warehouses/{id}", handler.Delete)
+
+	// Create request
+	req := httptest.NewRequest(http.MethodDelete, "/warehouses/1", nil)
+	recorder := httptest.NewRecorder()
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusNoContent, recorder.Code)
+	require.Empty(t, recorder.Body.String())
+}
+
+func TestWarehouseHandler_Delete_Success_WithLogger(t *testing.T) {
+	// arrange - success case with logger
+	mockService := &mocks.WarehouseServiceMock{}
+
+	mockService.FuncDelete = func(ctx context.Context, id int) error {
+		return nil
+	}
+
+	warehouseHandler := handler.NewWarehouseHandler(mockService)
+	warehouseHandler.SetLogger(&SimpleTestLogger{})
+
+	router := chi.NewRouter()
+	router.Delete("/warehouses/{id}", warehouseHandler.Delete)
+
+	req := httptest.NewRequest(http.MethodDelete, "/warehouses/1", nil)
+	recorder := httptest.NewRecorder()
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusNoContent, recorder.Code)
+}
+
+func TestWarehouseHandler_Delete_InvalidID_WithLogger(t *testing.T) {
+	// arrange - invalid ID with logger
+	mockService := &mocks.WarehouseServiceMock{}
+
+	warehouseHandler := handler.NewWarehouseHandler(mockService)
+	warehouseHandler.SetLogger(&SimpleTestLogger{})
+
+	router := chi.NewRouter()
+	router.Delete("/warehouses/{id}", warehouseHandler.Delete)
+
+	req := httptest.NewRequest(http.MethodDelete, "/warehouses/invalid", nil)
+	recorder := httptest.NewRecorder()
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusBadRequest, recorder.Code)
+}
+
+func TestWarehouseHandler_Delete_ServiceError_WithLogger(t *testing.T) {
+	// arrange - service error with logger
+	mockService := &mocks.WarehouseServiceMock{}
+
+	mockService.FuncDelete = func(ctx context.Context, id int) error {
+		return apperrors.NewAppError(apperrors.CodeNotFound, "warehouse not found")
+	}
+
+	warehouseHandler := handler.NewWarehouseHandler(mockService)
+	warehouseHandler.SetLogger(&SimpleTestLogger{})
+
+	router := chi.NewRouter()
+	router.Delete("/warehouses/{id}", warehouseHandler.Delete)
+
+	req := httptest.NewRequest(http.MethodDelete, "/warehouses/1", nil)
+	recorder := httptest.NewRecorder()
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusNotFound, recorder.Code)
+}

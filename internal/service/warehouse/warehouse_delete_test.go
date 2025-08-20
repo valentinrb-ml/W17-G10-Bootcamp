@@ -2,11 +2,12 @@ package service_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/warehouse"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/warehouse"
+	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/warehouse"
+	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/warehouse"
 )
 
 func TestWarehouseDefault_Delete(t *testing.T) {
@@ -48,6 +49,27 @@ func TestWarehouseDefault_Delete(t *testing.T) {
 			},
 			output: output{
 				err: nil,
+			},
+		},
+		{
+			name: "error - repository delete fails",
+			arrange: arrange{
+				mockRepo: func() *mocks.WarehouseRepositoryMock {
+					mock := &mocks.WarehouseRepositoryMock{}
+
+					mock.FuncDelete = func(ctx context.Context, id int) error {
+						return errors.New("repository delete error")
+					}
+
+					return mock
+				},
+			},
+			input: input{
+				id:      1,
+				context: context.Background(),
+			},
+			output: output{
+				err: errors.New("repository delete error"),
 			},
 		},
 	}

@@ -182,3 +182,131 @@ func TestCarryRepository_Create(t *testing.T) {
 		})
 	}
 }
+
+func TestCarryRepository_Create_Success_WithLogger(t *testing.T) {
+	// arrange - success case with logger
+	mock, db := testhelpers.CreateMockDB()
+	defer db.Close()
+
+	expectedCarry := testhelpers.CreateExpectedCarry(1)
+
+	mock.ExpectExec(`INSERT INTO carriers \(cid, company_name, address, telephone, locality_id\) VALUES \(\?, \?, \?, \?, \?\)`).
+		WithArgs("CAR000", "Test Company 0", "Test Address 0", "5551234567", "1").
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	repo := repository.NewCarryRepository(db)
+	repo.SetLogger(&SimpleTestLogger{})
+
+	testCarry := *testhelpers.CreateTestCarry(0)
+
+	// act
+	result, err := repo.Create(context.Background(), testCarry)
+
+	// assert
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.Equal(t, expectedCarry.Id, result.Id)
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestCarryRepository_Create_DuplicateKey_WithLogger(t *testing.T) {
+	// arrange - duplicate key error with logger
+	mock, db := testhelpers.CreateMockDB()
+	defer db.Close()
+
+	mysqlErr := &mysql.MySQLError{
+		Number:  1062,
+		Message: "Duplicate entry 'CAR000' for key 'cid'",
+	}
+
+	mock.ExpectExec(`INSERT INTO carriers \(cid, company_name, address, telephone, locality_id\) VALUES \(\?, \?, \?, \?, \?\)`).
+		WithArgs("CAR000", "Test Company 0", "Test Address 0", "5551234567", "1").
+		WillReturnError(mysqlErr)
+
+	repo := repository.NewCarryRepository(db)
+	repo.SetLogger(&SimpleTestLogger{})
+
+	testCarry := *testhelpers.CreateTestCarry(0)
+
+	// act
+	result, err := repo.Create(context.Background(), testCarry)
+
+	// assert
+	require.Error(t, err)
+	require.Nil(t, result)
+	require.Contains(t, err.Error(), "cid already exists")
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestCarryRepository_Create_GenericError_WithLogger(t *testing.T) {
+	// arrange - generic database error with logger
+	mock, db := testhelpers.CreateMockDB()
+	defer db.Close()
+
+	mock.ExpectExec(`INSERT INTO carriers \(cid, company_name, address, telephone, locality_id\) VALUES \(\?, \?, \?, \?, \?\)`).
+		WithArgs("CAR000", "Test Company 0", "Test Address 0", "5551234567", "1").
+		WillReturnError(sql.ErrConnDone)
+
+	repo := repository.NewCarryRepository(db)
+	repo.SetLogger(&SimpleTestLogger{})
+
+	testCarry := *testhelpers.CreateTestCarry(0)
+
+	// act
+	result, err := repo.Create(context.Background(), testCarry)
+
+	// assert
+	require.Error(t, err)
+	require.Nil(t, result)
+	require.Contains(t, err.Error(), "error creating carry")
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestCarryRepository_Create_LastInsertIdError_WithLogger(t *testing.T) {
+	// arrange - last insert id error with logger
+	mock, db := testhelpers.CreateMockDB()
+	defer db.Close()
+
+	mock.ExpectExec(`INSERT INTO carriers \(cid, company_name, address, telephone, locality_id\) VALUES \(\?, \?, \?, \?, \?\)`).
+		WithArgs("CAR000", "Test Company 0", "Test Address 0", "5551234567", "1").
+		WillReturnResult(sqlmock.NewErrorResult(sql.ErrNoRows))
+
+	repo := repository.NewCarryRepository(db)
+	repo.SetLogger(&SimpleTestLogger{})
+
+	testCarry := *testhelpers.CreateTestCarry(0)
+
+	// act
+	result, err := repo.Create(context.Background(), testCarry)
+
+	// assert
+	require.Error(t, err)
+	require.Nil(t, result)
+	require.Contains(t, err.Error(), "error creating carry")
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestCarryRepository_Create_ForeignKeyConstraintError_WithLogger(t *testing.T) {
+	// arrange - foreign key constraint error (locality_id does not exist) with logger
+	mock, db := testhelpers.CreateMockDB()
+	defer db.Close()
+
+	carry := *testhelpers.CreateTestCarry(0)
+	mysqlErr := &mysql.MySQLError{Number: 1452, Message: "Cannot add or update a child row: a foreign key constraint fails"}
+
+	mock.ExpectExec(`INSERT INTO carriers \(cid, company_name, address, telephone, locality_id\) VALUES \(\?, \?, \?, \?, \?\)`).
+		WithArgs(carry.Cid, carry.CompanyName, carry.Address, carry.Telephone, carry.LocalityId).
+		WillReturnError(mysqlErr)
+
+	repo := repository.NewCarryRepository(db)
+	repo.SetLogger(&SimpleTestLogger{})
+
+	// act
+	result, err := repo.Create(context.Background(), carry)
+
+	// assert
+	require.Error(t, err)
+	require.Nil(t, result)
+	require.Contains(t, err.Error(), "locality_id does not exist")
+	require.NoError(t, mock.ExpectationsWereMet())
+}

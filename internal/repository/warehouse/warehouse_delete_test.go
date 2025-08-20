@@ -9,8 +9,8 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
 	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestWarehouseMySQL_Delete(t *testing.T) {
@@ -166,4 +166,114 @@ func TestWarehouseMySQL_Delete(t *testing.T) {
 			require.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
+}
+
+func TestWarehouseRepository_Delete_WithLogger(t *testing.T) {
+	// arrange - success case with logger
+	mock, db := testhelpers.CreateMockDB()
+	defer db.Close()
+
+	mock.ExpectExec("DELETE FROM warehouse WHERE id = \\?").
+		WithArgs(1).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	repo := repository.NewWarehouseRepository(db)
+	repo.SetLogger(&SimpleTestLogger{})
+
+	// act
+	err := repo.Delete(context.Background(), 1)
+
+	// assert
+	require.NoError(t, err)
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestWarehouseRepository_Delete_ForeignKeyConstraint_WithLogger(t *testing.T) {
+	// arrange - foreign key constraint with logger
+	mock, db := testhelpers.CreateMockDB()
+	defer db.Close()
+
+	mysqlErr := &mysql.MySQLError{
+		Number:  1451,
+		Message: "Cannot delete or update a parent row: a foreign key constraint fails",
+	}
+
+	mock.ExpectExec("DELETE FROM warehouse WHERE id = \\?").
+		WithArgs(1).
+		WillReturnError(mysqlErr)
+
+	repo := repository.NewWarehouseRepository(db)
+	repo.SetLogger(&SimpleTestLogger{})
+
+	// act
+	err := repo.Delete(context.Background(), 1)
+
+	// assert
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "cannot delete warehouse: it is being referenced by other records")
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestWarehouseRepository_Delete_GenericError_WithLogger(t *testing.T) {
+	// arrange - generic error with logger
+	mock, db := testhelpers.CreateMockDB()
+	defer db.Close()
+
+	mock.ExpectExec("DELETE FROM warehouse WHERE id = \\?").
+		WithArgs(1).
+		WillReturnError(sql.ErrConnDone)
+
+	repo := repository.NewWarehouseRepository(db)
+	repo.SetLogger(&SimpleTestLogger{})
+
+	// act
+	err := repo.Delete(context.Background(), 1)
+
+	// assert
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "error deleting warehouse")
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestWarehouseRepository_Delete_RowsAffectedError_WithLogger(t *testing.T) {
+	// arrange - rows affected error with logger
+	mock, db := testhelpers.CreateMockDB()
+	defer db.Close()
+
+	result := sqlmock.NewErrorResult(sql.ErrNoRows)
+	mock.ExpectExec("DELETE FROM warehouse WHERE id = \\?").
+		WithArgs(1).
+		WillReturnResult(result)
+
+	repo := repository.NewWarehouseRepository(db)
+	repo.SetLogger(&SimpleTestLogger{})
+
+	// act
+	err := repo.Delete(context.Background(), 1)
+
+	// assert
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "error deleting warehouse")
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestWarehouseRepository_Delete_NotFound_WithLogger(t *testing.T) {
+	// arrange - warehouse not found with logger
+	mock, db := testhelpers.CreateMockDB()
+	defer db.Close()
+
+	mock.ExpectExec("DELETE FROM warehouse WHERE id = \\?").
+		WithArgs(1).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+
+	repo := repository.NewWarehouseRepository(db)
+	repo.SetLogger(&SimpleTestLogger{})
+
+	// act
+	err := repo.Delete(context.Background(), 1)
+
+	// assert
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "warehouse not found")
+	require.NoError(t, mock.ExpectationsWereMet())
 }

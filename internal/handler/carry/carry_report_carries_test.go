@@ -173,3 +173,128 @@ func TestCarryHandler_ReportCarries(t *testing.T) {
 		})
 	}
 }
+
+func TestCarryHandler_ReportCarries_AllCarries_WithLogger(t *testing.T) {
+	// arrange - all carries report with logger
+	mockService := &mocks.CarryServiceMock{}
+
+	mockService.FuncGetCarriesReport = func(ctx context.Context, localityID *string) (interface{}, error) {
+		return testhelpers.CreateTestCarriesReportSlice(), nil
+	}
+
+	h := handler.NewCarryHandler(mockService)
+	h.SetLogger(&SimpleTestLogger{})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/carries/reportCarries", nil)
+	recorder := httptest.NewRecorder()
+
+	router := chi.NewRouter()
+	router.Get("/api/v1/carries/reportCarries", h.ReportCarries)
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusOK, recorder.Code)
+}
+
+func TestCarryHandler_ReportCarries_SpecificLocality_WithLogger(t *testing.T) {
+	// arrange - specific locality report with logger
+	mockService := &mocks.CarryServiceMock{}
+
+	mockService.FuncGetCarriesReport = func(ctx context.Context, localityID *string) (interface{}, error) {
+		report := testhelpers.CreateTestCarriesReport("LOC001", "Test Locality", 5)
+		return report, nil
+	}
+
+	h := handler.NewCarryHandler(mockService)
+	h.SetLogger(&SimpleTestLogger{})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/carries/reportCarries?locality_id=LOC001", nil)
+	recorder := httptest.NewRecorder()
+
+	router := chi.NewRouter()
+	router.Get("/api/v1/carries/reportCarries", h.ReportCarries)
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusOK, recorder.Code)
+}
+
+func TestCarryHandler_ReportCarries_ServiceError_WithLogger(t *testing.T) {
+	// arrange - service error with logger
+	mockService := &mocks.CarryServiceMock{}
+
+	mockService.FuncGetCarriesReport = func(ctx context.Context, localityID *string) (interface{}, error) {
+		return nil, apperrors.NewAppError(apperrors.CodeNotFound, "locality not found")
+	}
+
+	h := handler.NewCarryHandler(mockService)
+	h.SetLogger(&SimpleTestLogger{})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/carries/reportCarries?locality_id=LOC999", nil)
+	recorder := httptest.NewRecorder()
+
+	router := chi.NewRouter()
+	router.Get("/api/v1/carries/reportCarries", h.ReportCarries)
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusNotFound, recorder.Code)
+}
+
+func TestCarryHandler_ReportCarries_NoQueryParam_WithLogger(t *testing.T) {
+	// arrange - no query parameter with logger
+	mockService := &mocks.CarryServiceMock{}
+	mockService.FuncGetCarriesReport = func(ctx context.Context, localityID *string) (interface{}, error) {
+		return testhelpers.CreateTestCarriesReportSlice(), nil
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/carries/reportCarries", nil)
+	recorder := httptest.NewRecorder()
+
+	h := handler.NewCarryHandler(mockService)
+	h.SetLogger(&SimpleTestLogger{})
+
+	router := chi.NewRouter()
+	router.Get("/api/v1/carries/reportCarries", h.ReportCarries)
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusOK, recorder.Code)
+
+	// Just verify we got a valid response
+	require.Greater(t, len(recorder.Body.String()), 0)
+}
+
+func TestCarryHandler_ReportCarries_WithQueryParam_WithLogger(t *testing.T) {
+	// arrange - with query parameter and logger
+	mockService := &mocks.CarryServiceMock{}
+	mockService.FuncGetCarriesReport = func(ctx context.Context, localityID *string) (interface{}, error) {
+		return testhelpers.CreateTestCarriesReportSlice(), nil
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/carries/reportCarries?id=1", nil)
+	recorder := httptest.NewRecorder()
+
+	h := handler.NewCarryHandler(mockService)
+	h.SetLogger(&SimpleTestLogger{})
+
+	router := chi.NewRouter()
+	router.Get("/api/v1/carries/reportCarries", h.ReportCarries)
+
+	// act
+	router.ServeHTTP(recorder, req)
+
+	// assert
+	require.Equal(t, http.StatusOK, recorder.Code)
+
+	// Just verify we got a valid response
+	require.Greater(t, len(recorder.Body.String()), 0)
+}
