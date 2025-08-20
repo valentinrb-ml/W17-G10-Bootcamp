@@ -55,6 +55,7 @@ func TestProductRepository_GetAll(t *testing.T) {
 
 			tc.setup(mock)
 			repo, _ := NewProductRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			_, err := repo.GetAll(context.Background())
 			if tc.wantErr {

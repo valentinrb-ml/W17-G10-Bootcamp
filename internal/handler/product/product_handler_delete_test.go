@@ -67,6 +67,7 @@ func TestProductHandler_Delete(t *testing.T) {
 			tc.mockSetup(svc)
 
 			h := handler.NewProductHandler(svc)
+			h.SetLogger(testhelpers.NewTestLogger())
 			req := testhelpers.NewRequest(t, http.MethodDelete, "/products/"+tc.param, nil)
 			req = withID(req, tc.param)
 

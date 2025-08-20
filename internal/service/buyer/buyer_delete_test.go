@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/buyer"
 	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/buyer"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestBuyerService_Delete(t *testing.T) {
@@ -17,6 +18,7 @@ func TestBuyerService_Delete(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 1
 
@@ -37,6 +39,7 @@ func TestBuyerService_Delete(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 1
 		expectedError := errors.New("database delete failed")
@@ -59,6 +62,7 @@ func TestBuyerService_Delete(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 0
 
@@ -79,6 +83,7 @@ func TestBuyerService_Delete(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := -1
 

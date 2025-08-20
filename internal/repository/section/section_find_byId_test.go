@@ -2,13 +2,14 @@ package repository_test
 
 import (
 	"context"
+	"testing"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
 	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
-	"testing"
 )
 
 func TestSectionRepository_FindById(t *testing.T) {
@@ -93,6 +94,7 @@ func TestSectionRepository_FindById(t *testing.T) {
 			require.NoError(t, err)
 			defer db.Close()
 			repo := repository.NewSectionRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			tc.arrange.dbMock(mock)
 

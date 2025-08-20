@@ -19,6 +19,7 @@ func TestBuyerService_FindAll(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		expectedBuyers := testhelpers.FindAllBuyersDummy()
 		expectedResponse := testhelpers.FindAllBuyersResponseDummy()
@@ -54,6 +55,7 @@ func TestBuyerService_FindAll(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		// Mock repository methods
 		mockRepo.MockFindAll = func(ctx context.Context) ([]models.Buyer, error) {
@@ -73,6 +75,7 @@ func TestBuyerService_FindAll(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		// Mock repository methods
 		mockRepo.MockFindAll = func(ctx context.Context) ([]models.Buyer, error) {
@@ -92,6 +95,7 @@ func TestBuyerService_FindAll(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		expectedError := errors.New("database connection failed")
 
@@ -113,6 +117,7 @@ func TestBuyerService_FindAll(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		singleBuyer := []models.Buyer{
 			{

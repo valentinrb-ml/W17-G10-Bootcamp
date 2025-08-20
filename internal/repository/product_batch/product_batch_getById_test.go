@@ -4,13 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"testing"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
 	repo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/product_batch"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_batches"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
-	"testing"
 )
 
 func TestProductBatchesRepository_GetReportProductById(t *testing.T) {
@@ -90,6 +91,7 @@ func TestProductBatchesRepository_GetReportProductById(t *testing.T) {
 			require.NoError(t, err)
 			defer db.Close()
 			repository := repo.NewProductBatchesRepository(db)
+			repository.SetLogger(testhelpers.NewTestLogger())
 
 			tc.arrange.dbMock(mock)
 

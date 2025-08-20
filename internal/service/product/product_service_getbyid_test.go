@@ -49,6 +49,8 @@ func TestProductService_GetByID(t *testing.T) {
 			tc.mockFn(repo)
 
 			svc := service.NewProductService(repo)
+			svc.SetLogger(testhelpers.NewTestLogger())
+
 			_, err := svc.GetByID(context.Background(), 42)
 
 			if tc.wantErr {

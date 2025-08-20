@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"context"
+
 	"github.com/stretchr/testify/require"
 	handler "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/handler/section"
 	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/section"
@@ -82,6 +83,7 @@ func TestSectionHandler_DeleteSection(t *testing.T) {
 			rec := httptest.NewRecorder()
 			req = testhelpers.SetChiURLParam(req, "id", tt.inputID)
 			h := handler.NewSectionHandler(tt.mockService())
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			h.DeleteSection(rec, req)
 

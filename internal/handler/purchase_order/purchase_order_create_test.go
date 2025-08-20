@@ -13,6 +13,7 @@ import (
 	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/purchase_order"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestPurchaseOrderHandler_Create(t *testing.T) {
@@ -104,6 +105,7 @@ func TestPurchaseOrderHandler_Create(t *testing.T) {
 			}
 
 			h := handler.NewPurchaseOrderHandler(mockService)
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			req := httptest.NewRequest(http.MethodPost, "/purchase-orders", bytes.NewBufferString(tt.requestBody))
 			req.Header.Set("Content-Type", "application/json")

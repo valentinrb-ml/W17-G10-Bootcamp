@@ -54,6 +54,8 @@ func TestProductService_GetAll(t *testing.T) {
 			tc.mockFn(repo)
 
 			svc := service.NewProductService(repo)
+			svc.SetLogger(testhelpers.NewTestLogger())
+
 			_, err := svc.GetAll(context.Background())
 
 			if tc.wantErr {

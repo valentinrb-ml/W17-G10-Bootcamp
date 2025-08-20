@@ -9,6 +9,7 @@ import (
 	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/geography"
 	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/geography"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/geography"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestGeographyService_CountSellersGroupedByLocality(t *testing.T) {
@@ -142,6 +143,7 @@ func TestGeographyService_CountSellersByLocality(t *testing.T) {
 			repo := tt.mockRepo()
 			srv := service.NewGeographyService(repo)
 			resp, err := srv.CountSellersByLocality(context.Background(), tt.id)
+			srv.SetLogger(testhelpers.NewTestLogger())
 
 			if tt.wantErr {
 				require.Error(t, err)

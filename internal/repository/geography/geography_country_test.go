@@ -139,6 +139,7 @@ func TestGeographyRepository_FindCountryByName(t *testing.T) {
 			defer db.Close()
 			tt.setup(mock)
 			repo := repository.NewGeographyRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			got, err := repo.FindCountryByName(context.Background(), tt.arg)
 			if tt.wantErr {

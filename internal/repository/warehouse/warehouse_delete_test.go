@@ -9,8 +9,8 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
 	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestWarehouseMySQL_Delete(t *testing.T) {
@@ -152,6 +152,7 @@ func TestWarehouseMySQL_Delete(t *testing.T) {
 			mock, db := tc.arrange.dbMock()
 			defer db.Close()
 			repo := repository.NewWarehouseRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			// act
 			err := repo.Delete(tc.input.context, tc.input.id)

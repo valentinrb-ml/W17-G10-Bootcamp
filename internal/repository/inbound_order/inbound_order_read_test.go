@@ -9,6 +9,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
 	repo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/inbound_order"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 // Test unitario de ReportAll: repote agrupado de todos los empleados
@@ -137,6 +138,7 @@ func TestInboundOrderRepository_ReportByID(t *testing.T) {
 			defer db.Close()
 			tc.mockSetup(mock)
 			repository := repo.NewInboundOrderRepository(db)
+			repository.SetLogger(testhelpers.NewTestLogger())
 			res, err := repository.ReportByID(context.Background(), tc.employeeID)
 			if tc.expectErr {
 				require.Error(t, err)

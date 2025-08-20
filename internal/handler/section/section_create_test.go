@@ -107,6 +107,8 @@ func TestSectionHandler_CreateSection(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			h := handler.NewSectionHandler(tt.mockService())
+			// inject test logger to cover logger != nil branches
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			// Call handler
 			h.CreateSection(rec, req)

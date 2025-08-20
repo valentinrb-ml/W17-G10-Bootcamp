@@ -78,6 +78,7 @@ func TestProductHandler_Create(t *testing.T) {
 			tc.mockSetup(svc)
 
 			h := handler.NewProductHandler(svc)
+			h.SetLogger(testhelpers.NewTestLogger())
 			req := testhelpers.NewRequest(t, http.MethodPost, "/products", bytes.NewReader(tc.body))
 			rec := testhelpers.DoRawRequest(t, req, http.HandlerFunc(h.Create))
 

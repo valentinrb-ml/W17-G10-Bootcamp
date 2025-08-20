@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/seller"
+	testhelpers "github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestSellerRepository_Delete(t *testing.T) {
@@ -92,6 +93,7 @@ func TestSellerRepository_Delete(t *testing.T) {
 
 			tt.mock(mock, tt.args.id)
 			repo := repository.NewSellerRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			err = repo.Delete(context.Background(), tt.args.id)
 			if !tt.wantErr {

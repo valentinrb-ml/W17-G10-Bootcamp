@@ -149,6 +149,7 @@ func TestBuyerHandler_Update(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 			h := handler.NewBuyerHandler(tt.mockService())
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			h.Update(rec, req)
 

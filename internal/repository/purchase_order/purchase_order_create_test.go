@@ -144,6 +144,7 @@ func TestPurchaseOrderRepository_Create(t *testing.T) {
 
 			tt.setup(mock)
 			repo := repository.NewPurchaseOrderRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			got, err := repo.Create(context.Background(), tt.arg)
 

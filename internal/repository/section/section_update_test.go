@@ -3,9 +3,10 @@ package repository_test
 import (
 	"context"
 	"errors"
+	"testing"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
-	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/go-sql-driver/mysql"
@@ -149,6 +150,7 @@ func TestSectionRepository_UpdateSection(t *testing.T) {
 			require.NoError(t, err)
 			defer db.Close()
 			repo := repository.NewSectionRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			tc.arrange.dbMock(mock)
 			result, err := repo.UpdateSection(context.Background(), tc.input.id, tc.input.sec)

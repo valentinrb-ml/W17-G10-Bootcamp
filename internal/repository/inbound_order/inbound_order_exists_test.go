@@ -8,6 +8,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
 	repo "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/inbound_order"
+	testhelpers "github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 // Test para ExistsByOrderNumber: verifica consulta de unicidad de número de orden
@@ -66,6 +67,7 @@ func TestInboundOrderRepository_ExistsByOrderNumber(t *testing.T) {
 			tc.mockSetup(mock) // Setup para este test en concreto
 
 			repository := repo.NewInboundOrderRepository(db)
+			repository.SetLogger(testhelpers.NewTestLogger())
 			res, err := repository.ExistsByOrderNumber(context.Background(), tc.orderNum)
 
 			if tc.expectErr {

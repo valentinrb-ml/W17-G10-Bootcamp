@@ -120,6 +120,7 @@ func TestProductBatchesRepository_GetReportProduct(t *testing.T) {
 			require.NoError(t, err)
 			defer db.Close()
 			repository := repo.NewProductBatchesRepository(db)
+			repository.SetLogger(testhelpers.NewTestLogger())
 
 			tc.arrange.dbMock(mock)
 

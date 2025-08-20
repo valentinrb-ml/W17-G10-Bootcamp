@@ -61,6 +61,7 @@ func TestPurchaseOrderService_GetByID(t *testing.T) {
 			},
 		}
 		service := service.NewPurchaseOrderService(repoMock)
+		service.SetLogger(testhelpers.NewTestLogger())
 
 		// Execute
 		_, err := service.GetByID(context.Background(), 1)

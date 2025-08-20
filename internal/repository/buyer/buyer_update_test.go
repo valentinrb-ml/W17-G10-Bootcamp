@@ -137,7 +137,7 @@ func TestBuyerRepository_Update(t *testing.T) {
 			mock, db := tc.arrange.dbMock(tc.input.id, tc.input.buyer)
 			defer db.Close()
 			repo := repository.NewBuyerRepository(db)
-
+			repo.SetLogger(testhelpers.NewTestLogger())
 			// Act
 			err := repo.Update(tc.input.ctx, tc.input.id, tc.input.buyer)
 

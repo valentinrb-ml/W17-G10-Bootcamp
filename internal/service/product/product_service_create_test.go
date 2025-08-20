@@ -77,6 +77,8 @@ func TestProductService_Create(t *testing.T) {
 			tc.mockFn(repo)
 
 			svc := service.NewProductService(repo)
+			svc.SetLogger(testhelpers.NewTestLogger())
+
 			_, err := svc.Create(context.Background(), tc.input)
 
 			if tc.wantErr {
@@ -85,7 +87,7 @@ func TestProductService_Create(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
-			
+
 			repo.AssertExpectations(t)
 		})
 	}

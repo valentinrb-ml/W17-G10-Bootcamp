@@ -118,6 +118,7 @@ func TestProductRepository_Patch(t *testing.T) {
 			tc.setup(mock, prepSel)
 
 			repo, _ := NewProductRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 			_, err := repo.Patch(context.Background(), tc.id, tc.req)
 
 			if tc.wantErr {

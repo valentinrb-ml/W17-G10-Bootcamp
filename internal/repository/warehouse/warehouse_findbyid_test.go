@@ -7,10 +7,10 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
+	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/warehouse"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/warehouse"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestWarehouseMySQL_FindById(t *testing.T) {
@@ -61,50 +61,50 @@ func TestWarehouseMySQL_FindById(t *testing.T) {
 				err:       nil,
 			},
 		},
-        {
-            name: "error - warehouse not found",
-            arrange: arrange{
-                dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-                    mock, db := testhelpers.CreateMockDB()
+		{
+			name: "error - warehouse not found",
+			arrange: arrange{
+				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockDB()
 
-                    mock.ExpectQuery("SELECT (.+) FROM warehouse WHERE id = ?").
-                        WithArgs(99).
-                        WillReturnError(sql.ErrNoRows)
+					mock.ExpectQuery("SELECT (.+) FROM warehouse WHERE id = ?").
+						WithArgs(99).
+						WillReturnError(sql.ErrNoRows)
 
-                    return mock, db
-                },
-            },
-            input: input{
-                id:      99,
-                context: context.Background(),
-            },
-            output: output{
-                warehouse: nil,
-                err:       apperrors.NewAppError(apperrors.CodeNotFound, "warehouse not found"),
-            },
-        },
-        {
-            name: "error - database error",
-            arrange: arrange{
-                dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
-                    mock, db := testhelpers.CreateMockDB()
+					return mock, db
+				},
+			},
+			input: input{
+				id:      99,
+				context: context.Background(),
+			},
+			output: output{
+				warehouse: nil,
+				err:       apperrors.NewAppError(apperrors.CodeNotFound, "warehouse not found"),
+			},
+		},
+		{
+			name: "error - database error",
+			arrange: arrange{
+				dbMock: func() (sqlmock.Sqlmock, *sql.DB) {
+					mock, db := testhelpers.CreateMockDB()
 
-                    mock.ExpectQuery("SELECT (.+) FROM warehouse WHERE id = ?").
-                        WithArgs(99).
-                        WillReturnError(sql.ErrConnDone)
+					mock.ExpectQuery("SELECT (.+) FROM warehouse WHERE id = ?").
+						WithArgs(99).
+						WillReturnError(sql.ErrConnDone)
 
-                    return mock, db
-                },
-            },
-            input: input{
-                id:      99,
-                context: context.Background(),
-            },
-            output: output{
-                warehouse: nil,
-                err:       apperrors.NewAppError(apperrors.CodeInternal, "error getting warehouse"),
-            },
-        },
+					return mock, db
+				},
+			},
+			input: input{
+				id:      99,
+				context: context.Background(),
+			},
+			output: output{
+				warehouse: nil,
+				err:       apperrors.NewAppError(apperrors.CodeInternal, "error getting warehouse"),
+			},
+		},
 	}
 
 	// run test cases
@@ -114,6 +114,7 @@ func TestWarehouseMySQL_FindById(t *testing.T) {
 			mock, db := tc.arrange.dbMock()
 			defer db.Close()
 			repo := repository.NewWarehouseRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			// act
 			result, err := repo.FindById(tc.input.context, tc.input.id)

@@ -190,6 +190,7 @@ func TestEmployeeService_Delete_extraCases(t *testing.T) {
 			emRepo := tc.repoMock()
 			whRepo := &warehouseMocks.WarehouseRepositoryMock{}
 			svc := service.NewEmployeeDefault(emRepo, whRepo)
+			svc.SetLogger(testhelpers.NewTestLogger())
 			err := svc.Delete(context.Background(), tc.inputID)
 			if tc.wantErrCode != "" {
 				require.Error(t, err)

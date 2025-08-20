@@ -78,6 +78,7 @@ func TestProductRepository_Save(t *testing.T) {
 			}
 
 			repo, _ := NewProductRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 			_, err := repo.Save(context.Background(), tc.product)
 
 			if tc.appCode != "" {

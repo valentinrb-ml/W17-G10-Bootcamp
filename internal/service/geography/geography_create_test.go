@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/geography"
 	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/geography"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/geography"
+	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/geography"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/api/apperrors"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/geography"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
@@ -179,6 +179,7 @@ func TestGeographyService_Create(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := tt.mockRepo()
 			svc := service.NewGeographyService(repo)
+			svc.SetLogger(testhelpers.NewTestLogger())
 			resp, err := svc.Create(context.Background(), testhelpers.DummyRequestGeography())
 			if tt.wantErr {
 				require.Error(t, err)

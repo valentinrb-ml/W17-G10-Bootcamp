@@ -73,6 +73,7 @@ func TestEmployeeRepository_Update(t *testing.T) {
 			tc.mockSetup(mock, in)
 
 			repo := repo.NewEmployeeRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 			ctx := context.Background()
 			// Ejecuta el método Update del repo
 			err := repo.Update(ctx, tc.id, tc.input)

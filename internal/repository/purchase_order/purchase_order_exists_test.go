@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	repository "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/purchase_order"
+	testhelpers "github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestPurchaseOrderRepository_ExistsOrderNumber(t *testing.T) {
@@ -47,6 +48,7 @@ func TestPurchaseOrderRepository_ExistsOrderNumber(t *testing.T) {
 
 			tt.setup(mock)
 			repo := repository.NewPurchaseOrderRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			exists := repo.ExistsOrderNumber(context.Background(), tt.argNumber)
 			require.Equal(t, tt.wantExists, exists)

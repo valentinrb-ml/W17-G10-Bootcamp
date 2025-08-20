@@ -53,6 +53,7 @@ func TestEmployeeHandler_GetAll(t *testing.T) {
 			// Crea el mock del service usando la función del test
 			mockSvc := &employeeMocks.EmployeeServiceMock{MockFindAll: tc.mockFindAll}
 			h := handler.NewEmployeeHandler(mockSvc)
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			// Ejecuta el GET como lo haría el router
 			req := httptest.NewRequest("GET", "/employees", nil)
@@ -102,6 +103,7 @@ func TestEmployeeHandler_GetByID(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			mockSvc := &employeeMocks.EmployeeServiceMock{MockFindByID: tc.mockFindByID}
 			h := handler.NewEmployeeHandler(mockSvc)
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			req := httptest.NewRequest("GET", "/employees/"+strconv.Itoa(tc.id), nil)
 			w := httptest.NewRecorder()

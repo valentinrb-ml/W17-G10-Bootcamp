@@ -58,6 +58,7 @@ func TestProductRecordService_GetRecordsReport(t *testing.T) {
 
 			// 2. service under test
 			svc := service.NewProductRecordService(repoMock)
+			svc.SetLogger(testhelpers.NewTestLogger())
 
 			// 3. execute
 			_, err := svc.GetRecordsReport(context.Background(), tc.id)

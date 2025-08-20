@@ -114,6 +114,7 @@ func TestSellerHandler_FindById(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 			h := handler.NewSellerHandler(tt.mockService())
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			h.FindById(rec, req)
 

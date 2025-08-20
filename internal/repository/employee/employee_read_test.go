@@ -227,6 +227,7 @@ func TestEmployeeRepository_FindAll(t *testing.T) {
 			expectedEmployees := testhelpers.CreateTestEmployees() // Usa el helper para datos
 			tc.setup(mock, expectedEmployees)
 			repo := repo.NewEmployeeRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 			ctx := context.Background()
 			list, err := repo.FindAll(ctx)
 			if tc.expectErr {

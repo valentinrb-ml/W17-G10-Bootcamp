@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	service "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/service/section"
 	mocks "github.com/varobledo_meli/W17-G10-Bootcamp.git/mocks/section"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
-	"testing"
 )
 
 func TestSectionDefault_UpdateSection(t *testing.T) {
@@ -103,6 +104,7 @@ func TestSectionDefault_UpdateSection(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			svc := service.NewSectionService(tc.arrange.repoMock())
+			svc.SetLogger(testhelpers.NewTestLogger())
 
 			result, err := svc.UpdateSection(context.Background(), tc.input.id, tc.input.sec)
 			fmt.Println(err)

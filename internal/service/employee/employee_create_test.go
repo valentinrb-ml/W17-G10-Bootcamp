@@ -183,6 +183,7 @@ func TestEmployeeService_Create_allErrors(t *testing.T) {
 			FuncFindById: func(ctx context.Context, id int) (*wmodels.Warehouse, error) { return &wmodels.Warehouse{Id: 1}, nil },
 		}
 		svc := service.NewEmployeeDefault(repo, whRepo)
+		svc.SetLogger(testhelpers.NewTestLogger())
 		e := testhelpers.CreateTestEmployee()
 		res, err := svc.Create(ctx, &e)
 		require.Error(t, err)

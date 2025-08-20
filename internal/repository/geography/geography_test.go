@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	geography "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/repository/geography"
+	testhelpers "github.com/varobledo_meli/W17-G10-Bootcamp.git/testhelpers"
 )
 
 func TestGeographyRepository_BeginTx(t *testing.T) {
@@ -45,6 +46,7 @@ func TestGeographyRepository_RollbackTx(t *testing.T) {
 	assert.NoError(t, err)
 	defer db.Close()
 	repo := geography.NewGeographyRepository(db)
+	repo.SetLogger(testhelpers.NewTestLogger())
 
 	mock.ExpectBegin()
 	tx, err := db.Begin()

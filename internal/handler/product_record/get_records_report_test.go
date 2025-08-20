@@ -100,6 +100,7 @@ func TestProductRecordHandler_GetRecordsReport(t *testing.T) {
 			svc := &productrecordmock.MockProductRecordService{}
 			tc.mockSetup(svc)
 			h := handler.NewProductRecordHandler(svc)
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			// act
 			rec := testhelpers.DoRequest(t, http.MethodGet, tc.url, nil, http.HandlerFunc(h.GetRecordsReport))

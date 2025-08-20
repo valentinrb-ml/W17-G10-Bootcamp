@@ -71,6 +71,7 @@ func TestInboundOrderHandler_Report(t *testing.T) {
 			// Mock de servicio usando el closure de la tabla de test
 			mockSvc := &inboundOrderMocks.InboundOrderServiceMock{MockReport: tc.mockReport}
 			h := handler.NewInboundOrderHandler(mockSvc)
+			h.SetLogger(testhelpers.NewTestLogger())
 			// Construye la URL con o sin query param según el caso
 			url := "/api/v1/employees/reportInboundOrders"
 			if tc.queryID != nil {

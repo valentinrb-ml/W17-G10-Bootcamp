@@ -20,6 +20,7 @@ func TestBuyerService_Update(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 1
 		newCardNumber := "CARD-UPDATED"
@@ -71,6 +72,7 @@ func TestBuyerService_Update(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 1
 		newFirstName := "PartialUpdate"
@@ -119,6 +121,7 @@ func TestBuyerService_Update(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 1
 		conflictingCardNumber := "CARD-EXISTING"
@@ -164,6 +167,7 @@ func TestBuyerService_Update(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 999
 		req := testhelpers.DummyRequestBuyer()
@@ -197,6 +201,7 @@ func TestBuyerService_Update(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 1
 		req := testhelpers.DummyRequestBuyer()
@@ -229,6 +234,7 @@ func TestBuyerService_Update(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 1
 		newFirstName := "OnlyFirstName"
@@ -269,6 +275,7 @@ func TestBuyerService_Update(t *testing.T) {
 		// Arrange
 		mockRepo := &mocks.BuyerRepositoryMocks{}
 		buyerService := service.NewBuyerService(mockRepo)
+		buyerService.SetLogger(testhelpers.NewTestLogger())
 
 		buyerID := 1
 		req := models.RequestBuyer{
@@ -310,6 +317,7 @@ func BenchmarkBuyerService_Update(b *testing.B) {
 	ctx := context.Background()
 	mockRepo := &mocks.BuyerRepositoryMocks{}
 	buyerService := service.NewBuyerService(mockRepo)
+	buyerService.SetLogger(testhelpers.NewTestLogger())
 
 	buyerID := 1
 	req := testhelpers.DummyRequestBuyer()

@@ -51,6 +51,7 @@ func TestProductBatchesService_GetReportProduct(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			svc := service.NewProductBatchesService(tc.arrange.repoMock())
+			svc.SetLogger(testhelpers.NewTestLogger())
 
 			result, err := svc.GetReportProduct(context.Background())
 

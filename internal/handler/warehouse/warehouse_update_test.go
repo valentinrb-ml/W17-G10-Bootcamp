@@ -194,6 +194,7 @@ func TestWarehouseHandler_Update(t *testing.T) {
 			// arrange
 			mockService := tc.arrange.mockService()
 			handler := handler.NewWarehouseHandler(mockService)
+			handler.SetLogger(testhelpers.NewTestLogger())
 
 			// Configure router with ID parameter
 			router := chi.NewRouter()

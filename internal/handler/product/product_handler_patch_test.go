@@ -79,6 +79,7 @@ func TestProductHandler_Patch(t *testing.T) {
 			tc.mockSetup(svc)
 
 			h := handler.NewProductHandler(svc)
+			h.SetLogger(testhelpers.NewTestLogger())
 			req := testhelpers.NewRequest(t, http.MethodPatch, "/products/"+tc.param, bytes.NewReader(tc.body))
 			req = withIDPatch(req, tc.param)
 

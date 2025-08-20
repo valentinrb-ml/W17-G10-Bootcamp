@@ -76,6 +76,7 @@ func TestSellerRepository_FindById(t *testing.T) {
 
 			tt.mock(mock, tt.args.id)
 			repo := repository.NewSellerRepository(db)
+			repo.SetLogger(testhelpers.NewTestLogger())
 
 			got, err := repo.FindById(context.Background(), tt.args.id)
 

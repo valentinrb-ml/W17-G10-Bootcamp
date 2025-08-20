@@ -55,6 +55,7 @@ func TestEmployeeHandler_Delete(t *testing.T) {
 			// Creamos un service mock que usará el handler
 			mockSvc := &employeeMocks.EmployeeServiceMock{MockDelete: tc.mockDeleteFn}
 			h := handler.NewEmployeeHandler(mockSvc)
+			h.SetLogger(testhelpers.NewTestLogger())
 
 			// Armamos la request con el id, y el seteo de param chi (simula routing real)
 			req := httptest.NewRequest("DELETE", "/employees/"+strconv.Itoa(tc.id), nil)

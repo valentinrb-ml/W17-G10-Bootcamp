@@ -261,6 +261,7 @@ func TestInboundOrderService_Create(t *testing.T) {
 			empRepo := tc.employeeMock()
 			whRepo := tc.warehouseMock()
 			svc := service.NewInboundOrderService(repo, empRepo, whRepo)
+			svc.SetLogger(testhelpers.NewTestLogger())
 
 			res, err := svc.Create(context.Background(), tc.input)
 			if tc.wantErrCode == "" {
