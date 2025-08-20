@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -44,11 +45,15 @@ const (
 		GROUP BY p.id, p.description`
 )
 
+const prRepoServiceName = "product-record-repository" // [LOG]
+
 type productRecordMySQLRepository struct {
 	db                  *sqlx.DB
 	stmtInsert          *sqlx.Stmt
 	stmtReportAll       *sqlx.Stmt
 	stmtReportByProduct *sqlx.Stmt
+
+	logger logger.Logger // [LOG]
 }
 
 func NewProductRecordRepository(db *sql.DB) (ProductRecordRepository, error) {
@@ -77,9 +82,30 @@ func NewProductRecordRepository(db *sql.DB) (ProductRecordRepository, error) {
 	}, nil
 }
 
+// SetLogger allows injecting the logger after creation
+func (r *productRecordMySQLRepository) SetLogger(l logger.Logger) { // [LOG]
+	r.logger = l // [LOG]
+}
+
+// logging helpers (avoid repeating nil-check and set the service name)
+func (r *productRecordMySQLRepository) debug(ctx context.Context, msg string, md ...map[string]interface{}) { // [LOG]
+	if r.logger != nil {
+		r.logger.Debug(ctx, prRepoServiceName, msg, md...) // [LOG]
+	}
+}
+func (r *productRecordMySQLRepository) info(ctx context.Context, msg string, md ...map[string]interface{}) { // [LOG]
+	if r.logger != nil {
+		r.logger.Info(ctx, prRepoServiceName, msg, md...) // [LOG]
+	}
+}
+
 func (r *productRecordMySQLRepository) Create(ctx context.Context, record models.ProductRecord) (models.ProductRecord, error) {
 	ctx, cancel := context.WithTimeout(ctx, productRecordQueryTimeout)
 	defer cancel()
+
+	r.info(ctx, "Inserting product record", map[string]interface{}{ // [LOG]
+		"product_id": record.ProductID, // [LOG]
+	})
 
 	res, err := r.stmtInsert.ExecContext(ctx,
 		record.LastUpdateDate,
@@ -96,6 +122,12 @@ func (r *productRecordMySQLRepository) Create(ctx context.Context, record models
 	}
 
 	record.ID = int(id)
+
+	r.info(ctx, "Product record inserted", map[string]interface{}{ // [LOG]
+		"product_record_id": record.ID, // [LOG]
+		"product_id":        record.ProductID,
+	})
+
 	return record, nil
 }
 
@@ -106,10 +138,20 @@ func (r *productRecordMySQLRepository) GetRecordsReport(ctx context.Context, pro
 	var reports []models.ProductRecordReport
 
 	if productID == 0 {
+		r.debug(ctx, "Executing records report for all products") // [LOG]
+
 		if err := r.stmtReportAll.SelectContext(ctx, &reports); err != nil {
 			return nil, apperrors.Wrap(err, "failed to get records report for all products")
 		}
+
+		r.info(ctx, "Records report fetched (all products)", map[string]interface{}{ // [LOG]
+			"count": len(reports), // [LOG]
+		})
 	} else {
+		r.debug(ctx, "Executing records report by product", map[string]interface{}{ // [LOG]
+			"product_id": productID, // [LOG]
+		})
+
 		if err := r.stmtReportByProduct.SelectContext(ctx, &reports, productID); err != nil {
 			return nil, apperrors.Wrap(err, "failed to get records report for specific product")
 		}
@@ -120,6 +162,11 @@ func (r *productRecordMySQLRepository) GetRecordsReport(ctx context.Context, pro
 				fmt.Sprintf("product with id %d not found", productID),
 			)
 		}
+
+		r.info(ctx, "Records report fetched (filtered)", map[string]interface{}{ // [LOG]
+			"product_id": productID,    // [LOG]
+			"count":      len(reports), // [LOG]
+		})
 	}
 
 	return reports, nil

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	mappers "github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers/product"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 	"strings"
 	"time"
 
@@ -38,12 +39,16 @@ const (
 	deleteProduct = `DELETE FROM products WHERE id = ?`
 )
 
+const repoServiceName = "product-repository" // [LOG]
+
 type productMySQLRepository struct {
 	db         *sqlx.DB
 	stmtByID   *sqlx.Stmt
 	stmtInsert *sqlx.Stmt
 	stmtUpdate *sqlx.Stmt
 	stmtDelete *sqlx.Stmt
+
+	logger logger.Logger
 }
 
 func NewProductRepository(db *sql.DB) (ProductRepository, error) {
@@ -76,19 +81,41 @@ func NewProductRepository(db *sql.DB) (ProductRepository, error) {
 	}, nil
 }
 
+// SetLogger allows you to inject the logger after creation
+func (r *productMySQLRepository) SetLogger(l logger.Logger) {
+	r.logger = l
+}
+
+// --- logging helpers (avoid repeating nil-check and set the service name) ---
+func (r *productMySQLRepository) debug(ctx context.Context, msg string, md ...map[string]interface{}) { // [LOG]
+	if r.logger != nil {
+		r.logger.Debug(ctx, repoServiceName, msg, md...) // [LOG]
+	}
+}
+func (r *productMySQLRepository) info(ctx context.Context, msg string, md ...map[string]interface{}) { // [LOG]
+	if r.logger != nil {
+		r.logger.Info(ctx, repoServiceName, msg, md...) // [LOG]
+	}
+}
+
 // CRUD
 
 func (r *productMySQLRepository) GetAll(ctx context.Context) ([]models.Product, error) {
 	ctx, cancel := context.WithTimeout(ctx, queryTimeout)
 	defer cancel()
 
+	r.debug(ctx, "Executing GetAll query") // [LOG]
+
 	var dbRows []models.ProductDb
 	query := baseSelect + " ORDER BY id"
 
 	if err := r.db.SelectContext(ctx, &dbRows, query); err != nil {
-		fmt.Println(err)
 		return nil, apperrors.Wrap(err, "failed to get all products")
 	}
+
+	r.debug(ctx, "GetAll query completed", map[string]interface{}{ // [LOG]
+		"count": len(dbRows),
+	})
 
 	products := make([]models.Product, len(dbRows))
 	for i, dp := range dbRows {
@@ -101,6 +128,10 @@ func (r *productMySQLRepository) GetByID(ctx context.Context, id int) (models.Pr
 	ctx, cancel := context.WithTimeout(ctx, queryTimeout)
 	defer cancel()
 
+	r.debug(ctx, "Executing GetByID", map[string]interface{}{ // [LOG]
+		"product_id": id,
+	})
+
 	var dp models.ProductDb
 	if err := r.stmtByID.GetContext(ctx, &dp, id); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -111,6 +142,11 @@ func (r *productMySQLRepository) GetByID(ctx context.Context, id int) (models.Pr
 		}
 		return models.Product{}, apperrors.Wrap(err, "failed to get product by id")
 	}
+
+	r.debug(ctx, "GetByID completed", map[string]interface{}{ // [LOG]
+		"product_id": id,
+	})
+
 	return mappers.DbToDomain(dp), nil
 }
 
@@ -119,14 +155,40 @@ func (r *productMySQLRepository) Save(ctx context.Context, p models.Product) (mo
 	defer cancel()
 
 	if p.ID == 0 {
-		return r.create(ctx, p)
+		r.info(ctx, "Creating product", map[string]interface{}{ // [LOG]
+			"product_code": p.Code,
+		})
+		out, err := r.create(ctx, p)
+		if err != nil {
+			return models.Product{}, err // handler logs the error // [LOG]
+		}
+		r.info(ctx, "Product created", map[string]interface{}{ // [LOG]
+			"product_id":   out.ID,
+			"product_code": out.Code,
+		})
+		return out, nil
 	}
-	return r.update(ctx, p)
+
+	r.info(ctx, "Updating product", map[string]interface{}{ // [LOG]
+		"product_id": p.ID,
+	})
+	out, err := r.update(ctx, p)
+	if err != nil {
+		return models.Product{}, err // handler logs the error // [LOG]
+	}
+	r.info(ctx, "Product updated", map[string]interface{}{ // [LOG]
+		"product_id": p.ID,
+	})
+	return out, nil
 }
 
 func (r *productMySQLRepository) Delete(ctx context.Context, id int) error {
 	ctx, cancel := context.WithTimeout(ctx, queryTimeout)
 	defer cancel()
+
+	r.info(ctx, "Deleting product", map[string]interface{}{ // [LOG]
+		"product_id": id,
+	})
 
 	res, err := r.stmtDelete.ExecContext(ctx, id)
 	if err != nil {
@@ -135,6 +197,11 @@ func (r *productMySQLRepository) Delete(ctx context.Context, id int) error {
 	if n, _ := res.RowsAffected(); n == 0 {
 		return apperrors.NewAppError(apperrors.CodeNotFound, "product not found")
 	}
+
+	r.info(ctx, "Product deleted", map[string]interface{}{ // [LOG]
+		"product_id": id,
+	})
+
 	return nil
 }
 
@@ -193,8 +260,16 @@ func (r *productMySQLRepository) Patch(ctx context.Context, id int, req models.P
 	}
 
 	if len(fields) == 0 { // nothing to modify
+		r.debug(ctx, "Patch called with no fields; returning current product", map[string]interface{}{ // [LOG]
+			"product_id": id,
+		})
 		return r.GetByID(ctx, id)
 	}
+
+	r.info(ctx, "Patching product", map[string]interface{}{ // [LOG]
+		"product_id":   id,
+		"fields_count": len(fields),
+	})
 
 	query := fmt.Sprintf("UPDATE products SET %s WHERE id = ?", strings.Join(fields, ", "))
 	args = append(args, id)
@@ -207,12 +282,18 @@ func (r *productMySQLRepository) Patch(ctx context.Context, id int, req models.P
 		return models.Product{}, apperrors.NewAppError(apperrors.CodeNotFound, "product not found")
 	}
 
+	r.info(ctx, "Product patched", map[string]interface{}{ // [LOG]
+		"product_id": id,
+	})
+
 	return r.GetByID(ctx, id)
 }
 
 // privates (create / update)
 func (r *productMySQLRepository) create(ctx context.Context, p models.Product) (models.Product, error) {
 	d := mappers.FromDomainToDb(p)
+
+	r.debug(ctx, "Executing INSERT for product") // [LOG]
 
 	res, err := r.stmtInsert.ExecContext(ctx,
 		d.Code, d.Description, d.Width, d.Height, d.Length,
@@ -227,11 +308,20 @@ func (r *productMySQLRepository) create(ctx context.Context, p models.Product) (
 		return models.Product{}, apperrors.Wrap(err, "failed to fetch new id")
 	}
 	p.ID = int(id)
+
+	r.debug(ctx, "INSERT completed", map[string]interface{}{ // [LOG]
+		"product_id": p.ID,
+	})
+
 	return p, nil
 }
 
 func (r *productMySQLRepository) update(ctx context.Context, p models.Product) (models.Product, error) {
 	d := mappers.FromDomainToDb(p)
+
+	r.debug(ctx, "Executing UPDATE for product", map[string]interface{}{ // [LOG]
+		"product_id": p.ID,
+	})
 
 	_, err := r.stmtUpdate.ExecContext(ctx,
 		d.Code, d.Description, d.Width, d.Height, d.Length,
@@ -240,6 +330,11 @@ func (r *productMySQLRepository) update(ctx context.Context, p models.Product) (
 	if err != nil {
 		return models.Product{}, r.handleDBError(err, "failed to update product")
 	}
+
+	r.debug(ctx, "UPDATE completed", map[string]interface{}{ // [LOG]
+		"product_id": p.ID,
+	})
+
 	return p, nil
 }
 

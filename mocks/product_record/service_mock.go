@@ -2,6 +2,7 @@ package product_record
 
 import (
 	"context"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 
 	"github.com/stretchr/testify/mock"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product_record"
@@ -9,6 +10,7 @@ import (
 
 type MockProductRecordService struct {
 	mock.Mock
+	log logger.Logger
 }
 
 func (m *MockProductRecordService) Create(ctx context.Context, r models.ProductRecord) (models.ProductRecord, error) {
@@ -30,4 +32,8 @@ func (m *MockProductRecordService) GetRecordsReport(ctx context.Context, id int)
 		rep = arg0.([]models.ProductRecordReport)
 	}
 	return rep, args.Error(1)
+}
+
+func (m *MockProductRecordService) SetLogger(l logger.Logger) {
+	m.log = l
 }

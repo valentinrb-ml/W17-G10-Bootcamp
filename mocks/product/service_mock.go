@@ -2,12 +2,16 @@ package product
 
 import (
 	"context"
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 
 	"github.com/stretchr/testify/mock"
 	model "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/product"
 )
 
-type MockService struct{ mock.Mock }
+type MockService struct {
+	mock.Mock
+	log logger.Logger
+}
 
 func (m *MockService) GetAll(ctx context.Context) ([]model.ProductResponse, error) {
 	args := m.Called(ctx)
@@ -31,4 +35,8 @@ func (m *MockService) Delete(ctx context.Context, id int) error {
 func (m *MockService) Patch(ctx context.Context, id int, req model.ProductPatchRequest) (model.ProductResponse, error) {
 	args := m.Called(ctx, id, req)
 	return args.Get(0).(model.ProductResponse), args.Error(1)
+}
+
+func (m *MockService) SetLogger(l logger.Logger) {
+	m.log = l
 }
