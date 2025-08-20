@@ -1,9 +1,9 @@
-// internal/repository/purchase_order_interface.go
 package repository
 
 import (
 	"context"
 
+	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/logger"
 	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/buyer"
 )
 
@@ -14,4 +14,6 @@ type PurchaseOrderRepository interface {
 	ExistsOrderNumber(ctx context.Context, orderNumber string) bool
 	GetCountByBuyer(ctx context.Context, buyerID int) ([]models.BuyerWithPurchaseCount, error)
 	GetAllWithPurchaseCount(ctx context.Context) ([]models.BuyerWithPurchaseCount, error)
+
+	SetLogger(l logger.Logger)
 }
