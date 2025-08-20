@@ -45,7 +45,7 @@ func (h *SellerHandler) Create(w http.ResponseWriter, r *http.Request) {
 				"error": err.Error(),
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -58,7 +58,7 @@ func (h *SellerHandler) Create(w http.ResponseWriter, r *http.Request) {
 				"validation_error": err.Error(),
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -70,7 +70,7 @@ func (h *SellerHandler) Create(w http.ResponseWriter, r *http.Request) {
 				"company_name": sr.CompanyName,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -97,7 +97,7 @@ func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
 				"id_param": r.URL.Query().Get("id"),
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -115,7 +115,7 @@ func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
 				"error":     err.Error(),
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -127,7 +127,7 @@ func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
 				"validation_error": err.Error(),
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -141,7 +141,7 @@ func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
 				"validation_error": err.Error(),
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -154,7 +154,7 @@ func (h *SellerHandler) Update(w http.ResponseWriter, r *http.Request) {
 				"company_name": sr.CompanyName,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -181,7 +181,7 @@ func (h *SellerHandler) Delete(w http.ResponseWriter, r *http.Request) {
 				"id_param": r.URL.Query().Get("id"),
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -198,7 +198,7 @@ func (h *SellerHandler) Delete(w http.ResponseWriter, r *http.Request) {
 				"seller_id": id,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -225,7 +225,7 @@ func (h *SellerHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 		if h.logger != nil {
 			h.logger.Error(ctx, "seller-handler", "Failed to find all sellers", err, nil)
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -250,7 +250,7 @@ func (h *SellerHandler) FindById(w http.ResponseWriter, r *http.Request) {
 				"id_param": r.URL.Query().Get("id"),
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -267,7 +267,7 @@ func (h *SellerHandler) FindById(w http.ResponseWriter, r *http.Request) {
 				"seller_id": id,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 

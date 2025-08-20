@@ -45,7 +45,7 @@ func (h *GeographyHandler) Create(w http.ResponseWriter, r *http.Request) {
 				"error": err.Error(),
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -59,7 +59,7 @@ func (h *GeographyHandler) Create(w http.ResponseWriter, r *http.Request) {
 				"validation_error": err.Error(),
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -72,7 +72,7 @@ func (h *GeographyHandler) Create(w http.ResponseWriter, r *http.Request) {
 				"country_name":  rg.CountryName,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
@@ -105,7 +105,7 @@ func (h *GeographyHandler) CountSellersByLocality(w http.ResponseWriter, r *http
 			if h.logger != nil {
 				h.logger.Error(ctx, "geography-handler", "Failed to count sellers grouped by locality", err, nil)
 			}
-			response.Error(w, err)
+			response.ErrorWithRequest(w, r, err)
 			return
 		}
 
@@ -132,7 +132,7 @@ func (h *GeographyHandler) CountSellersByLocality(w http.ResponseWriter, r *http
 				"locality_id": id,
 			})
 		}
-		response.Error(w, err)
+		response.ErrorWithRequest(w, r, err)
 		return
 	}
 
