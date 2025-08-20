@@ -150,7 +150,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
   // Inject logger into purchase order components
 	repoPurchaseOrder.SetLogger(appLogger)
 	svcPurchaseOrder.SetLogger(appLogger)
-  
+
 	// Inject logger into section components
 	repoSection.SetLogger(appLogger)
 	svcSection.SetLogger(appLogger)
@@ -194,6 +194,7 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 	hdPurchaseOrder.SetLogger(appLogger)
   hdEmployee.SetLogger(appLogger)
   hdInboundOrder.SetLogger(appLogger)
+
 
 	appLogger.Info(ctx, "server", "All handlers initialized successfully")
 
