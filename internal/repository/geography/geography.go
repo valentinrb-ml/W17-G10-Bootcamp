@@ -28,11 +28,21 @@ const (
 func (r *geographyRepository) CreateCountry(ctx context.Context, exec Executor, c models.Country) (*models.Country, error) {
 	res, err := exec.ExecContext(ctx, queryCountryCreate, c.Name)
 	if err != nil {
+		if r.logger != nil {
+			r.logger.Error(ctx, "geography-repository", "Failed to create country", err, map[string]interface{}{
+				"country_name": c.Name,
+			})
+		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "failed to create country").WithDetail("error", err.Error())
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
+		if r.logger != nil {
+			r.logger.Error(ctx, "geography-repository", "Failed to get country ID after creation", err, map[string]interface{}{
+				"country_name": c.Name,
+			})
+		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "failed to get country ID after creation").WithDetail("error", err.Error())
 	}
 
@@ -45,7 +55,13 @@ func (r *geographyRepository) FindCountryByName(ctx context.Context, name string
 	err := r.mysql.QueryRowContext(ctx, queryCountryFindById, name).Scan(&country.Id, &country.Name)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			// No loggear este caso ya que es comportamiento esperado
 			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "country not found")
+		}
+		if r.logger != nil {
+			r.logger.Error(ctx, "geography-repository", "Database error finding country by name", err, map[string]interface{}{
+				"country_name": name,
+			})
 		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "failed to find country").WithDetail("error", err.Error())
 	}
@@ -55,11 +71,23 @@ func (r *geographyRepository) FindCountryByName(ctx context.Context, name string
 func (r *geographyRepository) CreateProvince(ctx context.Context, exec Executor, p models.Province) (*models.Province, error) {
 	res, err := exec.ExecContext(ctx, queryProvinceCreate, p.Name, p.CountryId)
 	if err != nil {
+		if r.logger != nil {
+			r.logger.Error(ctx, "geography-repository", "Failed to create province", err, map[string]interface{}{
+				"province_name": p.Name,
+				"country_id":    p.CountryId,
+			})
+		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "failed to create province").WithDetail("error", err.Error())
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
+		if r.logger != nil {
+			r.logger.Error(ctx, "geography-repository", "Failed to get province ID after creation", err, map[string]interface{}{
+				"province_name": p.Name,
+				"country_id":    p.CountryId,
+			})
+		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "failed to get province ID after creation").WithDetail("error", err.Error())
 	}
 
@@ -72,7 +100,14 @@ func (r *geographyRepository) FindProvinceByName(ctx context.Context, name strin
 	err := r.mysql.QueryRowContext(ctx, queryProvinceFindById, name, countryId).Scan(&province.Id, &province.Name, &province.CountryId)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			// No loggear este caso ya que es comportamiento esperado
 			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "province not found")
+		}
+		if r.logger != nil {
+			r.logger.Error(ctx, "geography-repository", "Database error finding province by name", err, map[string]interface{}{
+				"province_name": name,
+				"country_id":    countryId,
+			})
 		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "failed to find province").WithDetail("error", err.Error())
 	}
@@ -83,9 +118,24 @@ func (r *geographyRepository) CreateLocality(ctx context.Context, exec Executor,
 	_, err := exec.ExecContext(ctx, queryLocalityCreate, l.Id, l.Name, l.ProvinceId)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
+			if r.logger != nil {
+				r.logger.Warning(ctx, "geography-repository", "Duplicate locality creation attempted", map[string]interface{}{
+					"locality_id":   l.Id,
+					"locality_name": l.Name,
+					"province_id":   l.ProvinceId,
+					"mysql_error":   mysqlErr.Number,
+				})
+			}
 			return nil, apperrors.NewAppError(apperrors.CodeConflict, "The locality you are creating already exists.").
 				WithDetail("postal_code", l.Id).
 				WithDetail("locality_name", l.Name)
+		}
+		if r.logger != nil {
+			r.logger.Error(ctx, "geography-repository", "Failed to create locality", err, map[string]interface{}{
+				"locality_id":   l.Id,
+				"locality_name": l.Name,
+				"province_id":   l.ProvinceId,
+			})
 		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "failed to create locality").WithDetail("error", err.Error())
 	}
@@ -98,7 +148,13 @@ func (r *geographyRepository) FindLocalityById(ctx context.Context, id string) (
 	err := r.mysql.QueryRowContext(ctx, queryLocalityFindById, id).Scan(&locality.Id, &locality.Name, &locality.ProvinceId)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			// No loggear este caso ya que es comportamiento esperado
 			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "The locality you are looking for does not exist.")
+		}
+		if r.logger != nil {
+			r.logger.Error(ctx, "geography-repository", "Database error finding locality by ID", err, map[string]interface{}{
+				"locality_id": id,
+			})
 		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "failed to find locality").WithDetail("error", err.Error())
 	}
@@ -111,7 +167,13 @@ func (r *geographyRepository) CountSellersByLocality(ctx context.Context, id str
 	err := row.Scan(&resp.LocalityId, &resp.LocalityName, &resp.SellersCount)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			// No loggear este caso ya que es comportamiento esperado
 			return nil, apperrors.NewAppError(apperrors.CodeNotFound, "The locality you are looking for does not exist.")
+		}
+		if r.logger != nil {
+			r.logger.Error(ctx, "geography-repository", "Database error counting sellers by locality", err, map[string]interface{}{
+				"locality_id": id,
+			})
 		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the locality sellers count.")
 	}
@@ -121,6 +183,9 @@ func (r *geographyRepository) CountSellersByLocality(ctx context.Context, id str
 func (r *geographyRepository) CountSellersGroupedByLocality(ctx context.Context) ([]models.ResponseLocalitySellers, error) {
 	rows, err := r.mysql.QueryContext(ctx, queryAllLocalitiesWithSellers)
 	if err != nil {
+		if r.logger != nil {
+			r.logger.Error(ctx, "geography-repository", "Database error querying sellers grouped by locality", err, nil)
+		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An internal server error occurred while retrieving the sellers count by locality.")
 	}
 	defer rows.Close()
@@ -129,11 +194,17 @@ func (r *geographyRepository) CountSellersGroupedByLocality(ctx context.Context)
 	for rows.Next() {
 		var resp models.ResponseLocalitySellers
 		if err := rows.Scan(&resp.LocalityId, &resp.LocalityName, &resp.SellersCount); err != nil {
+			if r.logger != nil {
+				r.logger.Error(ctx, "geography-repository", "Error scanning locality sellers count row", err, nil)
+			}
 			return nil, apperrors.NewAppError(apperrors.CodeInternal, "Failed to scan locality sellers count.")
 		}
 		results = append(results, resp)
 	}
 	if err := rows.Err(); err != nil {
+		if r.logger != nil {
+			r.logger.Error(ctx, "geography-repository", "Error iterating over locality sellers count rows", err, nil)
+		}
 		return nil, apperrors.NewAppError(apperrors.CodeInternal, "An error occurred while iterating over the localities.")
 	}
 
