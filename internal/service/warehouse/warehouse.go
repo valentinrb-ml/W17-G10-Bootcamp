@@ -11,27 +11,9 @@ import (
 // Create creates a new warehouse by delegating to the repository layer
 // Returns the created warehouse or an error if the operation fails
 func (s *WarehouseDefault) Create(ctx context.Context, w warehouse.Warehouse) (*warehouse.Warehouse, error) {
-	if s.logger != nil {
-		s.logger.Info(ctx, "warehouse-service", "Creating warehouse", map[string]interface{}{
-			"warehouse_code": w.WarehouseCode,
-		})
-	}
-
 	result, err := s.rp.Create(ctx, w)
 	if err != nil {
-		if s.logger != nil {
-			s.logger.Error(ctx, "warehouse-service", "Failed to create warehouse", err, map[string]interface{}{
-				"warehouse_code": w.WarehouseCode,
-			})
-		}
 		return nil, err
-	}
-
-	if s.logger != nil {
-		s.logger.Info(ctx, "warehouse-service", "Warehouse created successfully", map[string]interface{}{
-			"warehouse_id":   result.Id,
-			"warehouse_code": result.WarehouseCode,
-		})
 	}
 
 	return result, nil
@@ -62,11 +44,6 @@ func (s *WarehouseDefault) Update(ctx context.Context, id int, patch warehouse.W
 
 	existing, err := s.rp.FindById(ctx, id)
 	if err != nil {
-		if s.logger != nil {
-			s.logger.Warning(ctx, "warehouse-service", "Warehouse not found for update", map[string]interface{}{
-				"warehouse_id": id,
-			})
-		}
 		return nil, err
 	}
 
@@ -109,27 +86,9 @@ func (s *WarehouseDefault) Update(ctx context.Context, id int, patch warehouse.W
 // First verifies the warehouse exists, then deletes it from the repository
 // Returns an error if the warehouse doesn't exist or operation fails
 func (s *WarehouseDefault) Delete(ctx context.Context, id int) error {
-	if s.logger != nil {
-		s.logger.Info(ctx, "warehouse-service", "Deleting warehouse", map[string]interface{}{
-			"warehouse_id": id,
-		})
-	}
-
 	err := s.rp.Delete(ctx, id)
 	if err != nil {
-		if s.logger != nil {
-			s.logger.Error(ctx, "warehouse-service", "Failed to delete warehouse", err, map[string]interface{}{
-				"warehouse_id": id,
-			})
-		}
 		return err
 	}
-
-	if s.logger != nil {
-		s.logger.Info(ctx, "warehouse-service", "Warehouse deleted successfully", map[string]interface{}{
-			"warehouse_id": id,
-		})
-	}
-
 	return nil
 }
