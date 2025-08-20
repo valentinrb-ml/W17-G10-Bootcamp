@@ -2,14 +2,22 @@ package service
 
 import (
 	"context"
+
 	"github.com/varobledo_meli/W17-G10-Bootcamp.git/internal/mappers"
-	"github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
+	models "github.com/varobledo_meli/W17-G10-Bootcamp.git/pkg/models/section"
 )
 
 // FindAllSections fetches and returns all sections from the repository.
 func (s *SectionDefault) FindAllSections(ctx context.Context) ([]models.Section, error) {
+
+	if s.logger != nil {
+		s.logger.Info(ctx, "section-service", "Find all sections request received")
+	}
 	sections, err := s.rp.FindAllSections(ctx)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error(ctx, "section-service", "Failed to find all sections", err)
+		}
 		return nil, err
 	}
 	return sections, nil
@@ -17,8 +25,16 @@ func (s *SectionDefault) FindAllSections(ctx context.Context) ([]models.Section,
 
 // FindById retrieves a section by its ID using the repository.
 func (s *SectionDefault) FindById(ctx context.Context, id int) (*models.Section, error) {
+	if s.logger != nil {
+		s.logger.Info(ctx, "section-service", "Find by id request received", map[string]interface{}{
+			"section_id": id,
+		})
+	}
 	sec, err := s.rp.FindById(ctx, id)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error(ctx, "section-service", "Failed to find section by id", err)
+		}
 		return nil, err
 	}
 	return sec, nil
@@ -46,8 +62,16 @@ func (s *SectionDefault) CreateSection(ctx context.Context, sec models.Section) 
 // UpdateSection partially updates an existing section by applying a patch and persisting changes.
 // Uses a mapper to apply only the changed fields.
 func (s *SectionDefault) UpdateSection(ctx context.Context, id int, sec models.PatchSection) (*models.Section, error) {
+	if s.logger != nil {
+		s.logger.Info(ctx, "section-service", "Update section request received", map[string]interface{}{
+			"section_id": id,
+		})
+	}
 	existing, err := s.rp.FindById(ctx, id)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error(ctx, "section-service", "Failed to find section by id", err)
+		}
 		return nil, err
 	}
 
@@ -56,6 +80,9 @@ func (s *SectionDefault) UpdateSection(ctx context.Context, id int, sec models.P
 	secUpd, err := s.rp.UpdateSection(ctx, id, existing)
 
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error(ctx, "section-service", "Failed to update section", err)
+		}
 		return nil, err
 	}
 
