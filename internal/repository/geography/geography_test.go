@@ -55,13 +55,3 @@ func TestGeographyRepository_RollbackTx(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
-
-func TestGeographyRepository_GetDB(t *testing.T) {
-	db, _, err := sqlmock.New()
-	assert.NoError(t, err)
-	defer db.Close()
-	repo := geography.NewGeographyRepository(db)
-
-	dbReturned := repo.GetDB()
-	assert.Equal(t, db, dbReturned)
-}

@@ -125,16 +125,33 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// Inject logger into warehouse components
 	repoWarehouse.SetLogger(appLogger)
+	repoSeller.SetLogger(appLogger)
+	repoGeography.SetLogger(appLogger)
+
 	svcWarehouse.SetLogger(appLogger)
+	svcWarehouse.SetLogger(appLogger)
+  
+	svcSeller.SetLogger(appLogger)
+	svcGeography.SetLogger(appLogger)
 
 	repoCarry.SetLogger(appLogger)
 	svcCarry.SetLogger(appLogger)
 
+  // Inject logger into buyer components
 	repoBuyer.SetLogger(appLogger)
 	svcBuyer.SetLogger(appLogger)
 
+  // Inject logger into purchase order components
 	repoPurchaseOrder.SetLogger(appLogger)
 	svcPurchaseOrder.SetLogger(appLogger)
+  
+	// Inject logger into section components
+	repoSection.SetLogger(appLogger)
+	svcSection.SetLogger(appLogger)
+
+	// Inject logger into product batches components
+	repoProductBatches.SetLogger(appLogger)
+	svcProductBatches.SetLogger(appLogger)
 
 	appLogger.Info(ctx, "server", "All services initialized successfully")
 
@@ -154,8 +171,11 @@ func (s *ServerChi) Run(mysql *sql.DB) (err error) {
 
 	// Inject logger into warehouse handler
 	hdWarehouse.SetLogger(appLogger)
+  hdSection.SetLogger(appLogger)
+	hdProductBatches.SetLogger(appLogger)
+	hdSeller.SetLogger(appLogger)
+	hdGeography.SetLogger(appLogger)
 	hdCarry.SetLogger(appLogger)
-
 	hdBuyer.SetLogger(appLogger)
 	hdPurchaseOrder.SetLogger(appLogger)
 
